@@ -59,10 +59,14 @@ class AcademiaController extends Controller
         return back()->with('success', 'Curso académico asignado correctamente.');
     }
     
-    
-    
-    
-    
+    public function cursos()
+    {
+       
+        // Obtener todas las familias profesionales con sus cursos, módulos y unidades formativas asociadas
+        $familias_profesionales = FamiliaProfesional::with('cursos.modulos.unidades')->get();
+        
+        return view('academia.cursos', compact('familias_profesionales'));
+    }
     
     public function misCursos()
     {
@@ -120,67 +124,69 @@ class AcademiaController extends Controller
     
         return redirect()->route('cursoAcademico.detalles', $cursoAcademicoId);
     }
+
     public function verDetalles($id)
-{
-    $cursoAcademico = CursoAcademico::findOrFail($id);
+    {
+        $cursoAcademico = CursoAcademico::findOrFail($id);
 
-    // Obtener los detalles del curso asociados con el curso académico
-    $detalles = $cursoAcademico->detallesCurso;
+        // Obtener los detalles del curso asociados con el curso académico
+        $detalles = $cursoAcademico->detallesCurso;
 
-    return view('academia.detalle_curso', compact('cursoAcademico', 'detalles'));
-}
-public function detalleCurso($id)
-{
-    // Buscar el CursoAcademico por su ID con la relación de cursos, modulos y unidades
-    $cursoAcademico = CursoAcademico::with('curso.modulos.unidades')->findOrFail($id);
+        return view('academia.detalle_curso', compact('cursoAcademico', 'detalles'));
+    }
 
-    // Preparar los detalles, incluyendo los módulos para cada unidad formativa
-    $detalles = [];
-    foreach ($cursoAcademico->curso->modulos as $modulo) {
-        foreach ($modulo->unidades as $unidad) {
-            // Aquí se accede al módulo desde la unidad formativa
-            $detalles[] = [
-                'unidad_formativa' => $unidad->nombre,
-                'codigo' => $unidad->codigo,
-                'inicio' => $unidad->inicio,  
-                'fin' => $unidad->fin,        
-                'Examen0' => $unidad->examen0, 
-                'ExamenF' => $unidad->examenF, 
-                'modulo' => $modulo->nombre,  // Módulo relacionado con la unidad
-            ];
+    public function detalleCurso($id)
+    {
+        // Buscar el CursoAcademico por su ID con la relación de cursos, modulos y unidades
+        $cursoAcademico = CursoAcademico::with('curso.modulos.unidades')->findOrFail($id);
+
+        // Preparar los detalles, incluyendo los módulos para cada unidad formativa
+        $detalles = [];
+        foreach ($cursoAcademico->curso->modulos as $modulo) {
+            foreach ($modulo->unidades as $unidad) {
+                // Aquí se accede al módulo desde la unidad formativa
+                $detalles[] = [
+                    'unidad_formativa' => $unidad->nombre,
+                    'codigo' => $unidad->codigo,
+                    'inicio' => $unidad->inicio,  
+                    'fin' => $unidad->fin,        
+                    'Examen0' => $unidad->examen0, 
+                    'ExamenF' => $unidad->examenF, 
+                    'modulo' => $modulo->nombre,  // Módulo relacionado con la unidad
+                ];
+            }
         }
+
+
+        return view('academia.detalle_curso', compact('cursoAcademico', 'detalles'));
     }
 
 
-    return view('academia.detalle_curso', compact('cursoAcademico', 'detalles'));
-}
+    public function guardarDetallesCurso(Request $request, $id)
+    {
+        $cursoAcademico = CursoAcademico::findOrFail($id);
 
-
-public function guardarDetallesCurso(Request $request, $id)
-{
-    $cursoAcademico = CursoAcademico::findOrFail($id);
-
-    // Validar los datos recibidos en el formulario
-    $request->validate([
-        'detalles' => 'required|array',
-        'detalles.*.inicio' => 'nullable|date',
-        'detalles.*.fin' => 'nullable|date',
-        'detalles.*.calificacion' => 'nullable|numeric|min:0|max:10', // Ajustar a tus necesidades
-    ]);
-
-    // Actualizar cada detalle de curso
-    foreach ($request->detalles as $detalleId => $values) {
-        $detalle = DetalleCurso::findOrFail($detalleId);
-        $detalle->update([
-            'inicio' => $values['inicio'],
-            'fin' => $values['fin'],
-            'calificacion' => $values['calificacion'],
+        // Validar los datos recibidos en el formulario
+        $request->validate([
+            'detalles' => 'required|array',
+            'detalles.*.inicio' => 'nullable|date',
+            'detalles.*.fin' => 'nullable|date',
+            'detalles.*.calificacion' => 'nullable|numeric|min:0|max:10', // Ajustar a tus necesidades
         ]);
-    }
 
-    // Redirigir con éxito
-    return redirect()->route('academia.detallesCurso', $cursoAcademico->id)->with('success', 'Detalles guardados correctamente.');
-}
+        // Actualizar cada detalle de curso
+        foreach ($request->detalles as $detalleId => $values) {
+            $detalle = DetalleCurso::findOrFail($detalleId);
+            $detalle->update([
+                'inicio' => $values['inicio'],
+                'fin' => $values['fin'],
+                'calificacion' => $values['calificacion'],
+            ]);
+        }
+
+        // Redirigir con éxito
+        return redirect()->route('academia.detallesCurso', $cursoAcademico->id)->with('success', 'Detalles guardados correctamente.');
+    }
 
 
     public function actualizarCurso(Request $request, $id)

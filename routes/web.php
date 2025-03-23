@@ -7,6 +7,7 @@ use App\Http\Controllers\FamiliaProfesionalController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\UnidadFormativaController;
 use App\Http\Controllers\AcademiaController;
+use App\Http\Controllers\ActaController;
 use App\Http\Controllers\CalificacionController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Auth;
@@ -95,3 +96,4 @@ Route::get('/calificaciones/{curso_academico_id}', [CalificacionController::clas
 
 Route::put('/calificaciones/{calificacion}', [CalificacionController::class, 'update'])->name('calificaciones.update');
 Route::post('/calificaciones', [CalificacionController::class, 'store'])->name('calificaciones.store');
+Route::post('/generar-actas/{grado}', [ActaController::class, 'generarActas'])->name('generar.actas');

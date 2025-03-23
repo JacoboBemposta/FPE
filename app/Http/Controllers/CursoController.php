@@ -4,17 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Curso;
 use App\Models\FamiliaProfesional;
+use App\Models\CursoAcademico;
 use Illuminate\Http\Request;
 
 class CursoController extends Controller
 {
     public function index()
     {
-        $cursos = Curso::all(); // Obtener todos los cursos
-        $familias_profesionales = FamiliaProfesional::all(); // Obtener las familias profesionales
-        return view('cursos.index', compact('cursos', 'familias_profesionales'));
+        // Obtener los cursos que ya están asignados a la academia del usuario autenticado
+        $cursosAsignados = CursoAcademico::where('academia_id', auth()->user()->academia_id)
+                                        ->pluck('curso_id')->toArray();
+    
+        // Obtener solo los cursos que NO están asignados
+        $cursosDisponibles = Curso::whereNotIn('id', $cursosAsignados)->get();
+    
+        return view('cursos.index', compact('cursosDisponibles'));
     }
-
+    
     public function create()
     {
         $familias_profesionales = FamiliaProfesional::all(); // Obtener todas las familias profesionales
