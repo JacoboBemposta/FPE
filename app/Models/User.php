@@ -79,9 +79,10 @@ class User extends Authenticatable
     // Relación de un profesor con los cursos académicos que imparte
     public function cursosAcademicos()
     {
-        return $this->belongsToMany(CursoAcademico::class, 'curso_academico_profesor', 'profesor_id', 'curso_academico_id');
+        // Relación para academia y profesores
+        return $this->belongsToMany(CursoAcademico::class, 'curso_academico_user', 'user_id', 'curso_academico_id')
+                    ->withPivot('role'); // Aquí añadimos el campo 'role' para saber si es academia o profesor
     }
-
     // Relación de una academia con los cursos académicos que gestiona
     public function cursoAcademico()
     {

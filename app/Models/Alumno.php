@@ -14,4 +14,8 @@ class Alumno extends Model
     {
         return $this->belongsToMany(CursoAcademico::class, 'alumnos_curso', 'alumno_id', 'curso_academico_id');
     }
+    public function calificaciones()
+    {
+        return $this->hasMany(Calificacion::class);
+    }
 }

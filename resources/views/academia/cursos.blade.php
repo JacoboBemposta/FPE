@@ -1,6 +1,8 @@
+
 @extends('layouts.app')
 
 @section('content')
+<!-- No utilizada -->
 <div class="container">
     <h1>Buscar Cursos</h1>
     
@@ -55,10 +57,10 @@
                             <tr>
                                 <td>{{ $curso->nombre }}</td>
                                 <td>
-                                    <form method="POST" action="{{ route('academia.asignar_curso', $curso->id) }}">
-                                        @csrf
-                                        <button type="submit" class="btn btn-success btn-sm">Asignar Curso</button>
-                                    </form>
+                                    <!-- Botón para abrir el modal de asignación del curso -->
+                                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#asignarCursoModal{{ $curso->id }}">
+                                        Asignar Curso
+                                    </button>
                                 </td>
                             </tr>
                             @endforeach
@@ -70,4 +72,47 @@
         </tbody>
     </table>
 </div>
+
+<!-- Modal para asignar curso -->
+@foreach($familias_profesionales as $familia)
+    @foreach($familia->cursos as $curso)
+        <div class="modal fade" id="asignarCursoModal{{ $curso->id }}" tabindex="-1" aria-labelledby="asignarCursoModalLabel{{ $curso->id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="asignarCursoModalLabel{{ $curso->id }}">Asignar Curso: {{ $curso->nombre }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="{{ route('academia.asignar_curso', $curso->id) }}">
+                            @csrf
+                            <div class="form-group">
+                                <label for="municipio">Municipio</label>
+                                <input type="text" name="municipio" id="municipio" class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="provincia">Provincia</label>
+                                <input type="text" name="provincia" id="provincia" class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="inicio">Fecha de inicio</label>
+                                <input type="date" name="inicio" id="inicio" class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fin">Fecha de fin</label>
+                                <input type="date" name="fin" id="fin" class="form-control">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Asignar Curso</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+@endforeach
+
 @endsection

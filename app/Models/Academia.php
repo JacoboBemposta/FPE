@@ -6,11 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Academia extends Model
 {
-    protected $fillable = ['cif', 'nombre','email', 'telefono', 'direccion', 'logo'];
+    protected $fillable = ['cif', 'nombre', 'email', 'telefono', 'direccion', 'logo'];
 
-    // Relación many-to-many con cursos
+    // Relación con CursoAcademico
+    public function cursosAcademicos()
+    {
+        return $this->hasMany(CursoAcademico::class, 'academia_id');
+    }
+
+    // Relación indirecta con cursos a través de CursoAcademico
     public function cursos()
     {
-        return $this->belongsToMany(Curso::class, 'user_id', 'curso_id');
+        return $this->hasManyThrough(Curso::class, CursoAcademico::class, 'academia_id', 'id', 'id', 'curso_id');
     }
 }

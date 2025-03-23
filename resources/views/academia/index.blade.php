@@ -33,8 +33,8 @@
                 <tr>
                     <td>{{ $cursoAcademico->curso->codigo ?? 'N/A' }}</td>
                     <td>{{ $cursoAcademico->curso->nombre ?? 'N/A' }}</td>
-                    <td>{{ $cursoAcademico->curso->FamiliaProfesional->nombre ?? 'N/A' }}</td>
-                    <td>{{ $cursoAcademico->curso->horas }}</td>
+                    <td>{{ $cursoAcademico->curso->familiaProfesional->nombre ?? 'N/A' }}</td>
+                    <td>{{ $cursoAcademico->curso->horas ?? 'N/A' }}</td>
                     <td>{{ $cursoAcademico->municipio ?? 'N/A' }}</td>
                     <td>{{ $cursoAcademico->provincia ?? 'N/A' }}</td>
                     <td>{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}</td>
@@ -51,12 +51,8 @@
                         </button>
                     </td>
                     <td>
-                        <!-- Botón para ver alumnos del curso -->
-                        <button class="btn btn-info btn-sm view-alumnos-btn">
-                             <!-- Enlace para ver detalles del curso -->
-                            <a href="{{ route('academia.detalleCurso', $cursoAcademico->id) }}" class="btn btn-info btn-sm">Ir al curso</a>
-                            </a>
-                        </button>
+                        <!-- Botón para ver detalles del curso -->
+                        <a href="{{ route('academia.detalleCurso', $cursoAcademico->id) }}" class="btn btn-info btn-sm">Ir al curso</a>
                     </td>
                 </tr>
             @endforeach
@@ -106,7 +102,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-
     <script>
         var misCursos = @json($misCursos);
         $(document).ready(function() {
@@ -117,23 +112,21 @@
                 let provincia = $(this).data('provincia');
                 let inicio = $(this).data('inicio');
                 let fin = $(this).data('fin');
-        
+
                 // Asignar los valores al formulario del modal de curso
                 $('#curso_id').val(cursoAcademicoId);
                 $('#municipio').val(municipio);
                 $('#provincia').val(provincia);
                 $('#inicio').val(inicio);
                 $('#fin').val(fin);
-        
+
                 // Actualizar el action del formulario
                 $('#editForm').attr('action', '/academia/curso/' + cursoAcademicoId + '/editar');
-        
+
                 // Mostrar el modal de edición de curso
                 $('#editModal').modal('show');
             });
-        
- 
         });
-        </script>
-   
+    </script>
+</div>
 @endsection

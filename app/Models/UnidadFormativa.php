@@ -21,4 +21,9 @@ class UnidadFormativa extends Model
     {
         return $this->belongsTo(Modulo::class);
     }
+    public function detallesCurso()
+    {
+        return $this->hasMany(DetalleCurso::class); // Relación de una unidad formativa con muchos detalles de curso
+    }
+
 }

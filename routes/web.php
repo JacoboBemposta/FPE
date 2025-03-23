@@ -7,6 +7,7 @@ use App\Http\Controllers\FamiliaProfesionalController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\UnidadFormativaController;
 use App\Http\Controllers\AcademiaController;
+use App\Http\Controllers\CalificacionController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Auth;
 
@@ -74,9 +75,23 @@ Route::middleware(['auth', 'rol:academia'])
         Route::get('/curso/{id}/alumnos', [AcademiaController::class, 'getAlumnos'])->name('getAlumnos');
         Route::put('/alumno/{id}/editar', [AcademiaController::class, 'actualizarAlumno'])->name('editarAlumno'); // Cambiar a PUT
         Route::delete('/eliminar-alumno/{id}', [AcademiaController::class, 'eliminarAlumno'])->name('eliminarAlumno');
+        Route::get('/curso/{cursoAcademico}/detalles', [AcademiaController::class, 'detallesCurso'])->name('academia.detallesCurso');
+        Route::get('/curso/{cursoAcademicoId}/detalles', [AcademiaController::class, 'showCursoDetalles'])->name('academia.showCursoDetalles');
+        Route::get('/curso/{id}/detalles', [AcademiaController::class, 'verDetalles'])->name('detalles');
+        Route::post('/curso/{id}/detalles', [AcademiaController::class, 'guardarDetallesCurso'])->name('guardarDetalles');
+        Route::post('/actualizar-detalle', [AcademiaController::class, 'actualizarDetalle'])->name('actualizarDetalle');
+        Route::post('/crear-detalle', [AcademiaController::class, 'crearDetalle'])->name('crearDetalle');
+        Route::get('/calificaciones/{cursoAcademicoId}', [AcademiaController::class, 'showCalificaciones'])->name('calificaciones');
+        Route::post('/calificaciones', [AcademiaController::class, 'storeCalificacion'])->name('calificaciones.store');
+
+        
     });
 
 Route::middleware(['auth', 'rol:academia'])->group(function () {
     Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
-});
 
+});
+Route::get('/calificaciones/{curso_academico_id}', [CalificacionController::class, 'showCalificaciones'])->name('calificaciones');
+
+Route::put('/calificaciones/{calificacion}', [CalificacionController::class, 'update'])->name('calificaciones.update');
+Route::post('/calificaciones', [CalificacionController::class, 'store'])->name('calificaciones.store');

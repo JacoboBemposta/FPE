@@ -18,9 +18,8 @@ class AlumnoCurso extends Model
         return $this->belongsTo(CursoAcademico::class, 'curso_academico_id');
     }
 
-    // Si tienes un modelo de Alumno, podrías definir la relación aquí también
-    // public function alumno()
-    // {
-    //     return $this->belongsTo(Alumno::class, 'alumno_id');
-    // }
+    public function calificaciones()
+    {
+        return $this->hasMany(Calificacion::class, 'alumno_curso_id');
+    }
 }
