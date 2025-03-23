@@ -29,7 +29,7 @@
         <p><strong>DATAS DE INICIO:</strong> {{ $cursoAcademico->inicio }}</p>
         <p><strong>DENOMINACIÓN:</strong> {{ $curso->nombre }}</p>
         <p><strong>CÓDIGO NIVEL:</strong> {{ $curso->codigo }}</p>
-        <p><strong>No ACCIÓN FORMATIVA:</strong> {{ $curso->codigo }}</p>
+        <p><strong>No ACCIÓN FORMATIVA:</strong> {{ $unidad->codigo }}</p>
     </div>
 
     <!-- Datos del centro de formación -->
@@ -56,7 +56,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($unidades as $unidad)
+    
                 <tr>
                     <td>{{ $unidad->codigo }}</td>
                     <td>{{ $unidad->nombre }}</td>
@@ -64,7 +64,7 @@
                     <td>{{ $notas[$unidad->id] ?? 'N/A' }}</td>
                     <td>{{ $alumnoCurso->horas_asistencia ?? 'N/A' }}</td> <!-- Horas de asistencia desde alumnos_curso -->
                 </tr>
-            @endforeach
+
         </tbody>
     </table>
 

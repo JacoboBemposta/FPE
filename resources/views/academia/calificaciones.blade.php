@@ -135,6 +135,60 @@
 </div>
 
 <script>
+// Función para validar el formulario antes de enviarlo
+function validarFormulario(grado) {
+    const unidadesSeleccionadas = document.querySelectorAll('input[name="unidades[]"]:checked').length;
+
+    // Validación para Grado A
+    if (grado === 'gradoA' && unidadesSeleccionadas !== 1) {
+        alert('Para el Grado A, debes seleccionar exactamente una unidad formativa.');
+        return false;
+    }
+
+    // Validación para Grado B
+    if (grado === 'gradoB') {
+        const modulos = document.querySelectorAll('th[colspan]');
+        let todasUnidadesSeleccionadas = true;
+
+        modulos.forEach(modulo => {
+            const unidadesModulo = modulo.parentElement.querySelectorAll('input[name="unidades[]"]');
+            const unidadesSeleccionadasModulo = Array.from(unidadesModulo).filter(input => input.checked).length;
+
+            if (unidadesSeleccionadasModulo !== unidadesModulo.length) {
+                todasUnidadesSeleccionadas = false;
+            }
+        });
+
+        if (!todasUnidadesSeleccionadas) {
+            alert('Para el Grado B, debes seleccionar todas las unidades formativas de cada módulo.');
+            return false;
+        }
+    }
+
+    // Validación para Grado C
+    if (grado === 'gradoC') {
+        const unidadesTotales = document.querySelectorAll('input[name="unidades[]"]').length;
+        const unidadesSeleccionadas = document.querySelectorAll('input[name="unidades[]"]:checked').length;
+
+        if (unidadesSeleccionadas !== unidadesTotales) {
+            alert('Para el Grado C, debes seleccionar todos los módulos y unidades formativas.');
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Asignar eventos a los botones de generación de actas
+document.querySelectorAll('button[formaction]').forEach(button => {
+    button.addEventListener('click', function (event) {
+        const grado = this.getAttribute('formaction').split('/').pop(); // Obtener el grado del formaction
+        if (!validarFormulario(grado)) {
+            event.preventDefault(); // Evitar que el formulario se envíe si la validación falla
+        }
+    });
+});
+
 // Función para actualizar calificación
 function updateCalificacion(input) {
     const calificacionId = input.getAttribute('data-calificacion-id');
