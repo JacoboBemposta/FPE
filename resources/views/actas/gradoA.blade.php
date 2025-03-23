@@ -20,27 +20,27 @@
 
     <!-- Datos del alumno -->
     <div>
-        <p><strong>ALUMNO/A (DNI/NIE/PASAPORTE, NOME E APELIDOS):</strong> {{ $alumno->dni }} - {{ $alumno->nombre }} {{ $alumno->apellidos }}</p>
+        <p><strong>ALUMNO/A (DNI/NIE/PASAPORTE, NOME E APELIDOS):</strong> {{ $alumnoCurso->dni }} - {{ $alumnoCurso->nombre }} {{ $alumnoCurso->apellidos }}</p>
         <p><strong>CERTIFICADO PROFESIONAL:</strong> {{ $curso->nombre }}</p>
     </div>
 
     <!-- Datos de la acción formativa -->
     <div>
-        <p><strong>DATAS DE INICIO:</strong> {{ $cursoAcademico->fecha_inicio }}</p>
+        <p><strong>DATAS DE INICIO:</strong> {{ $cursoAcademico->inicio }}</p>
         <p><strong>DENOMINACIÓN:</strong> {{ $curso->nombre }}</p>
         <p><strong>CÓDIGO NIVEL:</strong> {{ $curso->codigo }}</p>
-        <p><strong>No ACCIÓN FORMATIVA:</strong> {{ $curso->numero_accion_formativa }}</p>
+        <p><strong>No ACCIÓN FORMATIVA:</strong> {{ $curso->codigo }}</p>
     </div>
 
     <!-- Datos del centro de formación -->
     <div>
-        {{-- <p><strong>ENTIDADE OU CENTRO DE FORMACIÓN:</strong></p>
-        <p><strong>No CENSO:</strong> {{ $curso->centro->numero_censo }}</p>
-        <p><strong>DENOMINACIÓN:</strong> {{ $curso->centro->nombre }}</p>
-        <p><strong>ENDEREZO:</strong> {{ $curso->centro->direccion }}</p>
-        <p><strong>C. POSTAL:</strong> {{ $curso->centro->codigo_postal }}</p>
-        <p><strong>LOCALIDADE:</strong> {{ $curso->centro->localidad }}</p>
-        <p><strong>PROVINCIA:</strong> {{ $curso->centro->provincia }}</p> --}}
+        <p><strong>ENTIDADE OU CENTRO DE FORMACIÓN:</strong></p>
+        <p><strong>No CENSO:</strong> {{ $centroFormacion->numero_censo }}</p>
+        <p><strong>DENOMINACIÓN:</strong> {{ $centroFormacion->ident }}</p> <!-- Nombre del centro -->
+        <p><strong>ENDEREZO:</strong> {{ $centroFormacion->direccion }}</p>
+        <p><strong>C. POSTAL:</strong> {{ $centroFormacion->codigo_postal }}</p>
+        <p><strong>LOCALIDADE:</strong> {{ $centroFormacion->localidad }}</p>
+        <p><strong>PROVINCIA:</strong> {{ $centroFormacion->provincia }}</p>
     </div>
 
     <!-- Módulos profesionales -->

@@ -14,7 +14,7 @@ return new class extends Migration
 
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('ident')->nullable()->unique();
+            $table->string('ident')->nullable();
             $table->string('name');
             $table->string('email')->unique();
             $table->string('telefono')->nullable();
@@ -22,9 +22,18 @@ return new class extends Migration
             $table->enum('rol', ['admin', 'academia', 'profesor', 'alumno']);
             $table->boolean('activo')->default(true);
             $table->boolean('premium')->default(false);
+            
+
+            $table->string('numero_censo')->nullable();
+            $table->string('direccion')->nullable();
+            $table->string('codigo_postal')->nullable();
+            $table->string('localidad')->nullable();
+            $table->string('provincia')->nullable();
+        
             $table->rememberToken();
             $table->timestamps();
         });
+        
         
         
 

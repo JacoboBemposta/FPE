@@ -49,9 +49,17 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
+            'ident' => ['required', 'string', 'max:255', 'unique:users'],
+            'numero_censo' => ['nullable', 'string', 'max:20'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'telefono' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'rol' => ['required', 'string', 'in:admin,academia,profesor,alumno'],
+            'direccion' => ['nullable', 'string', 'max:255'],
+            'codigo_postal' => ['nullable', 'string', 'max:10'],
+            'localidad' => ['nullable', 'string', 'max:255'],
+            'provincia' => ['nullable', 'string', 'max:255'],
         ]);
     }
 
@@ -63,13 +71,24 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        
         return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
+            'ident' => strip_tags($data['ident']),
+            'name' => strip_tags($data['name']),
+            'email' => strip_tags($data['email']),
+            'telefono' => isset($data['telefono']) ? strip_tags($data['telefono']) : null,
             'password' => Hash::make($data['password']),
+            'rol' => strip_tags($data['rol']),
+            'activo' => isset($data['activo']) ? true : false,
+            'premium' => isset($data['premium']) ? true : false,
+            'numero_censo' => isset($data['numero_censo']) ? strip_tags($data['numero_censo']) : null,
+            'direccion' => isset($data['direccion']) ? strip_tags($data['direccion']) : null,
+            'codigo_postal' => isset($data['codigo_postal']) ? strip_tags($data['codigo_postal']) : null,
+            'localidad' => isset($data['localidad']) ? strip_tags($data['localidad']) : null,
+            'provincia' => isset($data['provincia']) ? strip_tags($data['provincia']) : null,
         ]);
-    }
 
+    }
     protected function redirectTo()
     {
         return '/'; // Página de inicio

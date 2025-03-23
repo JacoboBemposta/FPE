@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\UnidadFormativa;
 use App\Models\Calificacion;
-use App\Models\AlumnoCurso; // Modelo para la tabla alumnos_curso
+use App\Models\AlumnoCurso;
 use App\Models\CursoAcademico;
+use App\Models\User;
+use ZipStream\ZipStream; // Usar la librería zipstream-php
 
 class ActaController extends Controller
 {
@@ -44,36 +46,51 @@ class ActaController extends Controller
         // Determinar la vista según el grado
         $vista = "actas.$grado"; // Ejemplo: actas.gradoA
 
-        // Crear un PDF por cada alumno
-        foreach ($datosActas as $alumnoCursoId => $notas) {
-            // Obtener los datos del alumno desde la tabla alumnos_curso
-            $alumnoCurso = AlumnoCurso::find($alumnoCursoId);
-    
-            if (!$alumnoCurso) {
-                continue; // Saltar si no se encuentra el alumno_curso
-            }
+        // Obtener el usuario logueado como centro de formación
+        $centroFormacion = auth()->user(); // Usuario logueado
 
-            // Obtener los datos del alumno (asumiendo que hay una relación con la tabla alumnos)
-            $alumno = $alumnoCurso;
-
-            // Obtener los datos del curso (asumiendo que hay una relación con la tabla cursos)
-            $curso = $cursoAcademico->curso;
-
-            if (!$curso) {
-                return response()->json(['message' => 'Curso no encontrado para el curso académico'], 404);
-            }
-
-            // Generar el HTML para el PDF
-            $html = view($vista, compact('unidades', 'notas', 'alumno', 'curso', 'cursoAcademico', 'alumnoCurso'))->render();
-
-            // Crear el PDF
-            $pdf = Pdf::loadHTML($html);
-
-            // Descargar el PDF
-            return $pdf->download("acta_gradoA_alumno_{$alumno->id}.pdf");
+        if (!$centroFormacion) {
+            return response()->json(['message' => 'Usuario no autenticado'], 401);
         }
 
-        // Retornar una respuesta si no hay PDFs generados
-        return response()->json(['message' => 'No se generaron actas']);
+        // Crear un archivo ZIP usando zipstream-php
+        return response()->streamDownload(function () use ($datosActas, $vista, $unidades, $cursoAcademico, $centroFormacion, $grado) {
+            $zip = new ZipStream(outputName: "actas_grado_$grado.zip");
+
+            foreach ($datosActas as $alumnoCursoId => $notas) {
+                // Obtener los datos del alumno desde la tabla alumnos_curso
+                $alumnoCurso = AlumnoCurso::find($alumnoCursoId);
+
+                if (!$alumnoCurso) {
+                    continue; // Saltar si no se encuentra el alumno_curso
+                }
+
+                // Obtener los datos del curso (asumiendo que hay una relación con la tabla cursos)
+                $curso = $cursoAcademico->curso;
+
+                if (!$curso) {
+                    return response()->json(['message' => 'Curso no encontrado para el curso académico'], 404);
+                }
+
+                // Generar el HTML para el PDF
+                $html = view($vista, compact('unidades', 'notas', 'alumnoCurso', 'curso', 'cursoAcademico', 'centroFormacion'))->render();
+
+                // Crear el PDF
+                $pdf = Pdf::loadHTML($html);
+
+                // Guardar el PDF en un archivo temporal
+                $pdfFileName = "acta_grado{$grado}_alumno_{$alumnoCurso->id}.pdf";
+                $pdf->save(storage_path("app/$pdfFileName"));
+
+                // Agregar el PDF al archivo ZIP
+                $zip->addFileFromPath($pdfFileName, storage_path("app/$pdfFileName"));
+
+                // Eliminar el archivo PDF temporal
+                unlink(storage_path("app/$pdfFileName"));
+            }
+
+            // Finalizar el archivo ZIP
+            $zip->finish();
+        }, "actas_grado_$grado.zip");
     }
 }
