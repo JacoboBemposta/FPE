@@ -22,4 +22,8 @@ class AlumnoCurso extends Model
     {
         return $this->hasMany(Calificacion::class, 'alumno_curso_id');
     }
+    public function alumno()
+    {
+        return $this->belongsTo(Alumno::class, 'alumno_id'); // Asegúrate de que 'alumno_id' es el campo correcto
+    }
 }

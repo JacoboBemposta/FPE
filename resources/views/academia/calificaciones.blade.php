@@ -5,45 +5,58 @@
     use Illuminate\Support\Str;
 @endphp
 <div class="container mt-4">
-    <h1>Calificaciones del Curso: </h1>
+    <h1>Calificaciones del Curso:</h1>
     <h2>{{ $cursoAcademico->curso->nombre }}</h2>
 
-    <!-- Formulario para seleccionar unidades y alumnos -->
+    <!-- Formulario para seleccionar módulos, unidades y alumnos -->
     <form id="form-actas" action="{{ route('generar.actas', 'gradoA') }}" method="POST" target="_blank">
         @csrf
         <!-- Campo oculto para el curso_academico_id -->
         <input type="hidden" name="curso_academico_id" value="{{ $cursoAcademico->id }}">        
+
         <!-- Tabla de calificaciones -->
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Alumnos</th>
+                    <th></th>
                     @foreach($cursoAcademico->curso->modulos as $modulo)
                         @if($modulo->unidades->count() > 0)
-                            <th colspan="{{ $modulo->unidades->count() }}">{{ $modulo->codigo }}</th>
+                            <th colspan="{{ $modulo->unidades->count() }}">
+                                <div class="form-check">
+                                    <!-- Checkbox para seleccionar módulo -->
+                                    <input class="form-check-input modulo-checkbox" type="checkbox" 
+                                        name="modulos[]" value="{{ $modulo->id }}" 
+                                        id="modulo{{ $modulo->id }}">
+                                    <label class="form-check-label" for="modulo{{ $modulo->id }}">
+                                        {{ $modulo->codigo }}
+                                    </label>
+                                </div>
+                            </th>
                         @else
-                            <th>{{ $modulo->codigo }}</th>
+                            <th>
+                                <div class="form-check">
+                                    <input class="form-check-input modulo-checkbox" type="checkbox" 
+                                        name="modulos[]" value="{{ $modulo->id }}" 
+                                        id="modulo{{ $modulo->id }}">
+                                    <label class="form-check-label" for="modulo{{ $modulo->id }}">
+                                        {{ $modulo->codigo }}
+                                    </label>
+                                </div>
+                            </th>
                         @endif
                     @endforeach
                 </tr>
                 <tr>
-                    <th></th>
+                    <th>Alumnos</th>
                     @foreach($cursoAcademico->curso->modulos as $modulo)
                         @if($modulo->unidades->count() > 0)
                             @foreach($modulo->unidades as $unidad)
                                 <th>
-                                    <div class="form-check">
-                                        <input class="form-check-input unidad-checkbox" type="checkbox" 
-                                            name="unidades[]" value="{{ $unidad->id }}" 
-                                            id="unidad{{ $unidad->id }}">
-                                        <label class="form-check-label" for="unidad{{ $unidad->id }}">
-                                            {{ $unidad->codigo }}
-                                        </label>
-                                    </div>
+                                    {{ $unidad->codigo }}
                                 </th>
                             @endforeach
                         @else
-                            <th>{{$modulo->codigo}}</th>
+                            <th>{{ $modulo->codigo }}</th>
                         @endif
                     @endforeach
                 </tr>
@@ -70,7 +83,9 @@
                                         ->first();
                                 @endphp
                                 <td>
-                                    <input type="number" class="form-control" 
+                                    <input type="number" 
+                                        name="calificaciones[{{ $alumno->id }}][unidad][{{ $unidad->id }}]" 
+                                        class="form-control" 
                                         @if($calificacion)
                                             value="{{ $calificacion->nota }}"
                                             data-calificacion-id="{{ $calificacion->id }}"
@@ -93,7 +108,9 @@
                                     ->first();
                             @endphp
                             <td>
-                                <input type="number" class="form-control" 
+                                <input type="number" 
+                                    name="calificaciones[{{ $alumno->id }}][modulo][{{ $modulo->id }}]" 
+                                    class="form-control" 
                                     @if($calificacionModulo)
                                         value="{{ $calificacionModulo->nota }}"
                                         data-calificacion-id="{{ $calificacionModulo->id }}"
@@ -134,46 +151,45 @@
     </div>
 </div>
 
+
 <script>
+
+
+// Asignar evento al formulario
+document.getElementById('form-actas').addEventListener('submit', function (e) {
+    // Si no hay alumnos seleccionados, seleccionar todos
+    const alumnosCheckboxes = document.querySelectorAll('input[name="alumnos[]"]:checked');
+    if (alumnosCheckboxes.length === 0) {
+        document.querySelectorAll('input[name="alumnos[]"]').forEach(alumno => {
+            alumno.checked = true;
+        });
+    }
+});
+
+
 // Función para validar el formulario antes de enviarlo
 function validarFormulario(grado) {
-    const unidadesSeleccionadas = document.querySelectorAll('input[name="unidades[]"]:checked').length;
+ 
+    const modulosSeleccionados = document.querySelectorAll('input[name="modulos[]"]:checked').length;
+    const alumnosSeleccionados = document.querySelectorAll('input[name="alumnos[]"]').length;
 
+    
     // Validación para Grado A
-    if (grado === 'gradoA' && unidadesSeleccionadas !== 1) {
-        alert('Para el Grado A, debes seleccionar exactamente una unidad formativa.');
+    if (grado === 'gradoA' && modulosSeleccionados !== 1) {
+        alert('Para el Grado A, debes seleccionar exactamente un modulo.');
         return false;
     }
 
+
     // Validación para Grado B
-    if (grado === 'gradoB') {
-        const modulos = document.querySelectorAll('th[colspan]');
-        let todasUnidadesSeleccionadas = true;
-
-        modulos.forEach(modulo => {
-            const unidadesModulo = modulo.parentElement.querySelectorAll('input[name="unidades[]"]');
-            const unidadesSeleccionadasModulo = Array.from(unidadesModulo).filter(input => input.checked).length;
-
-            if (unidadesSeleccionadasModulo !== unidadesModulo.length) {
-                todasUnidadesSeleccionadas = false;
-            }
-        });
-
-        if (!todasUnidadesSeleccionadas) {
-            alert('Para el Grado B, debes seleccionar todas las unidades formativas de cada módulo.');
-            return false;
-        }
+    if (grado === 'gradoB' && modulosSeleccionados !== 1) {
+        alert('Para el Grado B, debes seleccionar exactamente un modulo.');
+        return false;
     }
-
     // Validación para Grado C
     if (grado === 'gradoC') {
-        const unidadesTotales = document.querySelectorAll('input[name="unidades[]"]').length;
-        const unidadesSeleccionadas = document.querySelectorAll('input[name="unidades[]"]:checked').length;
+        const modulosTotales = document.querySelectorAll('input[name="modulos[]"]').length;
 
-        if (unidadesSeleccionadas !== unidadesTotales) {
-            alert('Para el Grado C, debes seleccionar todos los módulos y unidades formativas.');
-            return false;
-        }
     }
 
     return true;
@@ -188,6 +204,7 @@ document.querySelectorAll('button[formaction]').forEach(button => {
         }
     });
 });
+
 
 // Función para actualizar calificación
 function updateCalificacion(input) {
