@@ -79,27 +79,31 @@ class User extends Authenticatable
         return $this->rol === 'alumno';
     }
 
-
+    public function cursoAcademico()
+    {
+        return $this->hasMany(CursoAcademico::class, 'academia_id'); // Usamos 'academia_id' aquí
+    }
 
     // Relación de un profesor con los cursos académicos que imparte
     public function cursosAcademicos()
     {
         // Relación para academia y profesores
         return $this->belongsToMany(CursoAcademico::class, 'curso_academico_user', 'user_id', 'curso_academico_id')
-                    ->withPivot('role'); // Aquí añadimos el campo 'role' para saber si es academia o profesor
+                    ->withPivot('rol'); // Aquí añadimos el campo 'role' para saber si es academia o profesor
     }
     // Relación de una academia con los cursos académicos que gestiona
-    public function cursoAcademico()
+    public function profesores()
     {
-        return $this->hasMany(CursoAcademico::class);
+        return $this->belongsToMany(User::class, 'user_curso', 'curso_academico_id', 'user_id')
+            ->where('rol', 'profesor');
     }
 
     // Relación con los cursos de un  profesor
     public function cursos()
     {
-        return $this->hasMany(Curso::class);
+        return $this->belongsToMany(CursoAcademico::class, 'user_curso', 'user_id', 'curso_academico_id');
     }
-
+    
     public function misCursos()
     {
         return $this->belongsToMany(CursoAcademico::class, 'user_curso', 'user_id', 'curso_academico_id')

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+{{-- @extends('layouts.app')
 
 @section('content')
 <div class="container mt-4">
@@ -64,4 +64,4 @@
         <a href="{{ route('academia.miscursos') }}" class="text-white">Volver a mis Cursos</a>
     </button>
 </div>
-@endsection
+@endsection --}}

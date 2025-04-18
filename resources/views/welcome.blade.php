@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenido a la Plataforma Educativa</title>
+    <title>Bienvenido a RedFPE</title>
     <!-- Agregar Bootstrap CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -38,7 +38,7 @@
 <!-- Barra de navegación con login y registro -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Plataforma Educativa</a>
+
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -52,9 +52,9 @@
                         <a class="nav-link" href="{{ route('register') }}">Registrarse</a>
                     </li>
                 @else
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
-                    </li>
+                    </li> --}}
 
                     <!-- BOTÓN SOLO PARA ADMIN -->
                     @if(Auth::user()->rol === 'admin')
@@ -88,7 +88,7 @@
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container">
-        <h1 class="display-4">Bienvenido a SAFAPE</h1>
+        <h1 class="display-4">Bienvenido a RedFPE</h1>
         <h2 class="display-4">La plataforma que agiliza la gestión académica y conecta academias con profesores</h2>
         <p class="lead">Gestiona cursos, exámenes y más para academias, profesores y alumnos.</p>
         <a href="#roles" class="btn btn-light btn-lg">Descubre más</a>
@@ -108,8 +108,8 @@
                 <p>Gestiona cursos y asigna profesores. Haz crecer tu institución educativa.</p>
                 
                 @auth
-                    @if(Auth::user()->role === 'academia')
-                        <a href="{{ route('academia.cursos') }}" class="btn btn-primary">Acceder</a>
+                    @if(Auth::user()->rol === 'academia')
+                        <a href="{{ route('academia.miscursos') }}" class="btn btn-primary">Acceder</a>
                     @else
                         <button class="btn btn-secondary" disabled>Acceso restringido</button>
                     @endif
@@ -127,8 +127,8 @@
                 <p>Imparte clases y realiza seguimientos de los alumnos y exámenes.</p>
 
                 @auth
-                    @if(Auth::user()->role === 'profesor')
-                        <a href="{{ route('profesor.dashboard') }}" class="btn btn-primary">Acceder</a>
+                    @if(Auth::user()->rol === 'profesor')
+                        <a href="{{ route('profesor.miscursos') }}" class="btn btn-primary">Acceder</a>
                     @else
                         <button class="btn btn-secondary" disabled>Acceso restringido</button>
                     @endif
@@ -146,8 +146,8 @@
                 <p>Accede a tus cursos, exámenes y resultados de manera sencilla.</p>
 
                 @auth
-                    @if(Auth::user()->role === 'alumno')
-                        <a href="{{ route('alumno.dashboard') }}" class="btn btn-primary">Acceder</a>
+                    @if(Auth::user()->rol === 'alumno')
+                        <a href="{{ route('alumno.index') }}" class="btn btn-primary">Acceder</a>
                     @else
                         <button class="btn btn-secondary" disabled>Acceso restringido</button>
                     @endif

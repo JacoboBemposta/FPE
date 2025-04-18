@@ -1,4 +1,4 @@
-
+{{-- 
 @extends('layouts.app')
 
 @section('content')
@@ -115,4 +115,4 @@
     @endforeach
 @endforeach
 
-@endsection
+@endsection --}}

@@ -35,4 +35,5 @@ class Curso extends Model
         return $this->hasMany(Alumno::class);
     }
 
+
 }

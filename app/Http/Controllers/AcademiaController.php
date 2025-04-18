@@ -16,14 +16,101 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AcademiaController extends Controller
 {
-    public function index()
-    {
-        // Obtener todas las familias profesionales con sus cursos, módulos y unidades formativas asociadas
-        $familias_profesionales = FamiliaProfesional::with('cursos.modulos.unidades')->get();
+    // public function index()
+    // {
+    //     // Obtener todas las familias profesionales con sus cursos, módulos y unidades formativas asociadas
+    //     $familias_profesionales = FamiliaProfesional::with('cursos.modulos.unidades')->get();
 
-        // Pasar la variable a la vista
-        return view('academia.index', compact('familias_profesionales'));
+    //     // Pasar la variable a la vista
+    //     return view('academia.index', compact('familias_profesionales'));
+    // }
+
+    public function misCursos()
+    {
+        $user = Auth::user();
+    
+        if (!$user) {
+            return redirect()->route('login');
+        }
+    
+        // Verificar si el usuario tiene el rol de academia
+        if ($user->rol !== 'academia') {
+            return back()->withErrors(['error' => 'No tienes permisos para acceder a esta sección.']);
+        }
+    
+        // Obtener los cursos académicos del usuario
+        $misCursos = CursoAcademico::where('academia_id', $user->id)->get();
+        
+        return view('academia.index', compact('misCursos'));
     }
+        
+    public function verDocentes(Request $request)
+    {
+        // Inicializamos la consulta de docentes con rol 'profesor'
+        $docentesQuery = User::where('rol', 'profesor');
+    
+        // Aplicamos los filtros de búsqueda a la consulta de docentes, si se proporcionan
+        if ($request->filled('codigo')) {
+            $docentesQuery->whereHas('cursoAcademico.curso', function ($query) use ($request) {
+                $query->where('codigo', 'like', '%' . $request->codigo . '%');
+            });
+        }
+    
+        if ($request->filled('nombre')) {
+            $docentesQuery->whereHas('cursoAcademico.curso', function ($query) use ($request) {
+                $query->where('nombre', 'like', '%' . $request->nombre . '%');
+            });
+        }
+    
+        if ($request->filled('municipio')) {
+            $docentesQuery->whereHas('cursoAcademico', function ($query) use ($request) {
+                $query->where('municipio', 'like', '%' . $request->municipio . '%');
+            });
+        }
+    
+        if ($request->filled('provincia')) {
+            $docentesQuery->whereHas('cursoAcademico', function ($query) use ($request) {
+                $query->where('provincia', 'like', '%' . $request->provincia . '%');
+            });
+        }
+    
+        if ($request->filled('docente_nombre')) {
+            $docentesQuery->where('name', 'like', '%' . $request->docente_nombre . '%');
+        }
+    
+        // Ejecutamos la consulta y obtenemos los docentes filtrados
+        $docentes = $docentesQuery->get();
+    
+        // Creamos un array para almacenar los docentes y sus cursos
+        $docentesConCursos = [];
+    
+        // Recorremos los docentes
+        foreach ($docentes as $docente) {
+            // Obtenemos los cursos académicos asociados a este docente
+            $cursosDelDocente = $docente->cursoAcademico;
+    
+            // Si el docente tiene cursos asignados, los agregamos a la lista
+            if ($cursosDelDocente->isNotEmpty()) {
+                foreach ($cursosDelDocente as $cursoAcademico) {
+                    // Cargamos la información del curso relacionado
+                    $curso = $cursoAcademico->curso;
+    
+                    // Agregamos el docente y sus cursos asociados a la lista
+                    $docentesConCursos[] = [
+                        'docente' => $docente,
+                        'curso' => $cursoAcademico, // Información del CursoAcademico
+                        'curso_nombre' => $curso->nombre, // Nombre del curso
+                        'curso_codigo' => $curso->codigo, // Código del curso
+                    ];
+                }
+            }
+        }
+    
+        // Pasamos los datos a la vista
+        return view('academia.docentes', compact('docentesConCursos'));
+    }
+    
+    
 
     public function asignarCurso(Request $request, $curso_id)
     {
@@ -59,6 +146,48 @@ class AcademiaController extends Controller
         return back()->with('success', 'Curso académico asignado correctamente.');
     }
     
+    public function asignarProfesor(Request $request, $cursoAcademico_id)
+    {
+        // Asegurarse de que el usuario está autenticado
+        $user = Auth::user();
+        
+        if (!$user) {
+            return redirect()->route('login')->withErrors(['error' => 'Debes iniciar sesión.']);
+        }
+    
+        // Verificar si el usuario tiene el rol de 'profesor'
+        if ($user->rol !== 'profesor') {
+            return back()->withErrors(['error' => 'No tienes permisos para asignarte a este curso.']);
+        }
+    
+        // Verificar si el curso académico existe
+        $cursoAcademico = CursoAcademico::find($cursoAcademico_id);
+        
+        if (!$cursoAcademico) {
+            return back()->withErrors(['error' => 'El curso académico no existe.']);
+        }
+    
+        // Verificar si el profesor ya está asignado a este curso
+        if ($cursoAcademico->profesores->contains($user)) {
+            return back()->withErrors(['error' => 'Ya estás asignado a este curso académico.']);
+        }
+    
+        // Asignar el profesor al curso académico (relación N:M a través de la tabla user_curso)
+        $cursoAcademico->profesores()->attach($user->id);
+    
+        return back()->with('success', 'Te has asignado correctamente al curso académico.');
+    }
+    
+
+    public function destroyCursoAcademico($id)
+    {
+        $curso = CursoAcademico::findOrFail($id);
+        $curso->delete();
+
+        return redirect()->back()->with('success', 'Curso eliminado correctamente.');
+    }
+
+
     public function cursos()
     {
        
@@ -68,25 +197,7 @@ class AcademiaController extends Controller
         return view('academia.cursos', compact('familias_profesionales'));
     }
     
-    public function misCursos()
-    {
-        $user = Auth::user();
-    
-        if (!$user) {
-            return redirect()->route('login');
-        }
-    
-        // Verificar si el usuario tiene el rol de academia
-        if ($user->rol !== 'academia') {
-            return back()->withErrors(['error' => 'No tienes permisos para acceder a esta sección.']);
-        }
-    
-        // Obtener los cursos académicos del usuario
-        $misCursos = CursoAcademico::where('academia_id', $user->id)->get();
-        
-        return view('academia.index', compact('misCursos'));
-    }
-    
+
     public function getAlumnos($id)
     {
         // Obtén el curso académico por ID

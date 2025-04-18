@@ -7,9 +7,13 @@ use App\Http\Controllers\FamiliaProfesionalController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\UnidadFormativaController;
 use App\Http\Controllers\AcademiaController;
+use App\Http\Controllers\CursoAcademicoController;
 use App\Http\Controllers\ActaController;
 use App\Http\Controllers\CalificacionController;
+use App\Http\Controllers\ProfesorController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Controllers\ProfesorCursoController;
+
 use Illuminate\Support\Facades\Auth;
 
 
@@ -40,6 +44,13 @@ Route::get('/dashboard', function () {
     return view('dashboard'); // Asegúrate de que la vista "dashboard.blade.php" existe
 })->middleware(['auth'])->name('dashboard');
 
+
+
+
+
+
+
+
 Route::middleware(['auth', 'rol:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('panel');
 
@@ -66,7 +77,6 @@ Route::middleware(['auth', 'rol:academia'])
     ->name('academia.')
     ->group(function () {
         Route::get('/', [AcademiaController::class, 'index'])->name('index');
-        Route::get('/cursos', [AcademiaController::class, 'cursos'])->name('cursos');
         Route::get('/mis-cursos', [AcademiaController::class, 'misCursos'])->name('miscursos');
         Route::post('/asignar-curso/{curso}', [AcademiaController::class, 'asignarCurso'])->name('asignar_curso');
         Route::get('/mis-cursos/{cursoAcademico}', [AcademiaController::class, 'detalleCurso'])->name('detalleCurso');
@@ -84,16 +94,34 @@ Route::middleware(['auth', 'rol:academia'])
         Route::post('/crear-detalle', [AcademiaController::class, 'crearDetalle'])->name('crearDetalle');
         Route::get('/calificaciones/{cursoAcademicoId}', [AcademiaController::class, 'showCalificaciones'])->name('calificaciones');
         Route::post('/calificaciones', [AcademiaController::class, 'storeCalificacion'])->name('calificaciones.store');
+        Route::get('ver-docentes', [AcademiaController::class, 'verDocentes'])->name('ver_docentes');
+        Route::delete('/academia/curso/{id}', [AcademiaController::class, 'destroyCursoAcademico'])->name('curso_academico.destroy');
 
-        
     });
 
-Route::middleware(['auth', 'rol:academia'])->group(function () {
+Route::middleware(['auth', 'rol:academia,profesor'])->group(function () {
     Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
 
 });
-Route::get('/calificaciones/{curso_academico_id}', [CalificacionController::class, 'showCalificaciones'])->name('calificaciones');
 
+Route::get('/calificaciones/{curso_academico_id}', [CalificacionController::class, 'showCalificaciones'])->name('calificaciones');
 Route::put('/calificaciones/{calificacion}', [CalificacionController::class, 'update'])->name('calificaciones.update');
 Route::post('/calificaciones', [CalificacionController::class, 'store'])->name('calificaciones.store');
 Route::post('/generar-actas/{grado}', [ActaController::class, 'generarActas'])->name('generar.actas');
+
+
+Route::middleware(['auth', 'rol:profesor'])
+    ->prefix('profesor')
+    ->name('profesor.') 
+    ->group(function () {
+        Route::get('/mis-cursos', [ProfesorController::class, 'misCursos'])->name('miscursos');
+        Route::get('cursos', [ProfesorController::class, 'index'])->name('cursos.index');
+        Route::post('/asignar-curso/{curso}', [ProfesorController::class, 'asignarCurso'])->name('asignar_curso');
+        Route::delete('/curso/{id}', [ProfesorController::class, 'destroy'])->name('curso.destroy');
+        Route::get('/ver-academias', [ProfesorController::class, 'verAcademias'])->name('ver_academias');
+
+
+        Route::get('curso/{id}', [ProfesorController::class, 'detalleCurso'])->name('detalleCurso');
+        Route::put('curso/{id}/editar', [ProfesorController::class, 'update'])->name('curso.update');
+
+    });

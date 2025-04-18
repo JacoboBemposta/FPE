@@ -19,7 +19,7 @@ class CursoAcademico extends Model
     // Relación con Academia
     public function academia()
     {
-        return $this->belongsTo(Academia::class, 'academia_id');
+        return $this->belongsTo(User::class, 'academia_id');
     }
 
     // Relación con Usuarios (Profesores y Alumnos)
@@ -28,10 +28,10 @@ class CursoAcademico extends Model
         return $this->belongsToMany(User::class, 'user_curso', 'curso_academico_id', 'user_id');
     }
 
-    // Relación con Profesores
     public function profesores()
     {
-        return $this->belongsToMany(User::class, 'curso_academico_profesor');
+        return $this->belongsToMany(User::class, 'user_curso', 'curso_academico_id', 'user_id')
+            ->where('rol', 'profesor');
     }
 
     // Relación con Alumnos

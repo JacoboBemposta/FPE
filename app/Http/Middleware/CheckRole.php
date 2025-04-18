@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Auth;
 
 class CheckRole
 {
-    public function handle(Request $request, Closure $next, $rol)
+    public function handle($request, Closure $next, ...$roles)
     {
-        if (!Auth::check() || Auth::user()->rol !== $rol) {
-            return redirect('/')->with('error', 'Acceso no autorizado.');
+        if (!in_array(auth()->user()->rol, $roles)) {
+            return redirect('/');
         }
+    
         return $next($request);
     }
 }
