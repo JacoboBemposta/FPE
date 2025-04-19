@@ -5,6 +5,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Modulo;
+use App\Models\Curso;
 use App\Models\UnidadFormativa;
 use Illuminate\Http\Request;
 
@@ -29,61 +30,79 @@ class ModuloController extends Controller
         return view('admin.modulos.create');
     }
 
-    public function store(Request $request)
-    {
-        //dd($request);
-        // Validación
-        $request->validate([
-            'nombre' => 'required|string|max:255',  // Validación para el campo 'nombre'
-            'codigo' => 'required|string|max:255',  // Validación para el campo 'codigo'
-            'horas' => 'required|integer',          // Validación para el campo 'horas'
-            'curso_id' => 'required|exists:cursos,id',  // Validación para el campo 'curso_id'
-        ]);
-        //dd($request);
-        // Eliminar cualquier etiqueta HTML de los campos 'nombre', 'codigo', y 'horas'
-        $nombre = strip_tags($request->input('nombre')); 
-        $codigo = strip_tags($request->input('codigo')); 
-        $horas = strip_tags($request->input('horas'));   
-    
-        // Crear el módulo
-        $modulo = Modulo::create([
-            'nombre' => $nombre,
-            'codigo' => $codigo,
-            'horas' => $horas,
-            'curso_id' => $request->curso_id, // Relación con el curso seleccionado
-        ]);
-    
-        // Redirigir con un mensaje de éxito
-        return redirect()->route('admin.panel')->with('success', 'Módulo creado con éxito.');
-    }
-    
-    
 
+    public function store(Request $request, Curso $curso)
+    {
+        // Validación de los datos
+        $request->validate([
+            'curso_id' => 'required|exists:cursos,id',
+            'modulo_existente_id' => 'nullable|exists:modulos,id',
+            'codigo' => 'required_if:modulo_existente_id,new|string|max:50',
+            'nombre' => 'required_if:modulo_existente_id,new|string|max:255',
+            'horas' => 'nullable|numeric'
+        ]);
+        dd($request);
+        // Manejo de módulo existente o nuevo
+        if ($request->modulo_existente_id && $request->modulo_existente_id !== 'new') {
+            // Vincular módulo existente
+            $modulo = Modulo::findOrFail($request->modulo_existente_id);
+            
+            // Verificar si la relación ya existe
+            if (!$curso->modulos()->where('modulo_id', $modulo->id)->exists()) {
+                $curso->modulos()->attach($modulo->id);
+                return redirect()->back()->with('success', 'Módulo existente vinculado al curso correctamente');
+            }
+            
+            return redirect()->back()->with('info', 'Este módulo ya estaba vinculado al curso');
+        } else {
+            // Crear nuevo módulo
+            $modulo = Modulo::create([
+                'codigo' => $request->codigo,
+                'nombre' => $request->nombre,
+                'horas' => $request->horas
+            ]);
+            
+            // Vincular al curso
+            $curso->modulos()->attach($modulo->id);
+            
+            return redirect()->back()->with('success', 'Nuevo módulo creado y vinculado al curso correctamente');
+        }
+    }
     public function edit($id)
     {
         $modulo = Modulo::findOrFail($id);
         return view('admin.modulos.edit', compact('modulo'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Curso $curso)
     {
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'codigo' => 'required|string|max:255',
+        $validated = $request->validate([
+            'curso_id' => 'required|exists:cursos,id',
+            'modulo_existente_id' => 'nullable|in:new,' . implode(',', $modulosDisponibles->pluck('id')->toArray()), // Permite 'new' o módulos existentes
+            'codigo' => 'required_if:modulo_existente_id,new|string|max:50',
+            'nombre' => 'required_if:modulo_existente_id,new|string|max:255',
+            'horas' => 'nullable|numeric'
         ]);
-
-        $modulo = Modulo::findOrFail($id);
-
-        $nombre = strip_tags($request->input('nombre')); 
-        $codigo = strip_tags($request->input('codigo')); 
-        
-        $modulo->update([
-            'nombre' => $nombre,
-            'codigo' => $codigo,
-        ]);
-
-        return redirect()->route('admin.panel')->with('success', 'Módulo actualizado con éxito.');
+    
+        // Si se seleccionó crear un nuevo módulo, crearlo
+        if ($request->modulo_existente_id === 'new') {
+            $modulo = Modulo::create([
+                'curso_id' => $curso->id,
+                'codigo' => $request->codigo,
+                'nombre' => $request->nombre,
+                'horas' => $request->horas,
+            ]);
+        } else {
+            // Si se seleccionó un módulo existente, buscarlo
+            $modulo = Modulo::find($request->modulo_existente_id);
+        }
+    
+        // Sincronizar el módulo con el curso
+        $curso->modulos()->sync([$modulo->id]);
+    
+        return redirect()->back()->with('success', 'Curso actualizado correctamente');
     }
+    
 
     public function destroy($id)
     {

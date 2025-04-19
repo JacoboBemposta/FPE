@@ -1,72 +1,98 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
 use App\Models\Curso;
 use App\Models\FamiliaProfesional;
-use App\Models\CursoAcademico;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\Modulo;
 
 class CursoController extends Controller
 {
     public function index()
     {
-        // Obtener los cursos que ya están asignados a la academia del usuario autenticado
-        $cursosAsignados = CursoAcademico::where('academia_id', auth()->user()->academia_id)
-                                        ->pluck('curso_id')->toArray();
-    
-        // Obtener solo los cursos que NO están asignados
-        $cursosDisponibles = Curso::whereNotIn('id', $cursosAsignados)->get();
-    
-        return view('cursos.index', compact('cursosDisponibles'));
-    }
-    
-    public function create()
-    {
-        $familias_profesionales = FamiliaProfesional::all(); // Obtener todas las familias profesionales
-        return view('admin.curso.create', compact('familias_profesionales'));
+        $familiasProfesionales = FamiliaProfesional::with(['cursos.modulos'])->get();
+        $modulosDisponibles = Modulo::all();
+        
+        return view('admin.index', compact('familiasProfesionales', 'modulosDisponibles'));
     }
 
-    // Método para guardar un curso
+    public function create($familia_id = null)
+    {
+        $familias_profesionales = FamiliaProfesional::all();
+        $familia_seleccionada = null;
+    
+        if ($familia_id) {
+            $familia_seleccionada = FamiliaProfesional::findOrFail($familia_id);
+        }
+    
+        return view('admin.cursos.create', compact('familias_profesionales', 'familia_seleccionada'));
+    }
+    
     public function store(Request $request)
     {
-        try {
-            // Verifica qué datos llegan al backend
-            //dd($request->all()); // Verifica los datos que están llegando al controlador
-   
-            // Validación
-            $request->validate([
-                'familias_profesionales_id' => 'required|exists:familias_profesionales,id',
-                'codigo' => 'required|unique:cursos,codigo',
-                'nombre' => 'required|max:255',
-                'horas' => 'required|integer|min:1|max:1000',
-            ]);
-            //dd($request);
-            // Crear el curso
-            Curso::create([
-                'familias_profesionales_id' => $request->familias_profesionales_id,
-                'codigo' =>strip_tags($request->codigo),
-                'nombre' => strip_tags($request->nombre),
-                'horas' => strip_tags($request->horas),
-            ]);
-            
-            // Redirigir a alguna página (en este caso al panel de admin)
-            return redirect()->route('admin.panel')->with('success', 'Curso creado exitosamente');
-        } catch (\Exception $e) {
-            // Si ocurre un error, lo registramos
-            return back()->withErrors(['error' => $e->getMessage()]);
+
+        $validated = $request->validate([
+            'codigo' => 'required',
+            'nombre' => 'required',
+            'horas' => 'nullable|integer',
+            'familia_profesional_id' => 'required|exists:familias_profesionales,id'
+        ]);
+    
+        // Sanitizar los inputs antes de guardar
+        $cursoData = [
+            'codigo' => htmlspecialchars(strip_tags($request->input('codigo'))),
+            'nombre' => htmlspecialchars(strip_tags($request->input('nombre'))),
+            'horas' => htmlspecialchars(strip_tags($request->input('horas'))),
+            'familia_profesional_id' => $validated['familia_profesional_id'] // ✅ Correcto
+        ];
+        
+    
+        $curso = Curso::create($cursoData);
+
+        // Asociar módulos si fueron seleccionados
+        if ($request->has('modulos')) {
+            $curso->modulos()->attach($request->modulos);
         }
+    
+        return redirect()->back()->with('success', 'Curso creado correctamente');
     }
-    public function destroy($id)
+
+    public function edit(Curso $curso)
+    {
+   
+        // Aquí puedes cargar los módulos asociados al curso si es necesario
+        $familiasProfesionales = FamiliaProfesional::all();
+        return view('admin.cursos.edit', compact('curso', 'familiasProfesionales'));
+    }
+    
+    public function destroy(Curso $curso)
     {
         try {
-            $curso = Curso::findOrFail($id);
             $curso->delete();
-
-            return redirect()->route('admin.panel')->with('success', 'Curso eliminado exitosamente');
+            return redirect()->back()->with('success', 'Curso eliminado correctamente');
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Error al eliminar el curso'], 500);
         }
     }
 
+    public function update(Request $request, Curso $curso)
+    {
+     
+        $validated = $request->validate([
+            'codigo' => 'required|string|max:20|unique:cursos,codigo,'.$curso->id,
+            'nombre' => 'required|string|max:100',
+            'horas' => 'nullable|integer|min:0',
+            'familia_profesional_id' => 'required|exists:familias_profesionales,id'
+        ]);
+        
+        $curso->update($validated);
+ 
+        // Sincronizar módulos
+        $curso->modulos()->sync($request->modulos ?? []);
+    
+        return redirect()->back()->with('success', 'Curso actualizado correctamente');
+    }
 }

@@ -3,418 +3,451 @@
 @section('content')
 <div class="container">
     <h1>Administración de Cursos</h1>
-    
-    <!-- Botones para añadir Familia Profesional, Curso, Módulo y Unidad Formativa -->
-    <div class="mb-3">
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addFamiliaModal">
-            Añadir Familia Profesional
+
+    <!-- Botones para crear nuevos elementos -->
+    <div class="mb-4">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#crearFamiliaModal">
+            <i class="fas fa-plus"></i> Crear Familia Profesional
         </button>
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCourseModal">
-            Añadir Curso
-        </button>
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModuloModal">
-            Añadir Módulo
-        </button>
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUnidadModal">
-            Añadir Unidad Formativa
+        <button class="btn btn-success" data-toggle="modal" data-target="#crearCursoModal">
+            <i class="fas fa-plus"></i> Crear Curso
         </button>
     </div>
 
-    <!-- Tabla de Familias Profesionales -->
-    <table id="familiasTable" class="table table-striped mt-3">
-        <thead>
-          <tr>
-            <th style="width: 2%;">Código</th>
-            <th style="width: 78%;">Familia Profesional</th>
-            <th style="width: 20%;" class="text-end">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @foreach($familias_profesionales as $familia)
-            <!-- Fila de la familia -->
-            <tr>
-              <td>{{ $familia->codigo }}</td>
-              <td>{{ $familia->nombre }}</td>
-              <td class="text-end">
-                <button class="btn btn-info btn-sm" data-bs-toggle="collapse" data-bs-target="#cursos-{{ $familia->id }}" aria-expanded="false" aria-controls="cursos-{{ $familia->id }}">
-                  Ver Cursos
-                </button>
-                <form action="{{ route('admin.familia.destroy', $familia->id) }}" method="POST" style="display:inline;">
-                  @csrf
-                  @method('DELETE')
-                  <button type="submit" class="btn btn-danger btn-sm ms-2">Eliminar</button>
-                </form>
-              </td>
-            </tr>
-            <!-- Fila de cursos (se muestra debajo de la columna "Nombre" de la familia) -->
-            <tr class="collapse" id="cursos-{{ $familia->id }}">
-              <td></td>
-              <td colspan="2">
-                <table class="table table-bordered mb-0">
-                  <thead>
-                    <tr>
-                        <th style="width: 2%;">Código</th>
-                        <th style="width: 78%;">Curso</th>
-                        <th style="width: 20%;" class="text-end">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @foreach($familia->cursos as $curso)
-                      <!-- Fila de curso -->
-                      <tr>
-                        <td>{{ $curso->codigo }}</td>
-                        <td>{{ $curso->nombre }}</td>
-                        <td class="text-end">
-                          <button class="btn btn-info btn-sm" data-bs-toggle="collapse" data-bs-target="#modulos-{{ $curso->id }}" aria-expanded="false" aria-controls="modulos-{{ $curso->id }}">
-                            Ver Módulos
-                          </button>
-                          <form action="{{ route('admin.curso.destroy', $curso->id) }}" method="POST" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm ms-2">Eliminar Curso</button>
-                          </form>
-                        </td>
-                      </tr>
-                      <!-- Fila de módulos (debajo de la columna "Nombre" del curso) -->
-                      <tr class="collapse" id="modulos-{{ $curso->id }}">
-                        <td></td>
-                        <td colspan="2">
-                          <table class="table table-striped mb-0">
-                            <thead>
-                              <tr>
-                                <th style="width: 20%;">Código</th>
-                                <th style="width: 60%;">Módulo</th>
-                                <th style="width: 20%;" class="text-end">Acciones</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              @foreach($curso->modulos as $modulo)
-                                <!-- Fila de módulo -->
-                                <tr>
-                                  <td>{{ $modulo->codigo }}</td>
-                                  <td>{{ $modulo->nombre }}</td>
-                                  <td class="text-end">
-                                    @if($modulo->unidades->count() > 0)
-                                        <button class="btn btn-info btn-sm" data-bs-toggle="collapse" data-bs-target="#unidades-{{ $modulo->id }}" aria-expanded="false" aria-controls="unidades-{{ $modulo->id }}">
-                                        Ver Unidades Formativas
-                                        </button>
-                                    @endif
-                                    <form action="{{ route('admin.modulo.destroy', $modulo->id) }}" method="POST" style="display:inline;">
-                                      @csrf
-                                      @method('DELETE')
-                                      <button type="submit" class="btn btn-danger btn-sm ms-2">Eliminar Módulo</button>
-                                    </form>
-                                  </td>
-                                </tr>
-                                <!-- Fila de unidades formativas (debajo de la columna "Nombre" del módulo) -->
-                                <tr>
-                                    <td></td>
-                                    <td colspan="2">
-                                    <div class="collapse" id="unidades-{{ $modulo->id }}">
-                                        <div class="card card-body p-0">
-                                        <table class="table table-striped mb-0">
-                                            <thead>
-                                            <tr>
-                                                <th style="width: 2%;">Código</th>
-                                                <th style="width: 78%;">Unidad Formativa</th>
-                                                <th style="width: 20%;" class="text-end">Acciones</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            @foreach($modulo->unidades as $unidad)
-                                                <tr>
-                                                <td>{{ $unidad->codigo }}</td>
-                                                <td>{{ $unidad->nombre }}</td>
-                                                <td class="text-end">
-                                                    <form action="{{ route('admin.unidad.destroy', $unidad->id) }}" method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm">Eliminar </button>
-                                                    </form>
-                                                </td>
-                                                </tr>
-                                            @endforeach
-                                            </tbody>
-                                        </table>
+    <!-- Listado jerárquico de Familias Profesionales -->
+    <div class="accordion" id="familiasAccordion">
+        @foreach($familiasProfesionales as $familia)
+        <div class="card">
+            <div class="card-header" id="familiaHeading{{ $familia->id }}">
+                <h2 class="mb-0">
+                    <button class="btn btn-link btn-block text-left d-flex justify-content-between align-items-center" type="button" data-toggle="collapse" data-target="#familiaCollapse{{ $familia->id }}" aria-expanded="true" aria-controls="familiaCollapse{{ $familia->id }}">
+                        <span>
+                            <strong>{{ $familia->codigo }}</strong> - {{ $familia->nombre }}
+                        </span>
+                        <span class="badge badge-primary">{{ $familia->cursos->count() }} cursos</span>
+                    </button>
+                </h2>
+            </div>
+
+            <div id="familiaCollapse{{ $familia->id }}" class="collapse" aria-labelledby="familiaHeading{{ $familia->id }}" data-parent="#familiasAccordion">
+                <div class="card-body">
+                    <div class="accordion" id="cursosAccordion{{ $familia->id }}">
+                        @foreach($familia->cursos as $curso)
+                        <div class="card">
+                            <div class="card-header" id="cursoHeading{{ $curso->id }}">
+                                <h3 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left d-flex justify-content-between align-items-center" type="button" data-toggle="collapse" data-target="#cursoCollapse{{ $curso->id }}" aria-expanded="true" aria-controls="cursoCollapse{{ $curso->id }}">
+                                        <span>
+                                            <strong>{{ $curso->codigo }}</strong> - {{ $curso->nombre }} ({{ $curso->horas }}h)
+                                        </span>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-warning" data-toggle="modal" data-target="#editarCursoModal{{ $curso->id }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <form action="{{ route('admin.cursos.destroy', $curso->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este curso?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
                                         </div>
+                                    </button>
+                                </h3>
+                            </div>
+
+                            <!-- Modal Editar Curso - Debe estar dentro del bucle de cursos -->
+                            <div class="modal fade" id="editarCursoModal{{ $curso->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <form method="POST" action="{{ route('admin.cursos.update', $curso->id) }}">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Editar Curso</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <!-- Campo de selección de Familia Profesional -->
+                                                <div class="form-group">
+                                                    <label>Familia Profesional</label>
+                                                    <select name="familia_profesional_id" class="form-control" required>
+                                                        @foreach($familiasProfesionales as $familia)
+                                                            <option value="{{ $familia->id }}" 
+                                                                {{ $curso->familia_profesional_id == $familia->id ? 'selected' : '' }}>
+                                                                {{ $familia->codigo }} - {{ $familia->nombre }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                            
+                                                <!-- Código del Curso -->
+                                                <div class="form-group">
+                                                    <label>Código</label>
+                                                    <input type="text" name="codigo" class="form-control" value="{{ $curso->codigo }}" required>
+                                                </div>
+                            
+                                                <!-- Nombre del Curso -->
+                                                <div class="form-group">
+                                                    <label>Nombre</label>
+                                                    <input type="text" name="nombre" class="form-control" value="{{ $curso->nombre }}" required>
+                                                </div>
+                            
+                                                <!-- Horas del Curso -->
+                                                <div class="form-group">
+                                                    <label>Horas totales</label>
+                                                    <input type="number" name="horas" class="form-control" value="{{ $curso->horas }}">
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                                <button type="submit" class="btn btn-primary">Actualizar</button>
+                                            </div>
+                                        </form>
                                     </div>
-                                    </td>
-                                </tr>
-  
-                              @endforeach
-                            </tbody>
-                          </table>
-                        </td>
-                      </tr>
-                    @endforeach
-                  </tbody>
-                </table>
-              </td>
-            </tr>
-          @endforeach
-        </tbody>
-      </table>
-</div>    
+                                </div>
+                            </div>
+
+                            <div id="cursoCollapse{{ $curso->id }}" class="collapse" aria-labelledby="cursoHeading{{ $curso->id }}" data-parent="#cursosAccordion{{ $familia->id }}">
+                                <div class="card-body">
+                                    <!-- Mostrar módulos y sus unidades -->
+                                    <div class="mb-4">
+                                        <h5>Módulos del Curso</h5>
+                                        @if($curso->modulos && $curso->modulos->count())
+                                        @foreach($curso->modulos as $modulo)
+                                        <div class="card mb-3">
+                                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong>{{ $modulo->codigo }}</strong> - {{ $modulo->nombre }} ({{ $modulo->horas }}h)
+                                                </div>
+                                                <div>
+                                                    <button class="btn btn-sm btn-outline-info" data-toggle="modal" data-target="#agregarUnidadModal{{ $modulo->id }}">
+                                                        <i class="fas fa-plus"></i> Añadir Unidad
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-toggle="collapse" data-target="#unidadesModulo{{ $modulo->id }}" aria-expanded="false">
+                                                        <i class="fas fa-list"></i> Ver Unidades
+                                                    </button>
+                                                    <form action="{{ route('admin.cursos.modulos.destroy', ['curso' => $curso->id, 'modulo' => $modulo->id]) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este módulo del curso?');">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Sección de unidades formativas con collapse -->
+                                            <div class="collapse" id="unidadesModulo{{ $modulo->id }}">
+                                                <div class="card-body">
+                                                    @if($modulo->unidades->count())
+                                                        <div class="list-group">
+                                                            @foreach($modulo->unidades->sortBy([['codigo'], ['nombre']]) as $unidad)
+                                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                                    <div>
+                                                                        <strong>{{ $unidad->codigo }}</strong> - {{ $unidad->nombre }}
+                                                                        <span class="badge badge-info ml-2">{{ $unidad->horas }}h</span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <form action="{{ route('admin.unidades.destroy', $unidad->id) }}" method="POST" class="d-inline">
+                                                                            @csrf
+                                                                            @method('DELETE')
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta unidad formativa?');">
+                                                                                <i class="fas fa-trash"></i>
+                                                                            </button>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <p class="text-muted">Este módulo no tiene unidades formativas.</p>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                    @else
+                                        <p class="text-muted">Este curso no tiene módulos.</p>
+                                    @endif
+                                    </div>
+
+                                    <!-- Botón para añadir módulo -->
+                                    <button class="btn btn-primary" data-toggle="modal" data-target="#agregarModuloModal{{ $curso->id }}">
+                                        <i class="fas fa-plus"></i> Añadir Módulo
+                                    </button>
+                                </div>
+                            </div>
+
+                           <!-- Modal simplificado para agregar módulo -->
+                            <div class="modal fade" id="agregarModuloModal{{ $curso->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <form action="{{ route('admin.cursos.modulos.store', $curso->id) }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="curso_id" value="{{ $curso->id }}">
+                                            
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Agregar Nuevo Módulo al Curso</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label>Código del Módulo</label>
+                                                    <input type="text" name="codigo" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Nombre del Módulo</label>
+                                                    <input type="text" name="nombre" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Horas del Módulo</label>
+                                                    <input type="number" name="horas" class="form-control" required>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-primary">Guardar Módulo</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modal para agregar unidad formativa -->
+                            @foreach($curso->modulos as $modulo)
+                            <div class="modal fade" id="agregarUnidadModal{{ $modulo->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <form action="{{ route('admin.unidades.store') }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="modulo_id" value="{{ $modulo->id }}">
+                                            
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Añadir Unidad a {{ $modulo->nombre }}</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label>Código</label>
+                                                    <input type="text" name="codigo" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Nombre</label>
+                                                    <input type="text" name="nombre" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Horas</label>
+                                                    <input type="number" name="horas" class="form-control">
+                                                </div>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-success">Guardar Unidad</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>
+
+
+<!-- Modal Crear Familia Profesional -->
+<div class="modal fade" id="crearFamiliaModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="{{ route('admin.familias-profesionales.store') }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">Nueva Familia Profesional</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Código</label>
+                        <input type="text" name="codigo" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" name="nombre" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Crear Curso -->
+<div class="modal fade" id="crearCursoModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="{{ route('admin.cursos.store') }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo Curso</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Familia Profesional</label>
+                        <select name="familia_profesional_id" class="form-control" required>
+                            @foreach($familiasProfesionales as $familia)
+                                <option value="{{ $familia->id }}">{{ $familia->codigo }} - {{ $familia->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Código</label>
+                        <input type="text" name="codigo" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" name="nombre" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Horas totales</label>
+                        <input type="number" name="horas" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
 @endsection
 
-<!-- Modal Familia Profesional -->
-<div class="modal fade" id="addFamiliaModal" tabindex="-1" aria-labelledby="addFamiliaModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addFamiliaModalLabel">Añadir Familia Profesional</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addFamiliaForm" method="POST" action="{{ route('admin.familia.store') }}">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="codigo" class="form-label">Código de la familia profesional</label>
-                        <input type="text" class="form-control" id="codigo" name="codigo" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nombre" class="form-label">Nombre de la Familia Profesional</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" required>
-                    </div>
-                    <button type="submit" class="btn btn-success">Guardar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Curso  -->
-<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addCourseModalLabel">Añadir Curso</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addCourseForm" method="POST" action="{{ route('admin.curso.store') }}">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="familias_profesionales_id" class="form-label">Familia Profesional</label>
-                        <select class="form-select" id="familias_profesionales_id" name="familias_profesionales_id" required>
-                            <option value="">Selecciona una Familia Profesional</option>
-                            @foreach($familias_profesionales as $familia)
-                                <option value="{{ $familia->id }}">{{ $familia->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="codigo" class="form-label">Código del Curso</label>
-                        <input type="text" class="form-control" id="codigo" name="codigo" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nombre" class="form-label">Nombre del Curso</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="horas" class="form-label">Numero de horas</label>
-                        <input type="number" class="form-control" id="horas" name="horas" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Modulo  -->
-<div class="modal fade" id="addModuloModal" tabindex="-1" aria-labelledby="addModuloModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addModuloModalLabel">Añadir Módulo</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addModuloForm" method="POST" action="{{ route('admin.modulo.store') }}">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="familia_id_modulo" class="form-label">Familia Profesional</label>
-                        <select class="form-select" id="familia_id_modulo" name="familia_id_modulo" required>
-                            <option value="">Selecciona una Familia Profesional</option>
-                            @foreach($familias_profesionales as $familia)
-                                <option value="{{ $familia->id }}">{{ $familia->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="curso_id" class="form-label">Curso</label>
-                        <select class="form-select" id="curso_id" name="curso_id" required>
-                            <option value="">Selecciona un Curso</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="codigo" class="form-label">Código del Módulo</label>
-                        <input type="text" class="form-control" id="codigo" name="codigo" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nombre" class="form-label">Nombre del Módulo</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="horas" class="form-label">Horas del Módulo</label>
-                        <input type="text" class="form-control" id="horas" name="horas" required>
-                    </div>
-                    <button type="submit" class="btn btn-warning">Guardar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Unidad Formativa  -->
-<div class="modal fade" id="addUnidadModal" tabindex="-1" aria-labelledby="addUnidadModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addUnidadModalLabel">Añadir Unidad Formativa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addUnidadForm" method="POST" action="{{ route('admin.unidad.store') }}">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="familia_id_unidad" class="form-label">Familia Profesional</label>
-                        <select class="form-select" id="familia_id_unidad" name="familia_id_unidad" required>
-                            <option value="">Selecciona una Familia Profesional</option>
-                            @foreach($familias_profesionales as $familia)
-                                <option value="{{ $familia->id }}">{{ $familia->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="curso_id_unidad" class="form-label">Curso</label>
-                        <select class="form-select" id="curso_id_unidad" name="curso_id_unidad" required>
-                            <option value="">Selecciona un Curso</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="modulo_id" class="form-label">Módulo</label>
-                        <select class="form-select" id="modulo_id" name="modulo_id" required>
-                            <option value="">Selecciona un Módulo</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="codigo" class="form-label">Código de la Unidad</label>
-                        <input type="text" class="form-control" id="codigo" name="codigo" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nombre" class="form-label">Nombre de la Unidad</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="horas" class="form-label">Horas de la Unidad</label>
-                        <input type="text" class="form-control" id="horas" name="horas" required>
-                    </div>
-                    <button type="submit" class="btn btn-info">Guardar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- Asegúrate de que los datos estén disponibles en el script de la siguiente manera -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@push('scripts')
 <script>
-    $(document).ready(function () {
-        // --- Para el modal de añadir Curso (si fuera necesario) ---
-        $('#familia_id').on('change', function() {
-            let familiaId = $(this).val();
-            let cursoSelect = $('#curso_id');
-            cursoSelect.html('<option value="">Selecciona un Curso</option>');
-            if (familiaId) {
-                @foreach($familias_profesionales as $familia)
-                    if (familiaId == {{ $familia->id }}) {
-                        @foreach($familia->cursos as $curso)
-                            cursoSelect.append(`<option value="{{ $curso->id }}">{{ $curso->nombre }}</option>`);
-                        @endforeach
-                    }
-                @endforeach
+    document.addEventListener('DOMContentLoaded', function() {
+        // Manejo de eliminación de módulos (mantener esta funcionalidad)
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('.eliminar-modulo')) {
+                event.preventDefault();
+                const button = event.target.closest('.eliminar-modulo');
+                const moduloId = button.getAttribute('data-modulo-id');
+                const cursoId = button.getAttribute('data-curso-id');
+                
+                confirmarEliminarModulo(moduloId, cursoId);
             }
         });
-    
-        // --- Para el modal de añadir Módulo (si fuera necesario) ---
-        $('#familia_id_modulo').on('change', function() {
-            let familiaId = $(this).val();
-            let cursoSelect = $('#curso_id');
-            cursoSelect.html('<option value="">Selecciona un Curso</option>');
-            if (familiaId) {
-                @foreach($familias_profesionales as $familia)
-                    if (familiaId == {{ $familia->id }}) {
-                        @foreach($familia->cursos as $curso)
-                            cursoSelect.append(`<option value="{{ $curso->id }}">{{ $curso->nombre }}</option>`);
-                        @endforeach
-                    }
-                @endforeach
-            }
-        });
-    
 
-   // --- Para el modal de añadir Unidad Formativa ---
-   $('#familia_id_unidad').on('change', function() {
-        let familiaId = $(this).val();
-        let cursoSelect = $('#curso_id_unidad');
-        cursoSelect.html('<option value="">Selecciona un Curso</option>');
-        // También limpiamos el select de módulo
-        $('#modulo_id').html('<option value="">Selecciona un Módulo</option>');
-        
-        if (familiaId) {
-            @foreach($familias_profesionales as $familia)
-                if (familiaId == {{ $familia->id }}) {
-                    @foreach($familia->cursos as $curso)
-                        cursoSelect.append(`<option value="{{ $curso->id }}">{{ $curso->nombre }}</option>`);
-                    @endforeach
+        function confirmarEliminarModulo(moduloId, cursoId) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción eliminará la relación entre el módulo y el curso",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    eliminarModulo(moduloId, cursoId);
                 }
-            @endforeach
+            });
         }
-    });
 
-    $('#curso_id_unidad').on('change', function() {
-        let cursoId = $(this).val();
-        let moduloSelect = $('#modulo_id');
-        moduloSelect.html('<option value="">Selecciona un Módulo</option>');
-        if (cursoId) {
-            @foreach($familias_profesionales as $familia)
-                @foreach($familia->cursos as $curso)
-                    if (cursoId == {{ $curso->id }}) {
-                        @foreach($curso->modulos as $modulo)
-                            moduloSelect.append(`<option value="{{ $modulo->id }}">{{ $modulo->nombre }}</option>`);
-                        @endforeach
-                    }
-                @endforeach
-            @endforeach
+        function eliminarModulo(moduloId, cursoId) {
+            fetch(`/admin/cursos/${cursoId}/modulos/${moduloId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    _method: 'DELETE'
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    Swal.fire(
+                        '¡Eliminado!',
+                        'La relación ha sido eliminada.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    throw new Error(data.message || 'Error al eliminar');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error',
+                    error.message || 'Ocurrió un error al eliminar',
+                    'error'
+                );
+            });
         }
-    });
-    
-        $('#curso_unidad').on('change', function() {
-            let cursoId = $(this).val();
-            let moduloSelect = $('#modulo_unidad');
-            moduloSelect.html('<option value="">Selecciona un Módulo</option>');
-            if (cursoId) {
-                @foreach($familias_profesionales as $familia)
-                    @foreach($familia->cursos as $curso)
-                        if (cursoId == {{ $curso->id }}) {
-                            @foreach($curso->modulos as $modulo)
-                                moduloSelect.append(`<option value="{{ $modulo->id }}">{{ $modulo->nombre }}</option>`);
-                            @endforeach
-                        }
-                    @endforeach
-                @endforeach
-            }
-        });
-    
-        // Confirmación antes de eliminar
-        $('.delete-form').on('submit', function(e) {
-            if (!confirm('¿Estás seguro de que deseas eliminar este elemento?')) {
+
+     // Manejo de eliminación de unidades
+     document.addEventListener('click', function(e) {
+            if (e.target.closest('.eliminar-unidad')) {
                 e.preventDefault();
+                const form = e.target.closest('form');
+                confirmarEliminarUnidad(form);
             }
         });
+
+        function confirmarEliminarUnidad(form) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción eliminará permanentemente la unidad formativa",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
+
     });
-    </script>
-    
+</script>
+@endpush

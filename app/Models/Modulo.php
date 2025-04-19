@@ -9,10 +9,12 @@ class Modulo extends Model
     protected $table = 'modulos';
     protected $fillable = ['curso_id', 'codigo', 'nombre', 'horas'];
     
-    public function curso()
+    public function cursos()
     {
-        return $this->belongsTo(Curso::class);
+        return $this->belongsToMany(Curso::class, 'curso_modulo');
     }
+    
+    
 
     public function unidades()
     {

@@ -7,23 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class Curso extends Model
 {
     protected $table = 'cursos';
-    protected $fillable = ['familias_profesionales_id', 'codigo','nombre','horas'];
+    protected $fillable = ['familia_profesional_id', 'codigo','nombre','horas'];
 
     public function FamiliaProfesional()
     {
-        return $this->belongsTo(FamiliaProfesional::class, 'familias_profesionales_id');
+        return $this->belongsTo(FamiliaProfesional::class, 'familia_profesional_id');
     }
 
-    public function familia()
-    {
-        return $this->belongsTo(FamiliaProfesional::class, 'familias_profesionales_id'); // Asegúrate de que 'familia_id' es el campo correcto
-    }
+
 
     public function modulos()
     {
-        return $this->hasMany(Modulo::class);
+        return $this->belongsToMany(Modulo::class, 'curso_modulo')
+                    ->withTimestamps(); 
     }
-
 
     public function cursosAcademicos()
     {

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('cursos', function (Blueprint $table) {
             $table->id();
             // La familia profesional es obligatoria
-            $table->foreignId('familias_profesionales_id')->constrained('familias_profesionales')->onDelete('cascade');
+            $table->foreignId('familia_profesional_id')->constrained('familias_profesionales')->onDelete('cascade');
             $table->string('codigo')->unique();
             $table->string('nombre');
             $table->unsignedBigInteger('horas');

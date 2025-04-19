@@ -13,6 +13,7 @@ use App\Http\Controllers\CalificacionController;
 use App\Http\Controllers\ProfesorController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\ProfesorCursoController;
+use App\Http\Controllers\CursoModuloController;
 
 use Illuminate\Support\Facades\Auth;
 
@@ -48,28 +49,43 @@ Route::get('/dashboard', function () {
 
 
 
-
-
-
+// Grupo protegido por middleware y con prefijo
 Route::middleware(['auth', 'rol:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [AdminController::class, 'index'])->name('panel');
+    
+    // Ruta al panel (index principal del admin)
+    Route::get('/', [AdminController::class, 'index'])->name('panel'); 
 
+    // Familias Profesionales
+    Route::post('/familias-profesionales', [FamiliaProfesionalController::class, 'store'])->name('familias-profesionales.store');
+    
+    // Cursos
+    Route::get('/cursos/create', [CursoController::class, 'create'])->name('cursos.create');
+    Route::post('/cursos', [CursoController::class, 'store'])->name('cursos.store');
+    Route::delete('/cursos/{curso}', [CursoController::class, 'destroy'])->name('cursos.destroy');
+    Route::get('/cursos/{curso}/edit', [CursoController::class, 'edit'])->name('cursos.edit');
+    Route::put('/cursos/{curso}', [CursoController::class, 'update'])->name('cursos.update');
+    
     // Rutas para crear
-    Route::post('/familias_profesionales', [FamiliaProfesionalController::class, 'store'])->name('familia.store');
-    Route::post('/curso/store', [CursoController::class, 'store'])->name('curso.store');
-    Route::post('/modulos', [ModuloController::class, 'store'])->name('modulo.store');
-    Route::post('/unidad', [UnidadFormativaController::class, 'store'])->name('unidad.store');
+
+    Route::post('/unidades', [UnidadFormativaController::class, 'store'])->name('unidades.store');
+
+    Route::post('/cursos/{curso}/modulos', [CursoModuloController::class, 'store'])->name('cursos.modulos.store');
+    
 
     // Rutas para eliminar
     Route::delete('/familia/{id}', [FamiliaProfesionalController::class, 'destroy'])->name('familia.destroy');
-    Route::delete('/curso/{id}', [CursoController::class, 'destroy'])->name('curso.destroy');
-    Route::delete('/modulo/{id}', [ModuloController::class, 'destroy'])->name('modulo.destroy');
-    Route::delete('/unidad/{id}', [UnidadFormativaController::class, 'destroy'])->name('unidad.destroy');
+    Route::delete('/cursos/{curso}/modulos/{modulo}', [CursoModuloController::class, 'destroy'])->name('cursos.modulos.destroy');
+    Route::delete('unidades/{unidad}', [UnidadFormativaController::class, 'destroy'])->name('unidades.destroy');
+
+    // Rutas para ver y editar unidades formativas por módulo
+    Route::get('/modulo/{modulo}/unidades', [UnidadFormativaController::class, 'index'])->name('modulos.unidades.index');
+    Route::get('/modulo/{modulo}/unidades/create', [UnidadFormativaController::class, 'create'])->name('modulos.unidades.create');
+    Route::get('/modulo/{modulo}/unidades/{id}/edit', [UnidadFormativaController::class, 'edit'])->name('modulos.unidades.edit');
+    Route::put('/modulo/{modulo}/unidades/{id}', [UnidadFormativaController::class, 'update'])->name('modulos.unidades.update');
 });
 
 
 
-Route::get('/cursos/{familiaId}', [CursoController::class, 'getCursosByFamilia']);
 
 
 Route::middleware(['auth', 'rol:academia'])
@@ -99,10 +115,10 @@ Route::middleware(['auth', 'rol:academia'])
 
     });
 
-Route::middleware(['auth', 'rol:academia,profesor'])->group(function () {
-    Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
+    Route::middleware(['auth', 'rol:academia,profesor'])->group(function () {
+        Route::get('/cursos', [AcademiaController::class, 'index'])->name('cursos.index');
 
-});
+    });
 
 Route::get('/calificaciones/{curso_academico_id}', [CalificacionController::class, 'showCalificaciones'])->name('calificaciones');
 Route::put('/calificaciones/{calificacion}', [CalificacionController::class, 'update'])->name('calificaciones.update');

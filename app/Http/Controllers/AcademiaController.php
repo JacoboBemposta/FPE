@@ -16,14 +16,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AcademiaController extends Controller
 {
-    // public function index()
-    // {
-    //     // Obtener todas las familias profesionales con sus cursos, módulos y unidades formativas asociadas
-    //     $familias_profesionales = FamiliaProfesional::with('cursos.modulos.unidades')->get();
-
-    //     // Pasar la variable a la vista
-    //     return view('academia.index', compact('familias_profesionales'));
-    // }
+    public function index()
+    {
+        // Obtener todas las familias profesionales con sus cursos, módulos y unidades formativas asociadas
+        $familias_profesionales = FamiliaProfesional::with('cursos.modulos.unidades')->get();
+        
+        // Pasar la variable a la vista
+        return view('academia.index', compact('familias_profesionales'));
+    }
 
     public function misCursos()
     {
