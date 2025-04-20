@@ -33,9 +33,14 @@
                                 <strong>{{ $curso->codigo }}</strong> - {{ $curso->nombre }} ({{ $curso->horas }}h)
                             </div>
                             <div>
-                                <form action="{{ route('academia.asignar_curso', $curso->id) }}" method="POST" class="d-inline">                                    @csrf
-                                    <button type="submit" class="btn btn-success btn-sm">Asignar Curso</button>
+                                <form action="{{ Auth::user()->rol == 'academia' 
+                                    ? route('academia.asignar_curso', $curso->id) 
+                                    : route('profesor.asignar_curso', $curso->id) }}" 
+                                method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-success btn-sm">Asignar Curso</button>
                                 </form>
+                            
                             </div>
                         </div>
                     </div>

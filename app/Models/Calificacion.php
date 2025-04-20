@@ -11,7 +11,13 @@ class Calificacion extends Model
 
     protected $table = 'calificaciones';
     // Definir los campos que son asignables en masa (mass assignable)
-    protected $fillable = [ 'alumno_curso_id', 'unidad_formativa_id', 'nota'];
+    protected $fillable = [
+        'alumno_curso_id',
+        'unidad_formativa_id',
+        'modulo_id',
+        'curso_academico_id',
+        'nota',
+    ];
 
     // Relación con el curso académico
     public function cursoAcademico()

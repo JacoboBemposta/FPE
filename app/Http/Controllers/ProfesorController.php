@@ -24,12 +24,15 @@ class ProfesorController extends Controller
 
     public function cursos()
     {
-       
         // Obtener todas las familias profesionales con sus cursos, módulos y unidades formativas asociadas
         $familias_profesionales = FamiliaProfesional::with('cursos.modulos.unidades')->get();
-        
-        return view('profesor.cursos', compact('familias_profesionales'));
+    
+        // Obtener todos los cursos disponibles
+        $cursosDisponibles = Curso::all();
+    
+        return view('cursos.index', compact('familias_profesionales', 'cursosDisponibles'));
     }
+    
     
     public function misCursos()
     {
@@ -47,7 +50,7 @@ class ProfesorController extends Controller
         // Obtener los cursos académicos del usuario
         $misCursos = CursoAcademico::where('academia_id', $user->id)->get();
         
-        return view('docente.index', compact('misCursos'));
+        return view('profesor.index', compact('misCursos'));
     }
     
 
@@ -88,9 +91,16 @@ class ProfesorController extends Controller
 
     public function verAcademias(Request $request)
     {
-        $query = CursoAcademico::with(['curso.familiaProfesional', 'academia'])
-            ->whereDate('inicio', '>', Carbon::now());
-    
+        $fecha = now(); // o now()->format('Y-m-d')
+
+        $query = CursoAcademico::where(function($query) use ($fecha) {
+            $query->whereDate('inicio', '>', $fecha)
+                  ->orWhereNull('inicio');
+        })
+        ->whereDoesntHave('users', function($query) {
+            $query->where('rol', 'profesor'); // Filtra solo por rol profesor
+        })
+        ->get();
         // Filtros
         if ($request->filled('academia')) {
             $query->whereHas('academia', function ($q) use ($request) {
@@ -120,7 +130,7 @@ class ProfesorController extends Controller
     
         $cursosAcademicos = $query->get();
     
-        return view('docente.academias', compact('cursosAcademicos'));
+        return view('profesor.academias', compact('cursosAcademicos'));
     }
     
 

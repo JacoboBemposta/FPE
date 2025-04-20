@@ -25,12 +25,9 @@ class CursoAcademico extends Model
     // Relación con Usuarios (Profesores y Alumnos)
     public function users()
     {
-        return $this->belongsToMany(User::class, 'user_curso')
-                    ->withPivot('rol')
-                    ->withTimestamps();
+        return $this->belongsToMany(User::class, 'user_curso', 'curso_academico_id', 'user_id');
     }
-
-
+    
     public function profesores()
     {
         return $this->belongsToMany(User::class, 'user_curso', 'curso_academico_id', 'user_id')
@@ -42,11 +39,15 @@ class CursoAcademico extends Model
     {
         return $this->hasMany(AlumnoCurso::class, 'curso_academico_id');
     }
-
+    
+    public function detallesCursos()
+    {
+        return $this->hasMany(DetalleCurso::class, 'curso_academico_id');
+    }
+    
     public function detallesCurso()
     {
-        return $this->hasMany(DetalleCurso::class); // Relación de un curso académico con muchos detalles de curso
+        return $this->hasMany(DetalleCurso::class);
     }
-
 
 }

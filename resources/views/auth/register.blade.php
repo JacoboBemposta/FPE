@@ -13,9 +13,9 @@
                     
                         <!-- Campo Identificación -->
                         <div class="row mb-3">
-                            <label for="ident" class="col-md-4 col-form-label text-md-end">{{ __('Nombre') }}</label>
+                            <label for="ident" class="col-md-4 col-form-label text-md-end">{{ __('Academia') }}</label>
                             <div class="col-md-6">
-                                <input id="ident" type="text" class="form-control @error('ident') is-invalid @enderror" name="ident" value="{{ old('ident') }}" required>
+                                <input id="ident" type="text" class="form-control @error('ident') is-invalid @enderror" name="ident" value="{{ old('ident') }}" >
                                 @error('ident')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>

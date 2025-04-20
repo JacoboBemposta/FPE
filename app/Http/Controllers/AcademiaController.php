@@ -40,7 +40,7 @@ class AcademiaController extends Controller
     
         // Obtener los cursos académicos del usuario
         $misCursos = CursoAcademico::where('academia_id', $user->id)->get();
-        
+
         return view('academia.index', compact('misCursos'));
     }
         
@@ -110,8 +110,6 @@ class AcademiaController extends Controller
         return view('academia.docentes', compact('docentesConCursos'));
     }
     
-    
-
     public function asignarCurso(Request $request, $curso_id)
     {
         $user = Auth::user();
@@ -145,40 +143,7 @@ class AcademiaController extends Controller
                ->route('academia.miscursos')
                ->with('success', 'Curso asignado correctamente. Ahora puedes editar los detalles.');
     }
-
-    public function asignarProfesor(Request $request, $cursoAcademico_id)
-    {
-        // Asegurarse de que el usuario está autenticado
-        $user = Auth::user();
-        
-        if (!$user) {
-            return redirect()->route('login')->withErrors(['error' => 'Debes iniciar sesión.']);
-        }
     
-        // Verificar si el usuario tiene el rol de 'profesor'
-        if ($user->rol !== 'profesor') {
-            return back()->withErrors(['error' => 'No tienes permisos para asignarte a este curso.']);
-        }
-    
-        // Verificar si el curso académico existe
-        $cursoAcademico = CursoAcademico::find($cursoAcademico_id);
-        
-        if (!$cursoAcademico) {
-            return back()->withErrors(['error' => 'El curso académico no existe.']);
-        }
-    
-        // Verificar si el profesor ya está asignado a este curso
-        if ($cursoAcademico->profesores->contains($user)) {
-            return back()->withErrors(['error' => 'Ya estás asignado a este curso académico.']);
-        }
-    
-        // Asignar el profesor al curso académico (relación N:M a través de la tabla user_curso)
-        $cursoAcademico->profesores()->attach($user->id);
-    
-        return back()->with('success', 'Te has asignado correctamente al curso académico.');
-    }
-    
-
     public function destroyCursoAcademico($id)
     {
         $curso = CursoAcademico::findOrFail($id);
@@ -196,23 +161,6 @@ class AcademiaController extends Controller
         $cursosDisponibles = Curso::all();
     
         return view('cursos.index', compact('familias_profesionales', 'cursosDisponibles'));
-    }
-    
-
-    public function getAlumnos($id)
-    {
-        // Obtén el curso académico por ID
-        $cursoAcademico = CursoAcademico::find($id);
-        
-        // Verifica si existe el curso académico
-        if (!$cursoAcademico) {
-            return response()->json(['message' => 'Curso no encontrado'], 404);
-        }
-    
-        // Obtén los alumnos relacionados con ese curso
-        $alumnos = $cursoAcademico->alumnos;
-    
-        return response()->json($alumnos);
     }
     
     public function agregarDetallesCurso($cursoAcademicoId)
@@ -250,7 +198,11 @@ class AcademiaController extends Controller
     public function detalleCurso($id)
     {
         // Buscar el CursoAcademico por su ID con la relación de cursos, modulos y unidades
-        $cursoAcademico = CursoAcademico::with('curso.modulos.unidades')->findOrFail($id);
+        $cursoAcademico = CursoAcademico::with([
+            'curso.modulos.unidades', // si tienes relaciones anidadas
+            'detallesCurso',
+            'curso.FamiliaProfesional'
+        ])->findOrFail($id);
 
         // Preparar los detalles, incluyendo los módulos para cada unidad formativa
         $detalles = [];
@@ -273,42 +225,122 @@ class AcademiaController extends Controller
         return view('academia.detalle_curso', compact('cursoAcademico', 'detalles'));
     }
 
-
     public function guardarDetallesCurso(Request $request, $id)
     {
         $cursoAcademico = CursoAcademico::findOrFail($id);
-
-        // Validar los datos recibidos en el formulario
+    
         $request->validate([
             'detalles' => 'required|array',
             'detalles.*.inicio' => 'nullable|date',
             'detalles.*.fin' => 'nullable|date',
-            'detalles.*.calificacion' => 'nullable|numeric|min:0|max:10', // Ajustar a tus necesidades
+            'detalles.*.calificacion' => 'nullable|numeric|min:0|max:10',
+            'detalles.*.modulo_id' => 'nullable|exists:modulos,id' // Nuevo campo para módulos
         ]);
-
-        // Actualizar cada detalle de curso
-        foreach ($request->detalles as $detalleId => $values) {
-            $detalle = DetalleCurso::findOrFail($detalleId);
-            $detalle->update([
-                'inicio' => $values['inicio'],
-                'fin' => $values['fin'],
-                'calificacion' => $values['calificacion'],
-            ]);
+    
+        foreach ($request->detalles as $detalleData) {
+            // Buscar o crear el detalle
+            $detalle = DetalleCurso::updateOrCreate(
+                [
+                    'curso_academico_id' => $id,
+                    'unidad_formativa_id' => $detalleData['unidad_formativa_id'] ?? null,
+                    'modulo_id' => $detalleData['modulo_id'] ?? null
+                ],
+                [
+                    'inicio' => $detalleData['inicio'],
+                    'fin' => $detalleData['fin'],
+                    'calificacion' => $detalleData['calificacion']
+                ]
+            );
         }
-
-        // Redirigir con éxito
-        return redirect()->route('academia.detallesCurso', $cursoAcademico->id)->with('success', 'Detalles guardados correctamente.');
+    
+        return redirect()->back()->with('success', 'Detalles guardados correctamente.');
     }
 
+    public function guardarNotaModulo(Request $request)
+    {
+        // Forzar el manejo como JSON
+        if (!$request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta ruta solo acepta solicitudes JSON',
+                'received_data' => $request->all()
+            ], 400);
+        }
+    
+        try {
+            $validated = $request->validate([
+                'modulo_id' => 'required|exists:modulos,id',
+                'alumno_curso_id' => 'required|exists:alumnos_curso,id',
+                'curso_academico_id' => 'required|exists:curso_academicos,id',
+                'nota' => 'required|numeric|min:0|max:10'
+            ]);
+    
+            $calificacion = Calificacion::updateOrCreate(
+                [
+                    'alumno_curso_id' => $validated['alumno_curso_id'],
+                    'modulo_id' => $validated['modulo_id'],
+                    'unidad_formativa_id' => null
+                ],
+                [
+                    'nota' => $validated['nota'],
+                    'curso_academico_id' => $validated['curso_academico_id']
+                ]
+            );
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Nota guardada correctamente',
+                'data' => $calificacion
+            ]);
+    
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function guardarDetalleModulo(Request $request, $cursoId)
+    {
+        $request->validate([
+            'modulo_id' => 'required|exists:modulos,id',
+            'campo' => 'required|in:inicio,fin,calificacion',
+            'valor' => 'nullable'
+        ]);
+    
+        $detalle = DetalleCurso::updateOrCreate(
+            [
+                'curso_academico_id' => $cursoId,
+                'modulo_id' => $request->modulo_id,
+                'unidad_formativa_id' => null
+            ],
+            [
+                $request->campo => $request->valor
+            ]
+        );
+    
+        return response()->json([
+            'success' => true,
+            'detalle_id' => $detalle->id
+        ]);
+    }
 
     public function actualizarCurso(Request $request, $id)
     {
+        
         $cursoAcademico = CursoAcademico::findOrFail($id);
 
         // Validación de los campos del formulario
         $request->validate([
-            'municipio' => 'required|string|max:100',
-            'provincia' => 'required|string|max:100',
+            'municipio' => 'nullable|string|max:100',
+            'provincia' => 'nullable|string|max:100',
             'inicio' => 'nullable|date',
             'fin' => 'nullable|date',
         ]);
@@ -331,96 +363,65 @@ class AcademiaController extends Controller
         return view('academia.index', compact('misCursos','alumnos'));
     }
 
-    public function detallesCurso($id)
+    public function crearActualizarDetalle(Request $request)
     {
-        // Obtener el curso académico por ID
-        $cursoAcademico = CursoAcademico::findOrFail($id);
-        return view('academia.detalles', compact('cursoAcademico'));
-    }
-    public function guardarCursoAcademico(Request $request)
-    {
-        // Validamos que se reciba un curso académico válido
-        $request->validate([
-            'curso_academico_id' => 'required|exists:curso_academicos,id',  // Verificamos que el curso exista en la base de datos
+        $v = $request->validate([
+            'detalle_id'            => 'nullable|exists:detalles_curso,id',
+            'unidad_formativa_id'   => 'nullable|exists:unidades_formativas,id',
+            'modulo_id'             => 'nullable|exists:modulos,id',
+            'curso_academico_id'    => 'required|exists:curso_academicos,id',
+            'campo'                 => 'required|in:inicio,fin,Examen0,ExamenF',
+            'valor'                 => 'nullable|date',
         ]);
-
-        // Guardamos la relación en la tabla alumnos_curso
-        $alumnoCurso = new AlumnoCurso();
-        $alumnoCurso->curso_academico_id = $request->curso_academico_id;  // Asignamos el curso académico
-        $alumnoCurso->save();  // Guardamos la relación
-
-        $user = Auth::user();
-        $misCursos = $user->misCursos()->with(['curso', 'curso.FamiliaProfesional'])->get();
-        $alumnos = AlumnoCurso::whereIn('curso_academico_id', $misCursos->pluck('id'))->get();
-
+    
+        // Usar solo estos dos campos como "where" para evitar duplicados
+        $attributes = [
+            'curso_academico_id'  => $v['curso_academico_id'],
+            'unidad_formativa_id' => $v['unidad_formativa_id'] ?? null,
+            'modulo_id'           => $v['modulo_id'] ?? null,
+        ];
+    
+        // Y el campo dinámico en "values"
+        $values = [
+            $v['campo'] => $v['valor']
+        ];
+    
+        $detalle = DetalleCurso::updateOrCreate($attributes, $values);
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Cambios guardados correctamente',
+            'detalle' => $detalle->fresh(),
+        ]);
+    }
+    
+    public function getAlumnos($id)
+    {
+        // Obtén el curso académico por ID
+        $cursoAcademico = CursoAcademico::find($id);
         
-        return view('academia.index', compact('misCursos','alumnos'));
-    }
-
-    public function actualizarDetalle(Request $request)
-    {
-        $request->validate([
-            'detalle_id' => 'required|exists:detalles_curso,id',
-            'campo' => 'required|in:inicio,fin,Examen0,ExamenF',
-            'valor' => 'nullable|date', // Ajusta según el tipo de dato, si es numérico, cambia la validación
-        ]);
-        
-        $detalle = \App\Models\DetalleCurso::findOrFail($request->detalle_id);
-        $campo = $request->campo;
-        $detalle->{$campo} = $request->valor;
-        $detalle->save();
-    
-        return response()->json(['success' => true, 'message' => 'Actualizado correctamente']);
-    }
-
-    public function crearDetalle(Request $request)
-    {
-        $request->validate([
-            'unidad_formativa_id' => 'required|exists:unidades_formativas,id', // <-- Aquí estaba el error
-            'curso_academico_id' => 'required|exists:curso_academicos,id',
-        ]);
-    
-        $detalle = \App\Models\DetalleCurso::create([
-            'curso_academico_id' => $request->curso_academico_id,
-            'unidad_formativa_id' => $request->unidad_formativa_id,
-            'codigo' => '', 
-            'nombre' => '', 
-            'inicio' => null,
-            'fin' => null,
-            'Examen0' => null,
-            'ExamenF' => null,
-        ]);
-    
-        return response()->json(['success' => true, 'detalle_id' => $detalle->id]);
-    }
-    
-
-
-    public function showCursoDetalles($cursoAcademicoId)
-    {
-        // Cargamos el curso académico con sus módulos, unidades y detalles
-        $cursoAcademico = CursoAcademico::with([
-            'curso.modulos.unidades', // Cargar módulos y unidades
-            'detallesCurso',           // Cargar los detalles asociados
-        ])->find($cursoAcademicoId);
-
-        // Verificar si el curso académico existe
+        // Verifica si existe el curso académico
         if (!$cursoAcademico) {
-            return redirect()->route('academia.miscursos')->with('error', 'Curso no encontrado');
+            return response()->json(['message' => 'Curso no encontrado'], 404);
         }
-
-        // Pasar los datos del curso académico a la vista
-        return view('academia.cursoDetalles', compact('cursoAcademico'));
+    
+        // Obtén los alumnos relacionados con ese curso
+        $alumnos = $cursoAcademico->alumnos;
+    
+        return response()->json($alumnos);
     }
-
 
     public function guardarAlumno(Request $request)
     {
+          
         $dni = strip_tags($request->dni);
         $nombre = strip_tags($request->nombre);
         $email = strip_tags($request->email);
         $telefono = strip_tags($request->telefono);
-        
+        $es_profesor = filter_var($request->es_profesor, FILTER_VALIDATE_BOOLEAN);
+        $es_profesor = $request->has('es_profesor') ? 1 : 0;
+
+     
         // Validación de los datos del formulario
         $request->validate([
             'dni' => 'required|string|max:15',
@@ -428,11 +429,12 @@ class AcademiaController extends Controller
             'email' => 'required|email',
             'telefono' => 'nullable|string|max:20',
             'curso_academico_id' => 'required|exists:curso_academicos,id',
+            'es_profesor' => 'nullable|boolean',
         ]);
-
-
+  
+       
         $cursoAcademicoId = $request->curso_academico_id;
-
+  
         // Creación del nuevo alumno en la base de datos
         AlumnoCurso::create([
             'dni' => $dni,
@@ -440,6 +442,7 @@ class AcademiaController extends Controller
             'email' => $email,
             'telefono' => $telefono,
             'curso_academico_id' => $cursoAcademicoId,
+            'es_profesor' => $es_profesor,
         ]);
 
         // Cargar el curso académico junto con sus relaciones usando el ID correcto
@@ -450,7 +453,6 @@ class AcademiaController extends Controller
         return view('academia.detalle_curso', compact('cursoAcademico'));
     }
 
-
     public function actualizarAlumno(Request $request, $id)
     {
     
@@ -459,12 +461,14 @@ class AcademiaController extends Controller
         $nombre = strip_tags($request->nombre);
         $email = strip_tags($request->email);
         $telefono = strip_tags($request->telefono);
-    
+        $es_profesor = $request->es_profesor;
         // Validación de los datos (sin permitir HTML)
         $request->validate([
+            'dni' => 'required|string|max:255',
             'nombre' => 'required|string|max:255',
             'email' => 'required|email',
             'telefono' => 'nullable|string|max:20',
+            'es_profesor' => 'nullable|boolean',
         ]);
 
         // Verificar si alguna de las entradas tiene una longitud de solo espacios o está vacía después de eliminar las etiquetas HTML
@@ -480,6 +484,7 @@ class AcademiaController extends Controller
                 'nombre' => $nombre,
                 'email' => $email,
                 'telefono' => $telefono,
+                'es_profesor' => $request->es_profesor,
             ]);
         } catch (\Exception $e) {
             // Si hay un error al actualizar, mostrar un mensaje adecuado
@@ -493,6 +498,14 @@ class AcademiaController extends Controller
         return view('academia.detalle_curso', compact('cursoAcademico'));
     }
 
+    public function mostrarDetallesCurso($id)
+    {
+        $cursoAcademico = CursoAcademico::with(['detallesCurso', 'curso.modulos.unidades'])
+            ->findOrFail($id)
+            ->refresh(); // Recarga el modelo y sus relaciones
+        
+        return view('tu_vista', compact('cursoAcademico'));
+    }
 
     public function eliminarAlumno($id)
     {
@@ -521,8 +534,11 @@ class AcademiaController extends Controller
     {
         $cursoAcademico = CursoAcademico::with([
             'curso', 
-            'curso.modulos.unidades', 
-            'alumnos.calificaciones'
+            'curso.modulos.unidades',
+            'alumnos' => function($query) {
+                $query->where('es_profesor', false)
+                      ->with('calificaciones');
+            }
         ])->findOrFail($cursoAcademicoId);
     
         // Verificar que los datos están disponibles
@@ -533,7 +549,6 @@ class AcademiaController extends Controller
         return view('academia.calificaciones', compact('cursoAcademico'));
     }
     
-
     public function guardarCalificacion(Request $request)
     {
         // Suponiendo que se pasa el ID de alumno, unidad, y calificación
@@ -553,44 +568,135 @@ class AcademiaController extends Controller
         return response()->json(['success' => false]);
     }
 
-    public function updateCalificacion(Request $request, $calificacionId)
+    public function alumnosRegulares()
     {
-        $calificacion = Calificacion::findOrFail($calificacionId);
-        $calificacion->nota = $request->nota;
-        $calificacion->save();
-    
-        return response()->json(['success' => true]);
+        return $this->alumnos()->whereHas('alumno', function($query) {
+            $query->where('es_profesor', false);
+        })->with('alumno');
     }
+    // public function updateCalificacion(Request $request, $calificacionId)
+    // {
+    //     $calificacion = Calificacion::findOrFail($calificacionId);
+    //     $calificacion->nota = $request->nota;
+    //     $calificacion->save();
     
-    public function storeCalificacion(Request $request)
-    {
-        dd($request->all());
-        $request->validate([
-            'alumno_id' => 'required|integer',
-            'unidad_formativa_id' => 'required|integer',
-            'nota' => 'required|numeric',
-        ]);
+    //     return response()->json(['success' => true]);
+    // }
     
-        // Buscar si ya existe una calificación para este alumno y unidad formativa
-        $calificacion = Calificacion::where('alumno_curso_id', $request->alumno_id)
-                                      ->where('unidad_formativa_id', $request->unidad_formativa_id)
-                                      ->first();
+    // public function storeCalificacion(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'alumno_curso_id' => 'required|exists:alumnos_curso,id',
+    //         'unidad_formativa_id' => 'nullable|exists:unidades_formativas,id',
+    //         'modulo_id' => 'nullable|exists:modulos,id',
+    //         'nota' => 'required|numeric|min:0|max:10',
+    //         'curso_academico_id' => 'required|exists:curso_academicos,id'
+    //     ]);
     
-        if ($calificacion) {
-            // Si la calificación existe, actualiza la nota
-            $calificacion->nota = $request->nota;
-            $calificacion->save();
-        } else {
-            // Si no existe, crea una nueva calificación
-            $calificacion = new Calificacion();
-            $calificacion->alumno_curso_id = $request->alumno_id;
-            $calificacion->unidad_formativa_id = $request->unidad_formativa_id;
-            $calificacion->nota = $request->nota;
-            $calificacion->save();
-        }
+    //     // Validar que al menos uno de los dos campos esté presente
+    //     if (empty($validated['unidad_formativa_id']) && empty($validated['modulo_id'])) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Debe proporcionar unidad_formativa_id o modulo_id'
+    //         ], 422);
+    //     }
     
-        return response()->json(['success' => true]);
-    }
+    //     $calificacion = Calificacion::updateOrCreate(
+    //         [
+    //             'alumno_curso_id' => $validated['alumno_curso_id'],
+    //             'unidad_formativa_id' => $validated['unidad_formativa_id'],
+    //             'modulo_id' => $validated['modulo_id']
+    //         ],
+    //         [
+    //             'nota' => $validated['nota'],
+    //             'curso_academico_id' => $validated['curso_academico_id']
+    //         ]
+    //     );
     
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $calificacion
+    //     ]);
+    // }
 
+
+
+    // public function detallesCurso($id)
+    // {
+    //     // Obtener el curso académico por ID
+    //     $cursoAcademico = CursoAcademico::findOrFail($id);
+    //     return view('academia.detalles', compact('cursoAcademico'));
+    // }
+
+
+    // public function guardarCursoAcademico(Request $request)
+    // {
+    //     // Validamos que se reciba un curso académico válido
+    //     $request->validate([
+    //         'curso_academico_id' => 'required|exists:curso_academicos,id',  // Verificamos que el curso exista en la base de datos
+    //     ]);
+
+    //     // Guardamos la relación en la tabla alumnos_curso
+    //     $alumnoCurso = new AlumnoCurso();
+    //     $alumnoCurso->curso_academico_id = $request->curso_academico_id;  // Asignamos el curso académico
+    //     $alumnoCurso->save();  // Guardamos la relación
+
+    //     $user = Auth::user();
+    //     $misCursos = $user->misCursos()->with(['curso', 'curso.FamiliaProfesional'])->get();
+    //     $alumnos = AlumnoCurso::whereIn('curso_academico_id', $misCursos->pluck('id'))->get();
+
+        
+    //     return view('academia.index', compact('misCursos','alumnos'));
+    // }    
+
+
+
+    // public function showCursoDetalles($cursoAcademicoId)
+    // {
+    //     // Cargamos el curso académico con sus módulos, unidades y detalles
+    //     $cursoAcademico = CursoAcademico::with([
+    //         'curso.modulos.unidades', // Cargar módulos y unidades
+    //         'detallesCurso',           // Cargar los detalles asociados
+    //     ])->find($cursoAcademicoId);
+
+    //     // Verificar si el curso académico existe
+    //     if (!$cursoAcademico) {
+    //         return redirect()->route('academia.miscursos')->with('error', 'Curso no encontrado');
+    //     }
+
+    //     // Pasar los datos del curso académico a la vista
+    //     return view('academia.cursoDetalles', compact('cursoAcademico'));
+    // }    
+
+    // public function asignarProfesor(Request $request, $cursoAcademico_id)
+    // {
+    //     // Asegurarse de que el usuario está autenticado
+    //     $user = Auth::user();
+        
+    //     if (!$user) {
+    //         return redirect()->route('login')->withErrors(['error' => 'Debes iniciar sesión.']);
+    //     }
+    
+    //     // Verificar si el usuario tiene el rol de 'profesor'
+    //     if ($user->rol !== 'profesor') {
+    //         return back()->withErrors(['error' => 'No tienes permisos para asignarte a este curso.']);
+    //     }
+    
+    //     // Verificar si el curso académico existe
+    //     $cursoAcademico = CursoAcademico::find($cursoAcademico_id);
+        
+    //     if (!$cursoAcademico) {
+    //         return back()->withErrors(['error' => 'El curso académico no existe.']);
+    //     }
+    
+    //     // Verificar si el profesor ya está asignado a este curso
+    //     if ($cursoAcademico->profesores->contains($user)) {
+    //         return back()->withErrors(['error' => 'Ya estás asignado a este curso académico.']);
+    //     }
+    
+    //     // Asignar el profesor al curso académico (relación N:M a través de la tabla user_curso)
+    //     $cursoAcademico->profesores()->attach($user->id);
+    
+    //     return back()->with('success', 'Te has asignado correctamente al curso académico.');
+    // }
 }

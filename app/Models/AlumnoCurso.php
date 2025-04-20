@@ -9,7 +9,7 @@ class AlumnoCurso extends Model
 {
     use HasFactory;
     protected $table = 'alumnos_curso';
-    protected $fillable = ['curso_academico_id','dni', 'nombre','email', 'telefono'];
+    protected $fillable = ['curso_academico_id','dni', 'nombre','email', 'telefono','es_profesor'];
 
 
     // Definir relación con CursoAcademico
@@ -24,6 +24,6 @@ class AlumnoCurso extends Model
     }
     public function alumno()
     {
-        return $this->belongsTo(Alumno::class, 'alumno_id'); // Asegúrate de que 'alumno_id' es el campo correcto
+        return $this->belongsTo(Alumno::class, 'alumno_id');
     }
 }

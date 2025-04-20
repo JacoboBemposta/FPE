@@ -15,6 +15,7 @@ class CreateAlumnosCursoTable extends Migration
             $table->string('nombre');
             $table->string('email')->unique();
             $table->string('telefono', 20)->nullable();
+            $table->boolean('es_profesor')->default(false)->after('telefono');
             $table->timestamps();
         });
         
