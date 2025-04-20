@@ -7,7 +7,7 @@
     <!-- Filtros y botones -->
     <div class="d-flex justify-content-between mb-3">
         <button class="btn btn-primary" style="background-color: #007bff; border-color: #007bff;">
-            <a href="{{ route('cursos.index') }}" class="text-white">Buscar Cursos</a>
+            <a href="{{ route('academia.cursos') }}" class="text-white">Buscar Cursos</a>
         </button>
         <a href="{{ route('academia.ver_docentes') }}" class="btn btn-primary">Buscar Docente</a>
     </div>

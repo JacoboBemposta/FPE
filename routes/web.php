@@ -96,27 +96,27 @@ Route::middleware(['auth', 'rol:academia'])
         Route::get('/mis-cursos', [AcademiaController::class, 'misCursos'])->name('miscursos');
         Route::post('/asignar-curso/{curso}', [AcademiaController::class, 'asignarCurso'])->name('asignar_curso');
         Route::get('/mis-cursos/{cursoAcademico}', [AcademiaController::class, 'detalleCurso'])->name('detalleCurso');
-        Route::put('/curso/{id}/editar', [AcademiaController::class, 'actualizarCurso'])->name('actualizarCurso');
-        Route::get('/agregar-alumno', [AcademiaController::class, 'agregarAlumno'])->name('agregarAlumno');
+        //Route::put('/curso/{id}/editar', [AcademiaController::class, 'actualizarCurso'])->name('actualizarCurso');
+        //Route::get('/agregar-alumno', [AcademiaController::class, 'agregarAlumno'])->name('agregarAlumno');
         Route::post('/agregar-alumno', [AcademiaController::class, 'guardarAlumno'])->name('guardarAlumno');
-        Route::get('/curso/{id}/alumnos', [AcademiaController::class, 'getAlumnos'])->name('getAlumnos');
-        Route::put('/alumno/{id}/editar', [AcademiaController::class, 'actualizarAlumno'])->name('editarAlumno'); // Cambiar a PUT
-        Route::delete('/eliminar-alumno/{id}', [AcademiaController::class, 'eliminarAlumno'])->name('eliminarAlumno');
-        Route::get('/curso/{cursoAcademico}/detalles', [AcademiaController::class, 'detallesCurso'])->name('academia.detallesCurso');
-        Route::get('/curso/{cursoAcademicoId}/detalles', [AcademiaController::class, 'showCursoDetalles'])->name('academia.showCursoDetalles');
-        Route::get('/curso/{id}/detalles', [AcademiaController::class, 'verDetalles'])->name('detalles');
-        Route::post('/curso/{id}/detalles', [AcademiaController::class, 'guardarDetallesCurso'])->name('guardarDetalles');
+        // Route::get('/curso/{id}/alumnos', [AcademiaController::class, 'getAlumnos'])->name('getAlumnos');
+        // Route::put('/alumno/{id}/editar', [AcademiaController::class, 'actualizarAlumno'])->name('editarAlumno'); 
+        // Route::delete('/eliminar-alumno/{id}', [AcademiaController::class, 'eliminarAlumno'])->name('eliminarAlumno');
+        // Route::get('/curso/{cursoAcademico}/detalles', [AcademiaController::class, 'detallesCurso'])->name('academia.detallesCurso');
+        // Route::get('/curso/{cursoAcademicoId}/detalles', [AcademiaController::class, 'showCursoDetalles'])->name('academia.showCursoDetalles');
+        // Route::get('/curso/{id}/detalles', [AcademiaController::class, 'verDetalles'])->name('detalles');
+        // Route::post('/curso/{id}/detalles', [AcademiaController::class, 'guardarDetallesCurso'])->name('guardarDetalles');
         Route::post('/actualizar-detalle', [AcademiaController::class, 'actualizarDetalle'])->name('actualizarDetalle');
         Route::post('/crear-detalle', [AcademiaController::class, 'crearDetalle'])->name('crearDetalle');
         Route::get('/calificaciones/{cursoAcademicoId}', [AcademiaController::class, 'showCalificaciones'])->name('calificaciones');
-        Route::post('/calificaciones', [AcademiaController::class, 'storeCalificacion'])->name('calificaciones.store');
+        // Route::post('/calificaciones', [AcademiaController::class, 'storeCalificacion'])->name('calificaciones.store');
         Route::get('ver-docentes', [AcademiaController::class, 'verDocentes'])->name('ver_docentes');
         Route::delete('/academia/curso/{id}', [AcademiaController::class, 'destroyCursoAcademico'])->name('curso_academico.destroy');
 
     });
 
     Route::middleware(['auth', 'rol:academia,profesor'])->group(function () {
-        Route::get('/cursos', [AcademiaController::class, 'index'])->name('cursos.index');
+        Route::get('/cursos', [AcademiaController::class, 'cursos'])->name('academia.cursos');
 
     });
 

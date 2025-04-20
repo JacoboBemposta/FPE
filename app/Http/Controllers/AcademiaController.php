@@ -114,38 +114,38 @@ class AcademiaController extends Controller
 
     public function asignarCurso(Request $request, $curso_id)
     {
-        
         $user = Auth::user();
         
-        if (!$user) {
-            return redirect()->route('login')->withErrors(['error' => 'Debes iniciar sesión.']);
-        }
-    
-        // Verificar si el usuario tiene el rol de academia
-        if ($user->rol !== 'academia') {
-            return back()->withErrors(['error' => 'No tienes permisos para asignar cursos.']);
+        // Validación de usuario
+        if (!$user || $user->rol !== 'academia') {
+            return redirect()->route('login')->withErrors(['error' => 'Acceso no autorizado']);
         }
     
         // Verificar si el curso existe
         $curso = Curso::find($curso_id);
-        
         if (!$curso) {
-            return back()->withErrors(['error' => 'El curso no existe.']);
+            return back()->withErrors(['error' => 'El curso no existe']);
         }
     
-        // Crear el curso académico
-        $cursoAcademico = new CursoAcademico();
-        $cursoAcademico->curso_id = $curso->id;
-        $cursoAcademico->academia_id = $user->id; // Asocia el curso con el usuario academia
-        $cursoAcademico->municipio = $request->input('municipio');
-        $cursoAcademico->provincia = $request->input('provincia');
-        $cursoAcademico->inicio = $request->input('inicio');
-        $cursoAcademico->fin = $request->input('fin');
-        $cursoAcademico->save();
+        // Crear el curso académico con valores por defecto
+        $cursoAcademico = CursoAcademico::create([
+            'curso_id' => $curso->id, // Aquí se pasa correctamente el curso_id
+            'academia_id' => $user->id,
+
+        ]);
     
-        return back()->with('success', 'Curso académico asignado correctamente.');
+        // Vincular al usuario en la tabla pivote
+        $user->cursosAcademicos()->attach($cursoAcademico->id, [
+
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+    
+        return redirect()
+               ->route('academia.miscursos')
+               ->with('success', 'Curso asignado correctamente. Ahora puedes editar los detalles.');
     }
-    
+
     public function asignarProfesor(Request $request, $cursoAcademico_id)
     {
         // Asegurarse de que el usuario está autenticado
@@ -187,14 +187,15 @@ class AcademiaController extends Controller
         return redirect()->back()->with('success', 'Curso eliminado correctamente.');
     }
 
-
     public function cursos()
     {
-       
         // Obtener todas las familias profesionales con sus cursos, módulos y unidades formativas asociadas
         $familias_profesionales = FamiliaProfesional::with('cursos.modulos.unidades')->get();
-        
-        return view('academia.cursos', compact('familias_profesionales'));
+    
+        // Obtener todos los cursos disponibles
+        $cursosDisponibles = Curso::all();
+    
+        return view('cursos.index', compact('familias_profesionales', 'cursosDisponibles'));
     }
     
 

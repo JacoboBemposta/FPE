@@ -78,12 +78,12 @@
                             <thead>
                                 <tr>
                                     <th>Unidad Formativa</th>
-                                    <th>Código</th>
+                                    {{-- <th>Código</th> --}}
                                     <th>Inicio</th>
                                     <th>Fin</th>
                                     <th>Examen0</th>
                                     <th>ExamenF</th>
-                                    <th>Módulo</th>
+   
                                 </tr>
                             </thead>
                             <tbody>
@@ -93,7 +93,7 @@
                                         $detalle = $cursoAcademico->detallesCurso->where('unidad_formativa_id', $unidad->id)->first();
                                     @endphp
                                     <tr>
-                                        <td>{{ $unidad->nombre }}</td>
+                                        {{-- <td>{{ $unidad->nombre }}</td> --}}
                                         <td>{{ $unidad->codigo }}</td>
                                         <td>
                                             <input type="date" class="form-control fecha-cambio" 
@@ -123,7 +123,7 @@
                                                    data-campo="ExamenF" 
                                                    value="{{ $detalle ? $detalle->ExamenF : '' }}">
                                         </td>
-                                        <td>{{ $modulo->nombre }}</td>
+            
                                     </tr>
                                 @endforeach
                             </tbody>

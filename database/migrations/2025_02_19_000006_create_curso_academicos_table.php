@@ -20,6 +20,9 @@ return new class extends Migration
             $table->date('inicio')->nullable();
             $table->date('fin')->nullable();
             $table->timestamps();
+
+            // Opcional: índice compuesto para evitar duplicados
+            $table->unique(['curso_id', 'academia_id']);
         });
     }
 
@@ -31,3 +34,5 @@ return new class extends Migration
         Schema::dropIfExists('curso_academicos');
     }
 };
+
+

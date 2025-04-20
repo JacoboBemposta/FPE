@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class CursoAcademico extends Model
 {
     protected $table = 'curso_academicos';
-    protected $fillable = ['academia_id', 'curso_id', 'familias_profesionales_id', 'codigo', 'nombre', 'municipio', 'provincia', 'inicio', 'fin', 'active'];
+    protected $fillable = ['academia_id', 'curso_id',  'municipio', 'provincia', 'inicio', 'fin', 'active'];
 
     // Relación con Curso
     public function curso()
@@ -23,10 +23,13 @@ class CursoAcademico extends Model
     }
 
     // Relación con Usuarios (Profesores y Alumnos)
-    public function usuarios()
+    public function users()
     {
-        return $this->belongsToMany(User::class, 'user_curso', 'curso_academico_id', 'user_id');
+        return $this->belongsToMany(User::class, 'user_curso')
+                    ->withPivot('rol')
+                    ->withTimestamps();
     }
+
 
     public function profesores()
     {

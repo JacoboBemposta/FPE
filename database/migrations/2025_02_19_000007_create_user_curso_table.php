@@ -12,10 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_curso', function (Blueprint $table) {
-            $table->id();
+            // No necesitas un ID autonumérico en tablas pivote
             $table->foreignId('curso_academico_id')->constrained('curso_academicos')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Relacionado con el usuario que es profesor
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
+            
+            // Clave primaria compuesta (mejor práctica para tablas pivote)
+            $table->primary(['curso_academico_id', 'user_id']);
+            
         });
     }
 
