@@ -10,6 +10,7 @@ use App\Models\CursoAcademico;
 use App\Models\FamiliaProfesional;
 use App\Models\Curso;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ProfesorController extends Controller
 {
@@ -91,49 +92,78 @@ class ProfesorController extends Controller
 
     public function verAcademias(Request $request)
     {
-        $fecha = now(); // o now()->format('Y-m-d')
-
-        $query = CursoAcademico::where(function($query) use ($fecha) {
-            $query->whereDate('inicio', '>', $fecha)
-                  ->orWhereNull('inicio');
-        })
-        ->whereDoesntHave('users', function($query) {
-            $query->where('rol', 'profesor'); // Filtra solo por rol profesor
-        })
-        ->get();
-        // Filtros
-        if ($request->filled('academia')) {
-            $query->whereHas('academia', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->academia . '%');
-            });
-        }
+        $query = DB::table('users')
+            ->join('curso_academicos', 'users.id', '=', 'curso_academicos.academia_id')
+            ->join('cursos', 'curso_academicos.curso_id', '=', 'cursos.id')
+            ->where('users.rol', 'academia')
     
-        if ($request->filled('codigo')) {
-            $query->whereHas('curso', function ($q) use ($request) {
-                $q->where('codigo', 'like', '%' . $request->codigo . '%');
-            });
-        }
-    
-        if ($request->filled('nombre_curso')) {
-            $query->whereHas('curso', function ($q) use ($request) {
-                $q->where('nombre', 'like', '%' . $request->nombre_curso . '%');
-            });
-        }
-    
-        if ($request->filled('provincia')) {
-            $query->where('provincia', 'like', '%' . $request->provincia . '%');
-        }
-    
-        if ($request->filled('municipio')) {
-            $query->where('municipio', 'like', '%' . $request->municipio . '%');
-        }
+            // Filtrar por academia_nombre
+            ->when($request->filled('academia_nombre'), fn($q) =>
+                $q->where('users.ident', 'like', '%' . strtolower(trim($request->academia_nombre)) . '%')
+            )
+            // Filtrar por curso_codigo
+            ->when($request->filled('curso_codigo'), fn($q) =>
+                $q->where('cursos.codigo', 'like', '%' . strtolower(trim($request->curso_codigo)) . '%')
+            )
+            // Filtrar por curso_nombre
+            ->when($request->filled('curso_nombre'), fn($q) =>
+                $q->where('cursos.nombre', 'like', '%' . strtolower(trim($request->curso_nombre)) . '%')
+            )
+            // Filtrar por municipio
+            ->when($request->filled('municipio'), fn($q) =>
+                $q->where('curso_academicos.municipio', 'like', '%' . strtolower(trim($request->municipio)) . '%')
+            )
+            // Filtrar por provincia
+            ->when($request->filled('provincia'), fn($q) =>
+                $q->where('curso_academicos.provincia', 'like', '%' . strtolower(trim($request->provincia)) . '%')
+            )
+            ->when($request->filled('tiene_docente'), function ($q) use ($request) {
+                if ($request->tiene_docente == "1") {
+                    $q->whereExists(function ($subquery) {
+                        $subquery->select(DB::raw(1))
+                            ->from('alumnos_curso')
+                            ->whereRaw('alumnos_curso.curso_academico_id = curso_academicos.id')
+                            ->where('es_profesor', 1);
+                    });
+                } elseif ($request->tiene_docente == "0") {
+                    $q->whereNotExists(function ($subquery) {
+                        $subquery->select(DB::raw(1))
+                            ->from('alumnos_curso')
+                            ->whereRaw('alumnos_curso.curso_academico_id = curso_academicos.id')
+                            ->where('es_profesor', 1);
+                    });
+                }
+            })
+            // Seleccionar columnas
+            ->select([
+                'users.id as academia_id',
+                'users.ident as academia_nombre',
+                'users.email',
+                'users.telefono',
+                'curso_academicos.id as curso_acad_id',
+                'curso_academicos.municipio',
+                'curso_academicos.provincia',
+                'curso_academicos.inicio',
+                'curso_academicos.fin',
+                'cursos.nombre as curso_nombre',
+                'cursos.codigo as curso_codigo',
+            
+                // Subconsulta para obtener el nombre del docente
+                DB::raw("(
+                    SELECT nombre
+                    FROM alumnos_curso
+                    WHERE curso_academico_id = curso_academicos.id
+                    AND es_profesor = 1
+                    LIMIT 1
+                ) as docente_nombre")
+            ])
+            ->orderBy('cursos.codigo');
     
         $cursosAcademicos = $query->get();
     
         return view('profesor.academias', compact('cursosAcademicos'));
     }
     
-
 
     public function destroy($id)
     {
@@ -151,6 +181,37 @@ class ProfesorController extends Controller
         $curso->delete();
 
         return back()->with('success', 'Curso eliminado correctamente.');
+    }
+
+    public function actualizarCurso(Request $request, $id)
+    {
+       
+        $cursoAcademico = CursoAcademico::findOrFail($id);
+
+        // Validación de los campos del formulario
+        $request->validate([
+            'municipio' => 'nullable|string|max:100',
+            'provincia' => 'nullable|string|max:100',
+            'inicio' => 'nullable|date',
+            'fin' => 'nullable|date',
+        ]);
+
+        // Actualización de los campos en el modelo
+        $cursoAcademico->update([
+            'municipio' => strip_tags($request->municipio),
+            'provincia' => strip_tags($request->provincia),
+            'inicio' => $request->inicio,
+            'fin' => $request->fin,
+        ]);
+        
+
+
+        $user = Auth::user();
+        $misCursos = CursoAcademico::where('academia_id', $user->id)->get();
+  
+   
+        
+        return view('profesor.index', compact('misCursos'));
     }
 
 }

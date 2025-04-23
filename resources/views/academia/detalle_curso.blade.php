@@ -73,16 +73,21 @@
                 <strong>Horas:</strong> {{ $cursoAcademico->curso->horas }}<br>
     
                 <!-- Mostrar número de participantes (alumnos + docente) -->
-                <strong>Número de Participantes:</strong> 
-                {{ $cursoAcademico->alumnos->count() + ($cursoAcademico->alumnos->where('es_profesor', 1)->count() > 0 ? 1 : 0) }}<br>
+                <strong>Número de Alumnos:</strong> 
+                {{ $cursoAcademico->alumnos->where('es_profesor', 0)->count() }} <br>
     
                 <!-- Mostrar nombre del docente si existe -->
                 @php
                     $docente = $cursoAcademico->alumnos->where('es_profesor', 1)->first();
                 @endphp
+                <strong>Docente:</strong>
                 @if($docente)
-                    <strong>Docente:</strong> {{ $docente->nombre }}<br>
+                    {{ $docente->nombre }}
+                @else
+                <span class="text-muted">⚠️ Sin docente asignado</span>
                 @endif
+                <br>
+
             </p>
         </div>
     </div>

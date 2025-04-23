@@ -26,4 +26,11 @@ class AlumnoCurso extends Model
     {
         return $this->belongsTo(Alumno::class, 'alumno_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'email', 'email');
+    }    
+
+    
 }

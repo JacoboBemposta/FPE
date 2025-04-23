@@ -22,31 +22,38 @@ class UnidadFormativaController extends Controller
         return view('admin.unidades.create', compact('modulo'));
     }
 
+
     public function store(Request $request)
     {
-        
-        $request->validate([
-            'modulo_id' => 'required|exists:modulos,id',
-            'codigo' => 'required|string|max:20|unique:unidades_formativas',
+        $validated = $request->validate([
+            'modulo_id' => 'required|integer|exists:modulos,id',
+            'codigo' => 'required|string|max:20',
             'nombre' => 'required|string|max:255',
             'horas' => 'required|integer|min:1',
         ]);
     
-        $modulo_id=strip_tags($request->modulo_id);
-        $codigo=strip_tags($request->codigo);
-        $nombre=strip_tags($request->nombre);
-        $horas=strip_tags($request->horas);
-        // Crear la unidad formativa
-        UnidadFormativa::create([
-            'modulo_id' => $modulo_id,
-            'codigo' => $codigo,
-            'nombre' => $nombre,
-            'horas' => $horas,
+        // Buscar si ya existe una unidad con ese código
+        $unidad = UnidadFormativa::where('codigo', $validated['codigo'])->first();
+    
+        if ($unidad) {
+            // Ya existe, solo la vinculamos al módulo si no está ya
+            if (!$unidad->modulos()->where('modulo_id', $validated['modulo_id'])->exists()) {
+                $unidad->modulos()->attach($validated['modulo_id']);
+            }
+    
+            return redirect()->back()->with('success', 'Unidad existente vinculada al módulo.');
+        }
+    
+        // No existe, la creamos y la vinculamos
+        $unidad = UnidadFormativa::create([
+            'codigo' => $validated['codigo'],
+            'nombre' => $validated['nombre'],
+            'horas' => $validated['horas'],
         ]);
-        
-        // Redirigir con un mensaje de éxito
-        return redirect()->route('admin.panel')->with('success', 'Unidad formativa creada con éxito.');
-
+    
+        $unidad->modulos()->attach($validated['modulo_id']);
+    
+        return redirect()->back()->with('success', 'Unidad creada y vinculada correctamente.');
     }
     
     public function edit($modulo_id, $id)

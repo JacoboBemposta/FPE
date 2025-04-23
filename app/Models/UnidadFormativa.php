@@ -17,10 +17,11 @@ class UnidadFormativa extends Model
     protected $fillable = ['modulo_id','nombre', 'codigo','horas'];
 
     // Define the inverse of the relationship with Modulo
-    public function modulo()
+    public function modulos()
     {
-        return $this->belongsTo(Modulo::class);
+        return $this->belongsToMany(Modulo::class, 'modulo_unidad', 'unidad_formativa_id', 'modulo_id');
     }
+    
     public function detallesCurso()
     {
         return $this->hasMany(DetalleCurso::class); // Relación de una unidad formativa con muchos detalles de curso

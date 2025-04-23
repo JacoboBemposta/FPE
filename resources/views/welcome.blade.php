@@ -70,6 +70,13 @@
                         </li>
                     @endif
 
+                    <!-- BOTÓN SOLO PARA PROFESOR -->
+                    @if(Auth::user()->rol === 'profesor')
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-primary text-white px-3" href="{{ route('profesor.miscursos') }}">Panel Docente</a>
+                        </li>
+                    @endif
+
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('logout') }}" 
                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

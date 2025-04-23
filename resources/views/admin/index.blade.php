@@ -14,13 +14,18 @@
         </button>
     </div>
 
-    <!-- Listado jerárquico de Familias Profesionales -->
+    <!-- Listado jerárquico de Familias Profesionales - ESTRUCTURA CORREGIDA -->
     <div class="accordion" id="familiasAccordion">
         @foreach($familiasProfesionales as $familia)
         <div class="card">
             <div class="card-header" id="familiaHeading{{ $familia->id }}">
                 <h2 class="mb-0">
-                    <button class="btn btn-link btn-block text-left d-flex justify-content-between align-items-center" type="button" data-toggle="collapse" data-target="#familiaCollapse{{ $familia->id }}" aria-expanded="true" aria-controls="familiaCollapse{{ $familia->id }}">
+                    <button class="btn btn-link btn-block text-left d-flex justify-content-between align-items-center collapsed" 
+                            type="button" 
+                            data-toggle="collapse" 
+                            data-target="#familiaCollapse{{ $familia->id }}" 
+                            aria-expanded="false" 
+                            aria-controls="familiaCollapse{{ $familia->id }}">
                         <span>
                             <strong>{{ $familia->codigo }}</strong> - {{ $familia->nombre }}
                         </span>
@@ -29,14 +34,31 @@
                 </h2>
             </div>
 
-            <div id="familiaCollapse{{ $familia->id }}" class="collapse" aria-labelledby="familiaHeading{{ $familia->id }}" data-parent="#familiasAccordion">
-                <div class="card-body">
+
+
+
+
+
+
+
+
+            <div id="familiaCollapse{{ $familia->id }}" 
+                 class="collapse" 
+                 aria-labelledby="familiaHeading{{ $familia->id }}" 
+                 data-parent="#familiasAccordion">
+                <div class="card-body p-0">
+                    @foreach($familia->cursos as $curso)
                     <div class="accordion" id="cursosAccordion{{ $familia->id }}">
-                        @foreach($familia->cursos as $curso)
-                        <div class="card">
+                        <div class="card mb-2">
                             <div class="card-header" id="cursoHeading{{ $curso->id }}">
                                 <h3 class="mb-0">
-                                    <button class="btn btn-link btn-block text-left d-flex justify-content-between align-items-center" type="button" data-toggle="collapse" data-target="#cursoCollapse{{ $curso->id }}" aria-expanded="true" aria-controls="cursoCollapse{{ $curso->id }}">
+                                    <button class="btn btn-link btn-block text-left d-flex justify-content-between align-items-center collapsed" 
+                                            type="button" 
+                                            data-toggle="collapse" 
+                                            data-target="#cursoCollapse{{ $curso->id }}" 
+                                            aria-expanded="false" 
+                                            aria-controls="cursoCollapse{{ $curso->id }}"
+                                            data-parent="#cursosAccordion{{ $familia->id }}">
                                         <span>
                                             <strong>{{ $curso->codigo }}</strong> - {{ $curso->nombre }} ({{ $curso->horas }}h)
                                         </span>
@@ -55,6 +77,15 @@
                                     </button>
                                 </h3>
                             </div>
+
+
+
+
+
+
+
+
+
 
                             <!-- Modal Editar Curso - Debe estar dentro del bucle de cursos -->
                             <div class="modal fade" id="editarCursoModal{{ $curso->id }}" tabindex="-1" role="dialog" aria-hidden="true">
@@ -110,14 +141,19 @@
                                 </div>
                             </div>
 
+
+
+
+
+
                             <div id="cursoCollapse{{ $curso->id }}" class="collapse" aria-labelledby="cursoHeading{{ $curso->id }}" data-parent="#cursosAccordion{{ $familia->id }}">
                                 <div class="card-body">
                                     <!-- Mostrar módulos y sus unidades -->
                                     <div class="mb-4">
                                         <h5>Módulos del Curso</h5>
                                         @if($curso->modulos && $curso->modulos->count())
-                                        @foreach($curso->modulos as $modulo)
-                                        <div class="card mb-3">
+                                            @foreach($curso->modulos as $modulo)
+                                            <div class="card mb-3">
                                             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <strong>{{ $modulo->codigo }}</strong> - {{ $modulo->nombre }} ({{ $modulo->horas }}h)
@@ -220,46 +256,47 @@
                                 </div>
                             </div>
 
-                            <!-- Modal para agregar unidad formativa -->
-                            @foreach($curso->modulos as $modulo)
-                            <div class="modal fade" id="agregarUnidadModal{{ $modulo->id }}" tabindex="-1" role="dialog" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <form action="{{ route('admin.unidades.store') }}" method="POST">
-                                            @csrf
-                                            <input type="hidden" name="modulo_id" value="{{ $modulo->id }}">
-                                            
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Añadir Unidad a {{ $modulo->nombre }}</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
+<!-- Modal para agregar unidad formativa -->
+@foreach($curso->modulos as $modulo)
+<div class="modal fade" id="agregarUnidadModal{{ $modulo->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="{{ route('admin.unidades.store') }}" method="POST">
+                @csrf
+                <!-- Enviar múltiples módulos como array -->
+                <input type="hidden" name="modulo_id" value="{{ $modulo->id }}"> 
+                
+                <div class="modal-header">
+                    <h5 class="modal-title">Añadir Unidad a {{ $modulo->nombre }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
 
-                                            <div class="modal-body">
-                                                <div class="form-group">
-                                                    <label>Código</label>
-                                                    <input type="text" name="codigo" class="form-control" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Nombre</label>
-                                                    <input type="text" name="nombre" class="form-control" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Horas</label>
-                                                    <input type="number" name="horas" class="form-control">
-                                                </div>
-                                            </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Código</label>
+                        <input type="text" name="codigo" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" name="nombre" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Horas</label>
+                        <input type="number" name="horas" class="form-control" required>
+                    </div>
+                </div>
 
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                                                <button type="submit" class="btn btn-success">Guardar Unidad</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Unidad</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
                         </div>
                         @endforeach
                     </div>
@@ -347,6 +384,16 @@
 
 
 
+
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 @endsection
 
 @push('scripts')
