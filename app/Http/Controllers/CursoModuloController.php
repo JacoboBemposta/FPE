@@ -23,7 +23,6 @@ class CursoModuloController extends Controller
     {
         // Validación básica (sin unique en código)
         $request->validate([
-            'curso_id' => 'required|exists:cursos,id',
             'codigo' => 'required|string|max:50',
             'nombre' => 'required|string|max:255',
             'horas' => 'nullable|numeric|min:1|max:1000'
@@ -62,7 +61,6 @@ class CursoModuloController extends Controller
     
             // Crear nuevo módulo
             $modulo = Modulo::create([
-                'curso_id' => $curso->id,
                 'codigo' => $codigo,
                 'nombre' => $nombre,
                 'horas' => $horas,

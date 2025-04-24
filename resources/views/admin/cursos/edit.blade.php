@@ -20,3 +20,8 @@
     <label>Horas totales</label>
     <input type="number" name="horas" class="form-control" value="{{ $curso->horas }}">
 </div>
+
+<div class="form-group">
+    <label for="cualificacion">Cualificación</label>
+    <input type="text" name="cualificacion" id="cualificacion" class="form-control" value="{{  $curso->cualificacion }}">
+</div>

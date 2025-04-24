@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('codigo')->unique();
             $table->string('nombre');
             $table->unsignedBigInteger('horas');
+            $table->string('cualificacion')->nullable();
             $table->timestamps();
         });
     }

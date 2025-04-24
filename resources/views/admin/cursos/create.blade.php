@@ -17,6 +17,11 @@
             <input type="number" class="form-control" id="horas" name="horas" required>
         </div>
 
+        <div class="form-group">
+            <label for="cualificacion">Cualificación</label>
+            <input type="text" name="cualificacion" id="cualificacion" class="form-control" value="{{  $curso->cualificacion }}">
+        </div>
+
         <div class="mb-3">
             <label for="familia_id" class="form-label">Familia Profesional</label>
             <select class="form-control" id="familia_id" name="familia_id" required>

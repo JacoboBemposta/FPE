@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Curso extends Model
 {
     protected $table = 'cursos';
-    protected $fillable = ['familia_profesional_id', 'codigo','nombre','horas'];
+    protected $fillable = ['familia_profesional_id', 'codigo','nombre','horas', 'cualificacion'];
 
     public function FamiliaProfesional()
     {

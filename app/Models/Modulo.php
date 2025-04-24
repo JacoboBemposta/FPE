@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Modulo extends Model
 {
     protected $table = 'modulos';
-    protected $fillable = ['curso_id', 'codigo', 'nombre', 'horas'];
+    protected $fillable = ['codigo', 'nombre', 'horas'];
     
     public function cursos()
     {

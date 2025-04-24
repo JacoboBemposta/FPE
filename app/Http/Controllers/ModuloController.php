@@ -25,23 +25,23 @@ class ModuloController extends Controller
         return view('admin.modulos.show', compact('modulo'));
     }
 
-    public function create()
-    {
-        return view('admin.modulos.create');
-    }
+    // public function create()
+    // {
+    //     return view('admin.modulos.create');
+    // }
 
 
     public function store(Request $request, Curso $curso)
     {
+        dd($request);
         // Validación de los datos
         $request->validate([
-            'curso_id' => 'required|exists:cursos,id',
             'modulo_existente_id' => 'nullable|exists:modulos,id',
             'codigo' => 'required_if:modulo_existente_id,new|string|max:50',
             'nombre' => 'required_if:modulo_existente_id,new|string|max:255',
             'horas' => 'nullable|numeric'
         ]);
-        dd($request);
+        
         // Manejo de módulo existente o nuevo
         if ($request->modulo_existente_id && $request->modulo_existente_id !== 'new') {
             // Vincular módulo existente
@@ -76,8 +76,8 @@ class ModuloController extends Controller
 
     public function update(Request $request, Curso $curso)
     {
+        dd($curso);
         $validated = $request->validate([
-            'curso_id' => 'required|exists:cursos,id',
             'modulo_existente_id' => 'nullable|in:new,' . implode(',', $modulosDisponibles->pluck('id')->toArray()), // Permite 'new' o módulos existentes
             'codigo' => 'required_if:modulo_existente_id,new|string|max:50',
             'nombre' => 'required_if:modulo_existente_id,new|string|max:255',
@@ -87,7 +87,6 @@ class ModuloController extends Controller
         // Si se seleccionó crear un nuevo módulo, crearlo
         if ($request->modulo_existente_id === 'new') {
             $modulo = Modulo::create([
-                'curso_id' => $curso->id,
                 'codigo' => $request->codigo,
                 'nombre' => $request->nombre,
                 'horas' => $request->horas,

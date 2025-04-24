@@ -14,7 +14,7 @@
         </button>
     </div>
 
-    <!-- Listado jerárquico de Familias Profesionales - ESTRUCTURA CORREGIDA -->
+    <!-- Listado jerárquico de Familias Profesionales -->
     <div class="accordion" id="familiasAccordion">
         @foreach($familiasProfesionales as $familia)
         <div class="card">
@@ -33,9 +33,6 @@
                     </button>
                 </h2>
             </div>
-
-
-
 
 
 
@@ -79,14 +76,6 @@
                             </div>
 
 
-
-
-
-
-
-
-
-
                             <!-- Modal Editar Curso - Debe estar dentro del bucle de cursos -->
                             <div class="modal fade" id="editarCursoModal{{ $curso->id }}" tabindex="-1" role="dialog" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
@@ -119,7 +108,13 @@
                                                     <label>Código</label>
                                                     <input type="text" name="codigo" class="form-control" value="{{ $curso->codigo }}" required>
                                                 </div>
-                            
+
+                                                <!-- Cualificacion del curso -->
+                                                <div class="form-group">
+                                                    <label for="cualificacion">Cualificación</label>
+                                                    <input type="text" name="cualificacion" id="cualificacion" class="form-control" value="{{ $curso->cualificacion}}">
+                                                </div>
+                                                                                                
                                                 <!-- Nombre del Curso -->
                                                 <div class="form-group">
                                                     <label>Nombre</label>
@@ -131,6 +126,7 @@
                                                     <label>Horas totales</label>
                                                     <input type="number" name="horas" class="form-control" value="{{ $curso->horas }}">
                                                 </div>
+
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
@@ -140,10 +136,6 @@
                                     </div>
                                 </div>
                             </div>
-
-
-
-
 
 
                             <div id="cursoCollapse{{ $curso->id }}" class="collapse" aria-labelledby="cursoHeading{{ $curso->id }}" data-parent="#cursosAccordion{{ $familia->id }}">
@@ -223,7 +215,6 @@
                                     <div class="modal-content">
                                         <form action="{{ route('admin.cursos.modulos.store', $curso->id) }}" method="POST">
                                             @csrf
-                                            <input type="hidden" name="curso_id" value="{{ $curso->id }}">
                                             
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Agregar Nuevo Módulo al Curso</h5>
@@ -246,6 +237,8 @@
                                                     <input type="number" name="horas" class="form-control" required>
                                                 </div>
                                             </div>
+
+                                            
                                             
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -256,50 +249,49 @@
                                 </div>
                             </div>
 
-<!-- Modal para agregar unidad formativa -->
-@foreach($curso->modulos as $modulo)
-<div class="modal fade" id="agregarUnidadModal{{ $modulo->id }}" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form action="{{ route('admin.unidades.store') }}" method="POST">
-                @csrf
-                <!-- Enviar múltiples módulos como array -->
-                <input type="hidden" name="modulo_id" value="{{ $modulo->id }}"> 
-                
-                <div class="modal-header">
-                    <h5 class="modal-title">Añadir Unidad a {{ $modulo->nombre }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+                            <!-- Modal para agregar unidad formativa -->
+                            @foreach($curso->modulos as $modulo)
+                            <div class="modal fade" id="agregarUnidadModal{{ $modulo->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog modal-lg"role="document">
+                                    <div class="modal-content">
+                                        <form action="{{ route('admin.unidades.store') }}" method="POST">
+                                            @csrf
+                                            <!-- Enviar múltiples módulos como array -->
+                                            <input type="hidden" name="modulo_id" value="{{ $modulo->id }}"> 
+                                            
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Añadir Unidad a {{ $modulo->nombre }}</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
 
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Código</label>
-                        <input type="text" name="codigo" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Nombre</label>
-                        <input type="text" name="nombre" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Horas</label>
-                        <input type="number" name="horas" class="form-control" required>
-                    </div>
-                </div>
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label>Código</label>
+                                                    <input type="text" name="codigo" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Nombre</label>
+                                                    <input type="text" name="nombre" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Horas</label>
+                                                    <input type="number" name="horas" class="form-control" required>
+                                                </div>
+                                            </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Guardar Unidad</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endforeach
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-success">Guardar Unidad</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
-                        @endforeach
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
@@ -364,6 +356,13 @@
                         <label>Código</label>
                         <input type="text" name="codigo" class="form-control" required>
                     </div>
+
+                    <!-- Cualificacion del curso -->
+                    <div class="form-group">
+                        <label for="cualificacion">Cualificación</label>
+                        <input type="text" name="cualificacion" id="cualificacion" class="form-control" value="{{ $curso->cualificacion }}">
+                    </div>
+
                     <div class="form-group">
                         <label>Nombre</label>
                         <input type="text" name="nombre" class="form-control" required>

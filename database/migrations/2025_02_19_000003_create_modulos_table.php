@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('modulos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('curso_id')->constrained('cursos')->onDelete('cascade');
             $table->string('codigo')->unique();
             $table->string('nombre');
             $table->unsignedBigInteger('horas');
