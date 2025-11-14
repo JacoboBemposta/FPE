@@ -23,10 +23,10 @@ class User extends Authenticatable
         'telefono',
         'password',
         'rol',
-        'direccion', // <-- Asegúrate de incluir este campo
-        'codigo_postal', // <-- Asegúrate de incluir este campo
-        'localidad', // <-- Asegúrate de incluir este campo
-        'provincia', // <-- Asegúrate de incluir este campo
+        'direccion', 
+        'codigo_postal',
+        'localidad', 
+        'provincia', 
         'numero_censo',
         'activo',
         'premium'
@@ -87,11 +87,14 @@ class User extends Authenticatable
     // Relación de un profesor con los cursos académicos que imparte
     public function cursosAcademicos()
     {
-        // Relación para academia y profesores
-        return $this->belongsToMany(CursoAcademico::class, 'user_curso', 'user_id', 'curso_academico_id')
-                    ->withPivot('rol'); // Aquí añadimos el campo 'role' para saber si es academia o profesor
+        return $this->belongsToMany(
+            CursoAcademico::class,
+            'user_curso',
+            'user_id',
+            'curso_academico_id'
+        )
+        ->withTimestamps(); // si tus migraciones tienen timestamps
     }
-    
     // Relación de una academia con los cursos académicos que gestiona
     public function profesores()
     {
@@ -117,5 +120,16 @@ class User extends Authenticatable
     {
         return $this->rol === $rol;
     }    
+
+    public function asignaciones()
+    {
+        return $this->hasMany(AlumnoCurso::class, 'email', 'email');
+    }
+
+    // Sólo donde es_profesor = true
+    public function asignacionesComoProfesor()
+    {
+        return $this->asignaciones()->where('es_profesor', 1);
+    }
 }
 

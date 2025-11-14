@@ -13,6 +13,7 @@ use App\Models\DetalleCurso;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\DB;
 
 class AcademiaController extends Controller
 {
@@ -46,67 +47,44 @@ class AcademiaController extends Controller
         
     public function verDocentes(Request $request)
     {
-        // Inicializamos la consulta de docentes con rol 'profesor'
-        $docentesQuery = User::where('rol', 'profesor');
+        $query = DB::table('users')
+            ->join('curso_academicos', 'users.id', '=', 'curso_academicos.academia_id')
+            ->join('cursos', 'curso_academicos.curso_id', '=', 'cursos.id')
+            ->where('users.rol', 'profesor')
     
-        // Aplicamos los filtros de búsqueda a la consulta de docentes, si se proporcionan
-        if ($request->filled('codigo')) {
-            $docentesQuery->whereHas('cursoAcademico.curso', function ($query) use ($request) {
-                $query->where('codigo', 'like', '%' . $request->codigo . '%');
-            });
-        }
+            // filtros opcionales
+            ->when($request->filled('docente_nombre'), fn($q) =>
+                $q->where('users.name', 'like', '%' . $request->docente_nombre . '%')
+            )
+            ->when($request->filled('codigo'), fn($q) =>
+                $q->where('cursos.codigo', 'like', '%' . $request->codigo . '%')
+            )
+            ->when($request->filled('nombre'), fn($q) =>
+                $q->where('cursos.nombre', 'like', '%' . $request->nombre . '%')
+            )
+            ->when($request->filled('municipio'), fn($q) =>
+                $q->where('curso_academicos.municipio', 'like', '%' . $request->municipio . '%')
+            )
+            ->when($request->filled('provincia'), fn($q) =>
+                $q->where('curso_academicos.provincia', 'like', '%' . $request->provincia . '%')
+            )
+            ->select([
+                'users.id as docente_id',
+                'users.name as docente_nombre',
+                'users.email as docente_email',
+                'users.telefono as docente_telefono',
+                'curso_academicos.id as curso_acad_id',
+                'curso_academicos.municipio',
+                'curso_academicos.provincia',
+                'curso_academicos.inicio',
+                'curso_academicos.fin',
+                'cursos.nombre as curso_nombre',
+                'cursos.codigo as curso_codigo',
+            ])
+            ->orderBy('users.name');
     
-        if ($request->filled('nombre')) {
-            $docentesQuery->whereHas('cursoAcademico.curso', function ($query) use ($request) {
-                $query->where('nombre', 'like', '%' . $request->nombre . '%');
-            });
-        }
-    
-        if ($request->filled('municipio')) {
-            $docentesQuery->whereHas('cursoAcademico', function ($query) use ($request) {
-                $query->where('municipio', 'like', '%' . $request->municipio . '%');
-            });
-        }
-    
-        if ($request->filled('provincia')) {
-            $docentesQuery->whereHas('cursoAcademico', function ($query) use ($request) {
-                $query->where('provincia', 'like', '%' . $request->provincia . '%');
-            });
-        }
-    
-        if ($request->filled('docente_nombre')) {
-            $docentesQuery->where('name', 'like', '%' . $request->docente_nombre . '%');
-        }
-    
-        // Ejecutamos la consulta y obtenemos los docentes filtrados
-        $docentes = $docentesQuery->get();
-    
-        // Creamos un array para almacenar los docentes y sus cursos
-        $docentesConCursos = [];
-    
-        // Recorremos los docentes
-        foreach ($docentes as $docente) {
-            // Obtenemos los cursos académicos asociados a este docente
-            $cursosDelDocente = $docente->cursoAcademico;
-    
-            // Si el docente tiene cursos asignados, los agregamos a la lista
-            if ($cursosDelDocente->isNotEmpty()) {
-                foreach ($cursosDelDocente as $cursoAcademico) {
-                    // Cargamos la información del curso relacionado
-                    $curso = $cursoAcademico->curso;
-    
-                    // Agregamos el docente y sus cursos asociados a la lista
-                    $docentesConCursos[] = [
-                        'docente' => $docente,
-                        'curso' => $cursoAcademico, // Información del CursoAcademico
-                        'curso_nombre' => $curso->nombre, // Nombre del curso
-                        'curso_codigo' => $curso->codigo, // Código del curso
-                    ];
-                }
-            }
-        }
-    
-        // Pasamos los datos a la vista
+        $docentesConCursos = $query->get();
+
         return view('academia.docentes', compact('docentesConCursos'));
     }
     

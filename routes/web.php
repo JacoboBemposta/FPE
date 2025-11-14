@@ -150,9 +150,9 @@ Route::middleware(['auth', 'rol:profesor'])
         Route::delete('/curso/{id}', [ProfesorController::class, 'destroy'])->name('curso.destroy');
         Route::get('/ver-academias', [ProfesorController::class, 'verAcademias'])->name('ver_academias');
 
-
+        Route::put('curso/{id}/editar', [ProfesorController::class, 'actualizarCurso'])->name('curso.update');
         Route::get('curso/{id}', [ProfesorController::class, 'detalleCurso'])->name('detalleCurso');
-        Route::put('curso/{id}/editar', [ProfesorController::class, 'update'])->name('curso.update');
+       // Route::put('curso/{id}/editar', [ProfesorController::class, 'update'])->name('curso.update');
 
     });
 

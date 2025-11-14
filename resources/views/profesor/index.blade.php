@@ -157,7 +157,7 @@
 
                 $('#curso_id').val(cursoAcademicoId);
                 $('#provincia').val(provincia);
-                $('#editForm').attr('action', '/academia/curso/' + cursoAcademicoId + '/editar');
+                $('#editForm').attr('action', '/profesor/curso/' + cursoAcademicoId + '/editar');
                 $('#editModal').modal('show');
             });
         });
