@@ -19,7 +19,7 @@ class UnidadFormativa extends Model
     // Define the inverse of the relationship with Modulo
     public function modulo()
     {
-        return $this->belongsTo(Modulo::class);
+        return $this->belongsToMany(Modulo::class, 'modulo_unidad', 'unidad_formativa_id', 'modulo_id');
     }
     public function detallesCurso()
     {

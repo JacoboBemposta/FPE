@@ -18,7 +18,7 @@ class Modulo extends Model
 
     public function unidades()
     {
-        return $this->hasMany(UnidadFormativa::class, 'modulo_id');
+        return $this->belongsToMany(UnidadFormativa::class, 'modulo_unidad', 'modulo_id', 'unidad_formativa_id');
     }
 
 }
