@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenido a RedFPE</title>
-    <!-- Agregar Bootstrap CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .hero-section {
             background: #007bff;
@@ -30,7 +32,6 @@
             display: block;
             margin: 0 auto 10px;
         }
-
     </style>
 </head>
 <body>
@@ -59,7 +60,7 @@
                     <!-- BOTÓN SOLO PARA ADMIN -->
                     @if(Auth::user()->rol === 'admin')
                         <li class="nav-item">
-                            <a class="nav-link btn btn-danger text-white px-3" href="{{ route('admin.panel') }}">Panel Admin</a>
+                            <a class="btn btn-danger text-white px-3 border-0" href="{{ route('admin.panel') }}">Panel Admin</a>
                         </li>
                     @endif
 
@@ -170,9 +171,9 @@
 <footer class="bg-dark text-white text-center py-4">
     <p>&copy; 2025 Plataforma Educativa. Todos los derechos reservados.</p>
 </footer>
-
-<!-- Agregar los Scripts de Bootstrap -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
+   <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
