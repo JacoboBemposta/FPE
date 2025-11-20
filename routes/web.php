@@ -82,9 +82,18 @@ Route::middleware(['auth', 'rol:admin'])->prefix('admin')->name('admin.')->group
     Route::get('/modulo/{modulo}/unidades/create', [UnidadFormativaController::class, 'create'])->name('modulos.unidades.create');
     Route::get('/modulo/{modulo}/unidades/{id}/edit', [UnidadFormativaController::class, 'edit'])->name('modulos.unidades.edit');
     Route::put('/modulo/{modulo}/unidades/{id}', [UnidadFormativaController::class, 'update'])->name('modulos.unidades.update');
+
+    
+    // Rutas para AJAX
+    Route::get('/familias/{familia}/cursos', [App\Http\Controllers\FamiliaProfesionalController::class, 'getCursosByFamilia'])->name('familias.cursos');
+    Route::get('/cursos/{curso}/modulos', [App\Http\Controllers\CursoController::class, 'getModulosByCurso'])->name('cursos.modulos');
+    Route::get('/modulos/{modulo}/unidades', [App\Http\Controllers\ModuloController::class, 'getUnidadesByModulo'])->name('modulos.unidades');
+
+
+;
+
+
 });
-
-
 
 
 

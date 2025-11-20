@@ -1,9 +1,67 @@
 @extends('layouts.app')
+<style>
+/* Estilos para mejorar la jerarquía visual */
+.curso-header {
+    font-size: 1.1rem !important;
+    padding: 0.75rem 1rem !important;
+}
 
+.curso-title {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.modulo-container {
+    margin-left: 1.5rem;
+    border-left: 3px solid #e9ecef;
+    padding-left: 1rem;
+}
+
+.modulo-item {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6 !important;
+}
+
+.unidades-container {
+    margin-left: 1rem;
+}
+
+.badge-sm {
+    font-size: 0.75em;
+    padding: 0.25em 0.5em;
+}
+
+.accordion-body {
+    padding: 1rem 1.25rem;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+/* Mejorar la jerarquía visual */
+.familia-profesional {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.curso-profesional {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.modulo-profesional {
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.unidad-profesional {
+    font-size: 0.9rem;
+}
+</style>
 @section('content')
 <div class="container">
     <h1>Administración de Cursos</h1>
-
 
     <!-- Botones para crear nuevos elementos -->
     <div class="mb-4">
@@ -16,146 +74,45 @@
     </div>
 
     <!-- Listado jerárquico de Familias Profesionales -->
-<div class="accordion" id="familiasAccordion">
-    @foreach($familiasProfesionales as $familia)
-    <div class="accordion-item">
-        <h2 class="accordion-header" id="familiaHeading{{ $familia->id }}">
-            <button class="accordion-button collapsed" type="button"
-                data-bs-toggle="collapse" 
-                data-bs-target="#familiaCollapse{{ $familia->id }}"
-                aria-expanded="false" 
-                aria-controls="familiaCollapse{{ $familia->id }}">
-                <span class="d-flex justify-content-between align-items-center w-100">
-                    <span>
-                        <strong>{{ $familia->codigo }}</strong> - {{ $familia->nombre }}
+    <div class="accordion" id="familiasAccordion">
+        @foreach($familiasProfesionales as $familia)
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="familiaHeading{{ $familia->id }}">
+                <button class="accordion-button collapsed" type="button"
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#familiaCollapse{{ $familia->id }}"
+                    aria-expanded="false" 
+                    aria-controls="familiaCollapse{{ $familia->id }}"
+                    onclick="loadCursos({{ $familia->id }})">
+                    <span class="d-flex justify-content-between align-items-center w-100">
+                        <span>
+                            <strong>{{ $familia->codigo }}</strong> - {{ $familia->nombre }}
+                        </span>
+                        <span class="badge bg-primary ms-3">{{ $familia->cursos_count ?? $familia->cursos->count() }} cursos</span>
                     </span>
-                    <span class="badge bg-primary ms-3">{{ $familia->cursos->count() }} cursos</span>
-                </span>
-            </button>
-        </h2>
+                </button>
+            </h2>
 
-        <div id="familiaCollapse{{ $familia->id }}" 
-             class="accordion-collapse collapse" 
-             aria-labelledby="familiaHeading{{ $familia->id }}" 
-             data-bs-parent="#familiasAccordion">
-            <div class="accordion-body">
-                @if($familia->cursos->isEmpty())
-                    <div class="alert alert-warning text-center">
-                        <i class="fas fa-info-circle"></i> No hay cursos en esta familia profesional.
-                    </div>
-                @else
-                    <!-- CONTENIDO DE CURSOS - SIN ACORDDIONS ANIDADOS -->
-                    <div class="cursos-list">
-                        @foreach($familia->cursos as $curso)
-                        <div class="curso-item card mb-3" data-curso-id="{{ $curso->id }}">
-                            <div class="card-header bg-light">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-book me-2"></i>
-                                        <strong>{{ $curso->codigo }}</strong> - {{ $curso->nombre }} 
-                                        <span class="badge bg-secondary ms-2">{{ $curso->horas }}h</span>
-                                    </h5>
-                                    <div class="btn-group">
-                                        <button class="btn btn-sm btn-outline-warning" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#editarCursoModal{{ $curso->id }}">
-                                            <i class="fas fa-edit"></i> Editar
-                                        </button>
-                                        <form action="{{ route('admin.cursos.destroy', $curso->id) }}" 
-                                              method="POST" 
-                                              class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de eliminar este curso?')">
-                                                <i class="fas fa-trash"></i> Eliminar
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
+            <div id="familiaCollapse{{ $familia->id }}" 
+                 class="accordion-collapse collapse" 
+                 aria-labelledby="familiaHeading{{ $familia->id }}" 
+                 data-bs-parent="#familiasAccordion">
+                <div class="accordion-body">
+                    <div id="cursos-container-{{ $familia->id }}" 
+                         class="cursos-container"
+                         data-url="{{ route('admin.familias.cursos', ['familia' => $familia->id]) }}">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando cursos...</span>
                             </div>
-                            <div class="card-body">
-                                <h6 class="border-bottom pb-2">
-                                    <i class="fas fa-list-ul me-2"></i>Módulos del Curso 
-                                    <span class="badge bg-info">{{ $curso->modulos->count() }}</span>
-                                </h6>
-                                
-                                @if($curso->modulos->count() > 0)
-                                    <!-- MÓDULOS COMO LISTA SIMPLE - SIN ACORDDION -->
-                                    <div class="modulos-list">
-                                        @foreach($curso->modulos as $modulo)
-                                        <div class="modulo-item border rounded p-3 mb-2">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <strong>
-                                                    {{ $modulo->codigo }} - {{ $modulo->nombre }}
-                                                    <span class="badge bg-light text-dark ms-2">{{ $modulo->horas }}h</span>
-                                                </strong>
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                            data-bs-toggle="modal" 
-                                                            data-bs-target="#agregarUnidadModal{{ $modulo->id }}">
-                                                        <i class="fas fa-plus"></i> Unidad
-                                                    </button>
-                                                    <form action="{{ route('admin.cursos.modulos.destroy', ['curso' => $curso->id, 'modulo' => $modulo->id]) }}" 
-                                                          method="POST" 
-                                                          class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar módulo?')">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- UNIDADES -->
-                                            @if($modulo->unidades->count() > 0)
-                                                <div class="unidades-list">
-                                                    <strong class="text-muted">Unidades:</strong>
-                                                    <ul class="list-group mt-1">
-                                                        @foreach($modulo->unidades->sortBy([['codigo'], ['nombre']]) as $unidad)
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center py-1">
-                                                            <span>
-                                                                <strong>{{ $unidad->codigo }}</strong> - {{ $unidad->nombre }}
-                                                                <span class="badge bg-light text-dark ms-2">{{ $unidad->horas }}h</span>
-                                                            </span>
-                                                            <form action="{{ route('admin.unidades.destroy', $unidad->id) }}" method="POST" class="d-inline">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar unidad?')">
-                                                                    <i class="fas fa-trash"></i>
-                                                                </button>
-                                                            </form>
-                                                        </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                            @else
-                                                <p class="text-muted mb-0"><small>No hay unidades formativas</small></p>
-                                            @endif
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <p class="text-muted">Este curso no tiene módulos.</p>
-                                @endif
-
-                                <div class="mt-3">
-                                    <button class="btn btn-primary btn-sm" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#agregarModuloModal{{ $curso->id }}">
-                                        <i class="fas fa-plus"></i> Añadir Módulo
-                                    </button>
-                                </div>
-                            </div>
+                            <p class="mt-2 text-muted">Cargando cursos...</p>
                         </div>
-                        @endforeach
                     </div>
-                @endif
+                </div>
             </div>
         </div>
+        @endforeach
     </div>
-    @endforeach
-</div>
 </div>
 
 <!-- MODALES BÁSICOS -->
@@ -351,98 +308,477 @@
 
 <!-- Script de inicialización mejorado -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎯 Inicializando componentes Bootstrap...');
+// Función para cargar cursos de una familia
+function loadCursos(familiaId) {
+    const container = document.getElementById(`cursos-container-${familiaId}`);
+    const url = container.getAttribute('data-url');
     
-    // Pequeño delay para asegurar que el DOM esté completamente renderizado
-    setTimeout(function() {
-        if (typeof bootstrap !== 'undefined') {
-            console.log('✅ Bootstrap disponible');
-            
-            // Inicializar collapses
-            const collapses = document.querySelectorAll('.accordion-collapse');
-            collapses.forEach(collapse => {
-                try {
-                    new bootstrap.Collapse(collapse, { toggle: false });
-                } catch (e) {
-                    console.log('Error inicializando collapse:', e);
-                }
-            });
-            
-            // Inicializar modales
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
-                try {
-                    new bootstrap.Modal(modal);
-                } catch (e) {
-                    console.log('Error inicializando modal:', e);
-                }
-            });
-            
-            console.log(`✅ ${collapses.length} collapses y ${modals.length} modales inicializados`);
+    console.log('🔍 Cargando cursos para familia:', familiaId);
+    console.log('📡 URL:', url);
+
+    // Si ya se cargaron los cursos, no hacer nada
+    if (container.getAttribute('data-loaded') === 'true') {
+        console.log('✅ Los cursos ya estaban cargados');
+        return;
+    }
+
+    // Mostrar loading
+    container.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando cursos...</span>
+            </div>
+            <p class="mt-2 text-muted">Cargando cursos...</p>
+        </div>
+    `;
+
+    fetch(url, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => {
+        console.log('📨 Respuesta recibida:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(cursos => {
+        console.log('📊 Cursos cargados:', cursos);
+        
+        if (cursos.length === 0) {
+            container.innerHTML = `
+                <div class="alert alert-warning text-center">
+                    <i class="fas fa-info-circle"></i> No hay cursos en esta familia profesional.
+                </div>
+            `;
         } else {
-            console.error('❌ Bootstrap no disponible');
-        }
-    }, 100);
-});
-</script>
+            container.innerHTML = cursos.map(curso => `
+                <div class="curso-item card mb-3" data-curso-id="${curso.id}">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-book me-2"></i>
+                                <strong>${curso.codigo}</strong> - ${curso.nombre} 
+                                <span class="badge bg-secondary ms-2">${curso.horas}h</span>
+                            </h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-warning" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editarCursoModal${curso.id}">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <form action="/admin/cursos/${curso.id}" 
+                                      method="POST" 
+                                      class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de eliminar este curso?')">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="border-bottom pb-2">
+                            <i class="fas fa-list-ul me-2"></i>Módulos del Curso 
+                            <span class="badge bg-info">${curso.modulos_count}</span>
+                        </h6>
+                        
+                        <div id="modulos-container-${curso.id}" 
+                             class="modulos-container"
+                             data-url="/admin/cursos/${curso.id}/modulos">
+                            <button class="btn btn-outline-primary btn-sm" onclick="loadModulos(${curso.id})">
+                                <i class="fas fa-sync"></i> Cargar Módulos
+                            </button>
+                        </div>
 
-<!-- Script para forzar el comportamiento correcto de los accordions -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔧 Forzando comportamiento correcto de accordions...');
+                        <div class="mt-3">
+                            <button class="btn btn-primary btn-sm" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#agregarModuloModal${curso.id}">
+                                <i class="fas fa-plus"></i> Añadir Módulo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        container.setAttribute('data-loaded', 'true');
+    })
+    .catch(error => {
+        console.error('❌ Error cargando cursos:', error);
+        container.innerHTML = `
+            <div class="alert alert-danger text-center">
+                <i class="fas fa-exclamation-triangle"></i> Error al cargar los cursos.
+                <br><small>${error.message}</small>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-warning" onclick="loadCursos(${familiaId})">
+                        <i class="fas fa-redo"></i> Reintentar
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+}
+
+    // Función para cargar cursos de una familia
+function loadCursos(familiaId) {
+    const container = document.getElementById(`cursos-container-${familiaId}`);
+    const url = `/admin/familias/${familiaId}/cursos`;
     
-    // Esperar a que Bootstrap esté completamente cargado
-    setTimeout(function() {
-        if (typeof bootstrap !== 'undefined') {
-            // 1. Cerrar TODOS los accordions al inicio
-            const allCollapses = document.querySelectorAll('.accordion-collapse');
-            allCollapses.forEach(collapse => {
-                const bsCollapse = bootstrap.Collapse.getInstance(collapse);
-                if (bsCollapse) {
-                    bsCollapse.hide();
-                } else {
-                    new bootstrap.Collapse(collapse, { toggle: false }).hide();
-                }
+    console.log('🔍 Cargando cursos para familia:', familiaId);
+    console.log('📡 URL:', url);
+
+    // Si ya se cargaron los cursos, no hacer nada
+    if (container.getAttribute('data-loaded') === 'true') {
+        console.log('✅ Los cursos ya estaban cargados');
+        return;
+    }
+
+    // Mostrar loading
+    container.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando cursos...</span>
+            </div>
+            <p class="mt-2 text-muted">Cargando cursos...</p>
+        </div>
+    `;
+
+    fetch(url, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => {
+        console.log('📨 Respuesta recibida:', response.status, response.statusText);
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }).catch(() => {
+                throw new Error(`HTTP error! status: ${response.status}`);
             });
+        }
+        return response.json();
+    })
+    .then(cursos => {
+        console.log('📊 Cursos cargados:', cursos);
+        
+        // Verificar si es un error
+        if (cursos.error) {
+            throw new Error(cursos.message || cursos.error);
+        }
+        
+        if (cursos.length === 0) {
+            container.innerHTML = `
+                <div class="alert alert-warning text-center">
+                    <i class="fas fa-info-circle"></i> No hay cursos en esta familia profesional.
+                </div>
+            `;
+        } else {
+            container.innerHTML = cursos.map(curso => `
+    <div class="curso-item card mb-3" data-curso-id="${curso.id}">
+        <div class="card-header bg-light curso-header" style="cursor: pointer;" onclick="toggleModulos(${curso.id})">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="curso-title">
+                    <i class="fas fa-book me-2"></i>
+                    <strong class="curso-profesional">${curso.codigo}</strong> - <span class="curso-profesional">${curso.nombre}</span>
+                    <span class="badge bg-secondary badge-sm ms-2">${curso.horas}h</span>
+                    <span class="badge bg-info badge-sm ms-2">${curso.modulos_count} módulos</span>
+                    <i class="fas fa-chevron-down ms-2 toggle-icon" id="toggle-icon-${curso.id}"></i>
+                </div>
+                <div class="btn-group" onclick="event.stopPropagation()">
+                    <button class="btn btn-sm btn-outline-warning" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#editarCursoModal${curso.id}">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <form action="/admin/cursos/${curso.id}" 
+                          method="POST" 
+                          class="d-inline">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de eliminar este curso?')">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card-body modulos-body" id="modulos-body-${curso.id}" style="display: none;">
+            <h6 class="border-bottom pb-2" style="font-size: 0.95rem;">
+                <i class="fas fa-list-ul me-2"></i>Módulos del Curso 
+                <span class="badge bg-info badge-sm">${curso.modulos_count}</span>
+            </h6>
             
-            // 2. Asegurar que los botones tengan la clase 'collapsed'
-            const allButtons = document.querySelectorAll('.accordion-button');
-            allButtons.forEach(button => {
-                button.classList.add('collapsed');
-                button.setAttribute('aria-expanded', 'false');
-            });
+            <div id="modulos-container-${curso.id}" 
+                 class="modulos-container modulo-container">
+                <div class="text-center">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Cargando módulos...</span>
+                    </div>
+                    <span class="text-muted ms-2">Cargando módulos...</span>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <button class="btn btn-primary btn-sm" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#agregarModuloModal${curso.id}">
+                    <i class="fas fa-plus"></i> Añadir Módulo
+                </button>
+            </div>
+        </div>
+    </div>
+`).join('');
             
-            console.log('✅ Accordions forzados a estado colapsado');
-            
-            // 3. Agregar event listeners para debug
-            document.querySelectorAll('.accordion-button').forEach(button => {
-                button.addEventListener('click', function() {
-                    const target = this.getAttribute('data-bs-target');
-                    console.log('🔍 Click en accordion:', target);
+            // Cargar módulos automáticamente para el primer curso (opcional)
+            // loadModulos(cursos[0].id);
+        }
+        container.setAttribute('data-loaded', 'true');
+    })
+    .catch(error => {
+        console.error('❌ Error cargando cursos:', error);
+        container.innerHTML = `
+            <div class="alert alert-danger text-center">
+                <i class="fas fa-exclamation-triangle"></i> Error al cargar los cursos.
+                <br><small>${error.message}</small>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-warning" onclick="loadCursos(${familiaId})">
+                        <i class="fas fa-redo"></i> Reintentar
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+}
+
+// Función para mostrar/ocultar módulos
+function toggleModulos(cursoId) {
+    const modulosBody = document.getElementById(`modulos-body-${cursoId}`);
+    const toggleIcon = document.getElementById(`toggle-icon-${cursoId}`);
+    
+    if (modulosBody.style.display === 'none') {
+        // Mostrar módulos
+        modulosBody.style.display = 'block';
+        toggleIcon.classList.remove('fa-chevron-down');
+        toggleIcon.classList.add('fa-chevron-up');
+        
+        // Cargar módulos si no están cargados
+        const modulosContainer = document.getElementById(`modulos-container-${cursoId}`);
+        if (modulosContainer.getAttribute('data-loaded') !== 'true') {
+            loadModulos(cursoId);
+        }
+    } else {
+        // Ocultar módulos
+        modulosBody.style.display = 'none';
+        toggleIcon.classList.remove('fa-chevron-up');
+        toggleIcon.classList.add('fa-chevron-down');
+    }
+}
+
+// Función para cargar módulos de un curso
+    function loadModulos(cursoId) {
+        const container = document.getElementById(`modulos-container-${cursoId}`);
+        const url = `/admin/cursos/${cursoId}/modulos`;
+        
+        console.log('🔍 Cargando módulos para curso:', cursoId);
+        console.log('📡 URL:', url);
+
+        // Mostrar spinner
+        container.innerHTML = `
+            <div class="text-center py-2">
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">Cargando módulos...</span>
+                </div>
+                <span class="text-muted ms-2">Cargando módulos...</span>
+            </div>
+        `;
+
+        fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => {
+            console.log('📨 Respuesta módulos:', response.status, response.statusText);
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }).catch(() => {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 });
-            });
-        }
-    }, 500);
-});
-
-// Script adicional para manejar problemas de renderizado
-window.addEventListener('load', function() {
-    console.log('🔄 Página completamente cargada - Verificando accordions...');
-    
-    // Verificar que todos los accordions estén colapsados
-    const visibleCollapses = document.querySelectorAll('.accordion-collapse.show');
-    console.log(`📊 Accordions visibles: ${visibleCollapses.length}`);
-    
-    if (visibleCollapses.length > 0) {
-        console.log('⚠️  Algunos accordions están visibles cuando deberían estar ocultos');
-        // Forzar a ocultar
-        visibleCollapses.forEach(collapse => {
-            collapse.classList.remove('show');
-            collapse.style.display = 'none';
+            }
+            return response.json();
+        })
+        .then(modulos => {
+            console.log('📊 Módulos cargados:', modulos);
+            
+            // Verificar si es un error
+            if (modulos.error) {
+                throw new Error(modulos.message || modulos.error);
+            }
+            
+            if (modulos.length === 0) {
+                container.innerHTML = '<p class="text-muted">Este curso no tiene módulos.</p>';
+            } else {
+                container.innerHTML = modulos.map(modulo => `
+    <div class="modulo-item border rounded p-3 mb-2 modulo-container">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+                <strong class="modulo-profesional">
+                    ${modulo.codigo} - ${modulo.nombre}
+                </strong>
+                <span class="badge bg-light text-dark badge-sm ms-2">${modulo.horas}h</span>
+                <span class="badge bg-info badge-sm ms-2">${modulo.unidades_count} unidades</span>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-primary" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#agregarUnidadModal${modulo.id}">
+                    <i class="fas fa-plus"></i> Unidad
+                </button>
+                <form action="/admin/cursos/${modulo.curso_id}/modulos/${modulo.id}" 
+                      method="POST" 
+                      class="d-inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar módulo?')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Contenedor para unidades -->
+        <div id="unidades-container-${modulo.id}" 
+             class="unidades-container mt-2">
+            <button class="btn btn-outline-secondary btn-sm" onclick="loadUnidades(${modulo.id})">
+                <i class="fas fa-sync"></i> Cargar Unidades
+            </button>
+        </div>
+    </div>
+`).join('');
+            }
+            container.setAttribute('data-loaded', 'true');
+        })
+        .catch(error => {
+            console.error('❌ Error cargando módulos:', error);
+            container.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Error al cargar los módulos.
+                    <br><small>${error.message}</small>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-warning" onclick="loadModulos(${cursoId})">
+                            <i class="fas fa-redo"></i> Reintentar
+                        </button>
+                    </div>
+                </div>
+            `;
         });
     }
-});
-</script>
 
+// Función para cargar unidades de un módulo (sin cambios)
+    function loadUnidades(moduloId) {
+        const container = document.getElementById(`unidades-container-${moduloId}`);
+        const url = `/admin/modulos/${moduloId}/unidades`;
+        
+        console.log('🔍 Cargando unidades para módulo:', moduloId);
+        console.log('📡 URL:', url);
+
+        // Mostrar spinner
+        container.innerHTML = `
+            <div class="text-center py-1">
+                <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                    <span class="visually-hidden">Cargando unidades...</span>
+                </div>
+                <span class="text-muted ms-2">Cargando unidades...</span>
+            </div>
+        `;
+
+        fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => {
+            console.log('📨 Respuesta unidades:', response.status, response.statusText);
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }).catch(() => {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                });
+            }
+            return response.json();
+        })
+        .then(unidades => {
+            console.log('📊 Unidades cargadas:', unidades);
+            
+            // Verificar si es un error
+            if (unidades.error) {
+                throw new Error(unidades.message || unidades.error);
+            }
+            
+            if (unidades.length === 0) {
+                container.innerHTML = '<p class="text-muted mb-0"><small>No hay unidades formativas</small></p>';
+            } else {
+                // Ordenar unidades por código
+                const unidadesOrdenadas = unidades.sort((a, b) => a.codigo.localeCompare(b.codigo));
+                
+                container.innerHTML = `
+    <div class="unidades-container">
+        <strong class="text-muted unidad-profesional">Unidades formativas:</strong>
+        <ul class="list-group mt-1">
+            ${unidadesOrdenadas.map(unidad => `
+                <li class="list-group-item d-flex justify-content-between align-items-center py-2 unidad-profesional">
+                    <span>
+                        <strong>${unidad.codigo}</strong> - ${unidad.nombre}
+                        <span class="badge bg-light text-dark badge-sm ms-2">${unidad.horas}h</span>
+                    </span>
+                    <form action="/admin/unidades/${unidad.id}" method="POST" class="d-inline">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar unidad?')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </li>
+            `).join('')}
+        </ul>
+    </div>
+`;
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error cargando unidades:', error);
+            container.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Error al cargar las unidades.
+                    <br><small>${error.message}</small>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-warning" onclick="loadUnidades(${moduloId})">
+                            <i class="fas fa-redo"></i> Reintentar
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+
+
+
+</script>
 @endsection

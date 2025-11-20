@@ -37,4 +37,32 @@ class FamiliaProfesionalController extends Controller
 
         return back()->with('success', 'Registro creado con éxito');
     }
+
+    public function getCursosByFamilia(FamiliaProfesional $familia)
+    {
+        try {
+            $cursos = $familia->cursos()
+                ->withCount('modulos')
+                ->get()
+                ->map(function($curso) {
+                    return [
+                        'id' => $curso->id,
+                        'codigo' => $curso->codigo,
+                        'nombre' => $curso->nombre,
+                        'horas' => $curso->horas,
+                        'modulos_count' => $curso->modulos_count,
+                        'familia_profesional_id' => $curso->familia_profesional_id
+                    ];
+                });
+
+            return response()->json($cursos);
+        } catch (\Exception $e) {
+           // \Log::error('Error en getCursosByFamilia: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Error al cargar los cursos',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    
+    }
 }

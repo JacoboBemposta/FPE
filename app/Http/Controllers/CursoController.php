@@ -95,4 +95,31 @@ class CursoController extends Controller
     
         return redirect()->back()->with('success', 'Curso actualizado correctamente');
     }
+
+    public function getModulosByCurso(Curso $curso)
+    {
+        try {
+            $modulos = $curso->modulos()
+                ->withCount('unidades')
+                ->get()
+                ->map(function($modulo) {
+                    return [
+                        'id' => $modulo->id,
+                        'codigo' => $modulo->codigo,
+                        'nombre' => $modulo->nombre,
+                        'horas' => $modulo->horas,
+                        'unidades_count' => $modulo->unidades_count,
+                        'curso_id' => $modulo->curso_id
+                    ];
+                });
+
+            return response()->json($modulos);
+        } catch (\Exception $e) {
+            \Log::error('Error en getModulosByCurso: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Error al cargar los módulos',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

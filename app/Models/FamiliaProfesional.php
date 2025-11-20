@@ -17,4 +17,6 @@ class FamiliaProfesional extends Model
         return $this->hasMany(Curso::class, 'familia_profesional_id');
     }
 
+
+
 }

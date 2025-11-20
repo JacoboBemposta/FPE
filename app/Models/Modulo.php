@@ -21,4 +21,6 @@ class Modulo extends Model
         return $this->belongsToMany(UnidadFormativa::class, 'modulo_unidad', 'modulo_id', 'unidad_formativa_id');
     }
 
+
+
 }
