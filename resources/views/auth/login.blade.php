@@ -1,73 +1,167 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Login') }}</div>
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center min-vh-100 bg-light">
+        <div class="col-md-8 col-lg-6 col-xl-4">
+            <div class="card shadow-lg border-0 rounded-3">
+                <!-- Header con gradiente -->
+                <div class="card-header bg-gradient-primary text-white text-center py-4">
+                    <h2 class="mb-0 fw-bold"><i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión</h2>
+                    <p class="mb-0 mt-2 opacity-75">Accede a tu cuenta de Formación Plus</p>
+                </div>
 
-                <div class="card-body">
+                <div class="card-body p-5">
+                    <!-- Botón de Google -->
+                    <div class="d-grid mb-4">
+                        <a href="{{ route('login.google') }}" class="btn btn-outline-danger btn-lg py-3 fw-semibold">
+                            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" width="20" height="20" class="me-3">
+                            Continuar con Google
+                        </a>
+                    </div>
+
+                    <!-- Separador -->
+                    <div class="position-relative text-center my-4">
+                        <hr>
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted">
+                            o ingresa con tu email
+                        </span>
+                    </div>
+
+                    <!-- Formulario tradicional -->
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
 
-                        <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
-
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
-
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6 offset-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-
-                                    <label class="form-check-label" for="remember">
-                                        {{ __('Remember Me') }}
-                                    </label>
+                        <div class="form-floating mb-4">
+                            <input id="email" type="email" class="form-control form-control-lg @error('email') is-invalid @enderror" 
+                                   name="email" value="{{ old('email') }}" required autocomplete="email" autofocus 
+                                   placeholder="name@example.com">
+                            <label for="email" class="text-muted">
+                                <i class="fas fa-envelope me-2"></i>Correo Electrónico
+                            </label>
+                            @error('email')
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ $message }}
                                 </div>
-                            </div>
+                            @enderror
                         </div>
 
-                        <div class="row mb-0">
-                            <div class="col-md-8 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Login') }}
-                                </button>
+                        <div class="form-floating mb-4">
+                            <input id="password" type="password" class="form-control form-control-lg @error('password') is-invalid @enderror" 
+                                   name="password" required autocomplete="current-password" placeholder="Contraseña">
+                            <label for="password" class="text-muted">
+                                <i class="fas fa-lock me-2"></i>Contraseña
+                            </label>
+                            @error('password')
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ $message }}
+                                </div>
+                            @enderror
+                        </div>
 
-                                @if (Route::has('password.request'))
-                                    <a class="btn btn-link" href="{{ route('password.request') }}">
-                                        {{ __('Forgot Your Password?') }}
-                                    </a>
-                                @endif
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                                <label class="form-check-label text-muted" for="remember">
+                                    Recordarme
+                                </label>
                             </div>
+                            
+                            @if (Route::has('password.request'))
+                                <a class="text-primary text-decoration-none" href="{{ route('password.request') }}">
+                                    ¿Olvidaste tu contraseña?
+                                </a>
+                            @endif
+                        </div>
+
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg py-3 fw-semibold">
+                                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                            </button>
                         </div>
                     </form>
+
+                    <!-- Enlace a registro -->
+                    <div class="text-center pt-3 border-top">
+                        <p class="text-muted mb-0">¿No tienes una cuenta?
+                            <a href="{{ route('register') }}" class="text-primary text-decoration-none fw-semibold">
+                                Regístrate aquí
+                            </a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .min-vh-100 {
+        min-height: 100vh;
+    }
+    
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+    
+    .card {
+        border: none;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+    }
+    
+    .form-control-lg {
+        border-radius: 0.75rem;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control-lg:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .btn-lg {
+        border-radius: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-danger {
+        border: 2px solid;
+        font-weight: 600;
+    }
+    
+    .btn-outline-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        font-weight: 600;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .form-floating label {
+        padding-left: 2.5rem;
+    }
+    
+    .form-floating i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 5;
+    }
+</style>
 @endsection

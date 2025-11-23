@@ -11,7 +11,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Definir HOME constant si no existe
+        if (!defined('HOME')) {
+            define('HOME', '/home');
+        }
     }
 
     /**

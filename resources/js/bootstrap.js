@@ -1,5 +1,8 @@
 import 'bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
+
+// Opcional: Si necesitas los componentes de Bootstrap
+import * as bootstrap from 'bootstrap';
+window.bootstrap = bootstrap;
 
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests

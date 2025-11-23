@@ -52,18 +52,6 @@
                             </div>
                         </div>
                     
-                        <!-- Campo Teléfono -->
-                        <div class="row mb-3">
-                            <label for="telefono" class="col-md-4 col-form-label text-md-end">{{ __('Teléfono') }}</label>
-                            <div class="col-md-6">
-                                <input id="telefono" type="text" class="form-control @error('telefono') is-invalid @enderror" name="telefono" value="{{ old('telefono') }}" required>
-                                @error('telefono')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
                     
                         <!-- Campo Contraseña -->
                         <div class="row mb-3">
@@ -103,78 +91,8 @@
                                 @enderror
                             </div>
                         </div>
-                    
 
 
-                        <!-- Campo Localidad -->
-                        <div class="row mb-3">
-                            <label for="localidad" class="col-md-4 col-form-label text-md-end">{{ __('Localidad') }}</label>
-                            <div class="col-md-6">
-                                <input id="localidad" type="text" class="form-control @error('localidad') is-invalid @enderror" 
-                                    name="localidad" value="{{ old('localidad') }}" >
-                                @error('localidad')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Campo Provincia -->
-                        <div class="row mb-3">
-                            <label for="provincia" class="col-md-4 col-form-label text-md-end">{{ __('Provincia') }}</label>
-                            <div class="col-md-6">
-                                <input id="provincia" type="text" class="form-control @error('provincia') is-invalid @enderror" 
-                                    name="provincia" value="{{ old('provincia') }}" required>
-                                @error('provincia')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>                        
-
-                        <!-- Campo Número de Censo -->
-                        <div class="row mb-3">
-                            <label for="numero_censo" class="col-md-4 col-form-label text-md-end">{{ __('Número de Censo (solo academias)') }}</label>
-                            <div class="col-md-6">
-                                <input id="numero_censo" type="text" class="form-control @error('numero_censo') is-invalid @enderror" 
-                                    name="numero_censo" value="{{ old('numero_censo') }}" >
-                                @error('numero_censo')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Campo Dirección -->
-                        <div class="row mb-3">
-                            <label for="direccion" class="col-md-4 col-form-label text-md-end">{{ __('Dirección (solo academias)') }}</label>
-                            <div class="col-md-6">
-                                <input id="direccion" type="text" class="form-control @error('direccion') is-invalid @enderror" 
-                                    name="direccion" value="{{ old('direccion') }}" >
-                                @error('direccion')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Campo Código Postal -->
-                        <div class="row mb-3">
-                            <label for="codigo_postal" class="col-md-4 col-form-label text-md-end">{{ __('Código Postal (solo academias)') }}</label>
-                            <div class="col-md-6">
-                                <input id="codigo_postal" type="text" class="form-control @error('codigo_postal') is-invalid @enderror" 
-                                    name="codigo_postal" value="{{ old('codigo_postal') }}" >
-                                @error('codigo_postal')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
 
                         <!-- Campo Activo -->
                         <div class="row mb-3">

@@ -41,7 +41,7 @@ class ModuloController extends Controller
             'nombre' => 'required_if:modulo_existente_id,new|string|max:255',
             'horas' => 'nullable|numeric'
         ]);
-        dd($request);
+
         // Manejo de módulo existente o nuevo
         if ($request->modulo_existente_id && $request->modulo_existente_id !== 'new') {
             // Vincular módulo existente

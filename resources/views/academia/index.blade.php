@@ -5,26 +5,28 @@
     .header-curso {
         background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
         color: white;
-        padding: 15px 0;
-        border-radius: 8px;
+        padding: 20px 0;
+        border-radius: 10px;
         margin-bottom: 30px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     .btn-action {
-        border-radius: 20px;
-        padding: 8px 20px;
+        border-radius: 25px;
+        padding: 10px 25px;
         font-weight: 500;
         transition: all 0.3s;
         margin: 0 5px;
+        border: none;
     }
     .btn-action:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
     }
     .table-custom {
-        border-radius: 8px;
+        border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        border: none;
     }
     .table-custom thead {
         background: linear-gradient(135deg, #0056b3 0%, #003d7a 100%);
@@ -32,66 +34,89 @@
     }
     .table-custom th {
         border: none;
-        padding: 12px 15px;
+        padding: 15px 20px;
+        font-weight: 600;
+        font-size: 0.95rem;
     }
     .table-custom td {
         vertical-align: middle;
-        padding: 12px 15px;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .table-custom tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.03);
     }
     .badge-docente {
         background-color: #17a2b8;
         font-size: 0.8rem;
+        padding: 0.4em 0.8em;
     }
     .action-buttons {
         display: flex;
         gap: 8px;
+        flex-wrap: wrap;
     }
     .action-btn {
-        padding: 5px 12px;
+        padding: 6px 14px;
         font-size: 0.85rem;
-        border-radius: 4px;
+        border-radius: 6px;
         transition: all 0.2s;
+        border: none;
+        font-weight: 500;
     }
     .action-btn:hover {
-        filter: brightness(90%);
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
     }
     .btn-edit {
         background-color: #ffc107;
-        border-color: #ffc107;
         color: #212529;
     }
     .btn-delete {
         background-color: #dc3545;
-        border-color: #dc3545;
         color: white;
-        height: 100%;
     }
     .btn-view {
         background-color: #17a2b8;
-        border-color: #17a2b8;
         color: white;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #dee2e6;
+    }
+    .modal-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 1px solid #dee2e6;
     }
 </style>
 
 <div class="container mt-4">
     <!-- Encabezado -->
     <div class="header-curso text-center">
-        <h1>Mis Cursos Formativos</h1>
+        <h1 class="mb-2">Mis Cursos Formativos</h1>
+        <p class="mb-0 opacity-75">Gestiona y administra todos tus cursos asignados</p>
     </div>
 
     <!-- Barra de acciones -->
     <div class="d-flex justify-content-between mb-4">
         <div>
             <a href="{{ route('academia.cursos') }}" class="btn btn-primary btn-action">
-                <i class="fas fa-search mr-2"></i>Buscar Cursos
+                <i class="fas fa-search me-2"></i>Buscar Cursos
             </a>
             <a href="{{ route('academia.ver_docentes') }}" class="btn btn-primary btn-action">
-                <i class="fas fa-chalkboard-teacher mr-2"></i>Buscar Docente
+                <i class="fas fa-chalkboard-teacher me-2"></i>Buscar Docente
             </a>
         </div>
     </div>
 
     <!-- Tabla de cursos -->
+    @if($misCursos && count($misCursos) > 0)
     <div class="table-responsive">
         <table class="table table-custom table-hover">
             <thead>
@@ -111,10 +136,10 @@
             <tbody>
                 @foreach($misCursos as $cursoAcademico)
                 <tr>
-                    <td>{{ $cursoAcademico->curso->codigo ?? 'N/A' }}</td>
+                    <td><strong>{{ $cursoAcademico->curso->codigo ?? 'N/A' }}</strong></td>
                     <td>{{ $cursoAcademico->curso->nombre ?? 'N/A' }}</td>
                     <td>{{ $cursoAcademico->curso->familiaProfesional->nombre ?? 'N/A' }}</td>
-                    <td>{{ $cursoAcademico->curso->horas ?? 'N/A' }}</td>
+                    <td><span class="badge bg-secondary">{{ $cursoAcademico->curso->horas ?? 'N/A' }}h</span></td>
                     <td>{{ $cursoAcademico->municipio ?? 'N/A' }}</td>
                     <td>{{ $cursoAcademico->provincia ?? 'N/A' }}</td>
                     <td>{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}</td>
@@ -125,6 +150,8 @@
                         @endphp
                         @if($docente)
                             <span class="badge badge-docente">{{ $docente->nombre }}</span>
+                        @else
+                            <span class="badge bg-warning text-dark">Sin asignar</span>
                         @endif
                     </td>
                     <td>
@@ -136,7 +163,7 @@
                                     data-provincia="{{ $cursoAcademico->provincia }}"
                                     data-inicio="{{ $cursoAcademico->inicio }}"
                                     data-fin="{{ $cursoAcademico->fin }}">
-                                Editar
+                                <i class="fas fa-edit me-1"></i>Editar
                             </button>
                             
                             <!-- Botón para eliminar curso -->
@@ -144,13 +171,13 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-delete action-btn" onclick="return confirm('¿Estás seguro de que deseas eliminar este curso?')">
-                                    Eliminar
+                                    <i class="fas fa-trash me-1"></i>Eliminar
                                 </button>
                             </form>
                             
                             <!-- Botón para ver detalles del curso -->
                             <a href="{{ route('academia.detalleCurso', $cursoAcademico->id) }}" class="btn btn-view action-btn">
-                                Ir al curso
+                                <i class="fas fa-eye me-1"></i>Ver Curso
                             </a>
                         </div>
                     </td>
@@ -159,10 +186,20 @@
             </tbody>
         </table>
     </div>
+    @else
+    <div class="empty-state bg-light rounded-3 p-5">
+        <i class="fas fa-folder-open"></i>
+        <h3 class="text-muted">No tienes cursos asignados</h3>
+        <p class="text-muted">Comienza asignando cursos desde el buscador de cursos.</p>
+        <a href="{{ route('academia.cursos') }}" class="btn btn-primary mt-3">
+            <i class="fas fa-search me-2"></i>Buscar Cursos
+        </a>
+    </div>
+    @endif
 
-    <!-- Modal para editar curso (se mantiene igual) -->
-    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
+    <!-- Modal para editar curso -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
          <div class="modal-content">
              <div class="modal-header">
                  <h5 class="modal-title" id="editModalLabel">Editar Curso Académico</h5>
@@ -172,21 +209,21 @@
                  @csrf
                  @method('PUT')
                  <div class="modal-body">
-                     <input type="hidden" id="curso_id" name="curso_id" value="">
-                     <div class="form-group">
-                         <label for="municipio">Municipio</label>
+                     <input type="hidden" id="curso_id" name="curso_id">
+                     <div class="mb-3">
+                         <label for="municipio" class="form-label">Municipio</label>
                          <input type="text" class="form-control" id="municipio" name="municipio">
                      </div>
-                     <div class="form-group">
-                         <label for="provincia">Provincia</label>
+                     <div class="mb-3">
+                         <label for="provincia" class="form-label">Provincia</label>
                          <input type="text" class="form-control" id="provincia" name="provincia">
                      </div>
-                     <div class="form-group">
-                         <label for="inicio">Fecha de Inicio</label>
+                     <div class="mb-3">
+                         <label for="inicio" class="form-label">Fecha de Inicio</label>
                          <input type="date" class="form-control" id="inicio" name="inicio">
                      </div>
-                     <div class="form-group">
-                         <label for="fin">Fecha de Fin</label>
+                     <div class="mb-3">
+                         <label for="fin" class="form-label">Fecha de Fin</label>
                          <input type="date" class="form-control" id="fin" name="fin">
                      </div>
                  </div>
@@ -198,37 +235,36 @@
          </div>
       </div>
     </div>
+</div>
 
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
-    <script>
-        var misCursos = @json($misCursos);
-        $(document).ready(function() {
-            // Evento para abrir el modal de edición de curso
-            $('.edit-btn').on('click', function() {
-                let cursoAcademicoId = $(this).data('id');
-                let municipio = $(this).data('municipio');
-                let provincia = $(this).data('provincia');
-                let inicio = $(this).data('inicio');
-                let fin = $(this).data('fin');
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Evento para abrir el modal de edición de curso
+        const editButtons = document.querySelectorAll('.edit-btn');
+        
+        editButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const cursoAcademicoId = this.getAttribute('data-id');
+                const municipio = this.getAttribute('data-municipio');
+                const provincia = this.getAttribute('data-provincia');
+                const inicio = this.getAttribute('data-inicio');
+                const fin = this.getAttribute('data-fin');
 
                 // Asignar los valores al formulario del modal de curso
-                $('#curso_id').val(cursoAcademicoId);
-                $('#municipio').val(municipio);
-                $('#provincia').val(provincia);
-                $('#inicio').val(inicio);
-                $('#fin').val(fin);
+                document.getElementById('curso_id').value = cursoAcademicoId;
+                document.getElementById('municipio').value = municipio;
+                document.getElementById('provincia').value = provincia;
+                document.getElementById('inicio').value = inicio;
+                document.getElementById('fin').value = fin;
 
                 // Actualizar el action del formulario
-                $('#editForm').attr('action', '/academia/curso/' + cursoAcademicoId + '/editar');
+                document.getElementById('editForm').setAttribute('action', '/academia/curso/' + cursoAcademicoId + '/editar');
 
-                // Mostrar el modal de edición de curso
-                $('#editModal').modal('show');
+                // Mostrar el modal de edición de curso usando Bootstrap 5
+                const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+                editModal.show();
             });
         });
-    </script>
-</div>
+    });
+</script>
 @endsection

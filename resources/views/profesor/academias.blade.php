@@ -42,6 +42,18 @@
                             <label for="municipioInput"><i class="fas fa-map-marker-alt me-2"></i>Municipio</label>
                         </div>
                     </div>
+                    <!-- Selector de elementos por página -->
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <select name="per_page" class="form-control" id="perPageSelect" onchange="this.form.submit()">
+                                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 por página</option>
+                                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 por página</option>
+                                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 por página</option>
+                                <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100 por página</option>
+                            </select>
+                            <label for="perPageSelect">Resultados por página</label>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="d-flex justify-content-end mt-4">
@@ -53,6 +65,15 @@
                     </button>
                 </div>
             </form>
+
+            <!-- Información de paginación -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="text-muted">
+                    Mostrando 
+                    <strong>{{ $cursosAcademicos->firstItem() ?? 0 }}-{{ $cursosAcademicos->lastItem() ?? 0 }}</strong> 
+                    de <strong>{{ $cursosAcademicos->total() ?? 0 }}</strong> resultados
+                </div>
+            </div>
 
             <!-- Tabla de Academias con diseño moderno -->
             <div class="table-responsive">
@@ -66,8 +87,7 @@
                             <th><i class="fas fa-map-marked-alt me-2"></i>Provincia</th>
                             <th><i class="fas fa-calendar-start me-2"></i>Inicio</th>
                             <th><i class="fas fa-calendar-end me-2"></i>Fin</th>
-                            <th><i class="fas fa-envelope me-2"></i>Email</th>
-                            <th><i class="fas fa-phone me-2"></i>Contacto</th>
+                            <th><i class="fas fa-envelope me-2"></i>Email</th>                            <th><i class="fas fa-phone me-2"></i>Contacto</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -81,16 +101,105 @@
                                 <td>{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}</td>
                                 <td>{{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}</td>
                                 <td><a href="mailto:{{ $cursoAcademico->email ?? '' }}" class="text-primary">{{ $cursoAcademico->email ?? 'N/A' }}</a></td>
-                                <td>{{ $cursoAcademico->telefono ?? 'N/A' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="text-center py-4">No se encontraron resultados</td>
+                                <td colspan="9" class="text-center py-4">
+                                    <i class="fas fa-university fa-2x text-muted mb-3"></i>
+                                    <p class="text-muted mb-0">No se encontraron resultados</p>
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+
+            <!-- Paginación -->
+            @if($cursosAcademicos->hasPages())
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div class="text-muted">
+                    Página <strong>{{ $cursosAcademicos->currentPage() }}</strong> de <strong>{{ $cursosAcademicos->lastPage() }}</strong>
+                </div>
+                
+                <nav aria-label="Paginación de academias">
+                    <ul class="pagination justify-content-center mb-0">
+                        <!-- Enlace anterior -->
+                        <li class="page-item {{ $cursosAcademicos->onFirstPage() ? 'disabled' : '' }}">
+                            <a class="page-link" href="{{ $cursosAcademicos->previousPageUrl() }}" aria-label="Anterior">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        <!-- Números de página -->
+                        @php
+                            $current = $cursosAcademicos->currentPage();
+                            $last = $cursosAcademicos->lastPage();
+                            $start = max(1, $current - 2);
+                            $end = min($last, $current + 2);
+                        @endphp
+
+                        @if($start > 1)
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $cursosAcademicos->url(1) }}">1</a>
+                            </li>
+                            @if($start > 2)
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            @endif
+                        @endif
+
+                        @for($i = $start; $i <= $end; $i++)
+                            <li class="page-item {{ $i == $current ? 'active' : '' }}">
+                                <a class="page-link" href="{{ $cursosAcademicos->url($i) }}">{{ $i }}</a>
+                            </li>
+                        @endfor
+
+                        @if($end < $last)
+                            @if($end < $last - 1)
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            @endif
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $cursosAcademicos->url($last) }}">{{ $last }}</a>
+                            </li>
+                        @endif
+
+                        <!-- Enlace siguiente -->
+                        <li class="page-item {{ !$cursosAcademicos->hasMorePages() ? 'disabled' : '' }}">
+                            <a class="page-link" href="{{ $cursosAcademicos->nextPageUrl() }}" aria-label="Siguiente">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <!-- Selector de página rápida -->
+                <div class="d-flex align-items-center">
+                    <span class="text-muted me-2">Ir a:</span>
+                    <form method="GET" action="{{ route('profesor.ver_academias') }}" class="d-flex">
+                        <input type="hidden" name="academia_nombre" value="{{ request('academia_nombre') }}">
+                        <input type="hidden" name="curso_codigo" value="{{ request('curso_codigo') }}">
+                        <input type="hidden" name="curso_nombre" value="{{ request('curso_nombre') }}">
+                        <input type="hidden" name="provincia" value="{{ request('provincia') }}">
+                        <input type="hidden" name="municipio" value="{{ request('municipio') }}">
+                        <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
+                        
+                        <input type="number" 
+                               name="page" 
+                               class="form-control form-control-sm" 
+                               style="width: 80px;" 
+                               min="1" 
+                               max="{{ $cursosAcademicos->lastPage() }}"
+                               value="{{ $cursosAcademicos->currentPage() }}">
+                        <button type="submit" class="btn btn-sm btn-primary ms-2">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            @endif
 
             <!-- Botón Volver -->
             <div class="d-flex justify-content-end mt-4">
@@ -109,10 +218,12 @@
         document.getElementById('clearBtn').addEventListener('click', function() {
             const form = document.getElementById('searchForm');
             const inputs = form.querySelectorAll('input[type="text"]');
+            const select = form.querySelector('select[name="per_page"]');
             
             inputs.forEach(input => {
                 input.value = '';
             });
+            select.value = '10'; // Resetear a 10 por página
             
             // Enviar el formulario limpio
             form.submit();
@@ -202,9 +313,30 @@
     #academiaInput, #nombreCursoInput {
         text-transform: lowercase;
     }
+    
+    /* Estilos para paginación */
+    .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .page-link {
+        color: #0d6efd;
+        border: 1px solid #dee2e6;
+    }
+    
+    .page-link:hover {
+        color: #0a58ca;
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+    }
+    
+    .pagination {
+        margin-bottom: 0;
+    }
+    
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    }
 </style>
-
-<!-- Incluir Font Awesome para los iconos -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
 @endsection

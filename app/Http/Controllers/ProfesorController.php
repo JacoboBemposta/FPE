@@ -92,6 +92,8 @@ class ProfesorController extends Controller
 
     public function verAcademias(Request $request)
     {
+        $perPage = $request->get('per_page', 10);
+
         $query = DB::table('users')
             ->join('curso_academicos', 'users.id', '=', 'curso_academicos.academia_id')
             ->join('cursos', 'curso_academicos.curso_id', '=', 'cursos.id')
@@ -122,7 +124,6 @@ class ProfesorController extends Controller
                 'users.id as academia_id',
                 'users.ident as academia_nombre',
                 'users.email',
-                'users.telefono',
                 'curso_academicos.id as curso_acad_id',
                 'curso_academicos.municipio',
                 'curso_academicos.provincia',
@@ -133,7 +134,7 @@ class ProfesorController extends Controller
             ])
             ->orderBy('cursos.codigo');
     
-        $cursosAcademicos = $query->get();
+        $cursosAcademicos = $query->paginate($perPage);
     
         return view('profesor.academias', compact('cursosAcademicos'));
     }

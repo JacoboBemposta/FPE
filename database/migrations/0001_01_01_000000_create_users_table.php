@@ -17,18 +17,19 @@ return new class extends Migration
             $table->string('ident')->nullable();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('telefono')->nullable();
             $table->string('password');
-            $table->enum('rol', ['admin', 'academia', 'profesor', 'alumno']);
+            $table->string('rol')->nullable()->change();
             $table->boolean('activo')->default(true);
             $table->boolean('premium')->default(false);
             
 
-            $table->string('numero_censo')->nullable();
-            $table->string('direccion')->nullable();
-            $table->string('codigo_postal')->nullable();
-            $table->string('localidad')->nullable();
-            $table->string('provincia')->nullable();
+                    // Campos para OAuth
+            $table->string('google_id')->nullable()->unique();
+            $table->string('avatar')->nullable();
+            $table->string('provider')->nullable(); // 'google'
+
+
+
         
             $table->rememberToken();
             $table->timestamps();

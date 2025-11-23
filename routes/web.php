@@ -14,6 +14,7 @@ use App\Http\Controllers\ProfesorController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\ProfesorCursoController;
 use App\Http\Controllers\CursoModuloController;
+use App\Http\Controllers\Auth\GoogleLoginController;
 
 use Illuminate\Support\Facades\Auth;
 
@@ -41,9 +42,9 @@ Route::get('/alumno/dashboard', function () {
 })->name('alumno.dashboard');
 
 
-Route::get('/dashboard', function () {
-    return view('dashboard'); // Asegúrate de que la vista "dashboard.blade.php" existe
-})->middleware(['auth'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return view('welcome'); 
+// })->middleware(['auth'])->name('welcome');
 
 
 
@@ -166,7 +167,27 @@ Route::middleware(['auth', 'rol:profesor'])
     });
 
 
-
+// Rutas de Google OAuth
+Route::get('/auth/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('login.google');
+Route::get('/auth/google/callback', [GoogleLoginController::class, 'handleGoogleCallback']);
 
 
 Route::post('/calificaciones', [CalificacionController::class, 'storeCalificacion'])->name('calificaciones.store');
+
+
+Route::post('/user/update-role', [App\Http\Controllers\UserController::class, 'updateRole'])
+    ->name('user.updateRole')
+    ->middleware('auth');
+
+
+
+Route::get('/debug-middleware', function() {
+    return [
+        'kernel_exists' => file_exists(app_path('Http/Kernel.php')),
+        'middlewares' => [
+            'TrustProxies' => file_exists(app_path('Http/Middleware/TrustProxies.php')),
+            'CheckUserRole' => file_exists(app_path('Http/Middleware/CheckUserRole.php')),
+            // ... otros
+        ]
+    ];
+});
