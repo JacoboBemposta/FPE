@@ -11,6 +11,9 @@ use App\Models\FamiliaProfesional;
 use App\Models\Curso;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CandidaturaDocente;
+use Illuminate\Support\Facades\Storage;
 
 class ProfesorController extends Controller
 {
@@ -189,4 +192,58 @@ class ProfesorController extends Controller
         return view('profesor.index', compact('misCursos'));
     }
 
+
+
+
+
+    
+
+    public function enviarCandidatura(Request $request)
+    {
+        // Validar los datos
+        $request->validate([
+            'email' => 'required|email',
+            'subject' => 'required',
+            'message' => 'required',
+            'attachment' => 'nullable|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png' // 10MB máximo
+        ]);
+        
+        try {
+            // Datos del formulario
+            $data = [
+                'to_email' => $request->email,
+                'to_name' => 'Academia', // Puedes ajustar esto si tienes el nombre
+                'subject' => $request->subject,
+                'message' => $request->message,
+                'from_name' => Auth::user()->name,
+                'from_email' => Auth::user()->email
+            ];
+            
+            // Manejar el archivo adjunto
+            $attachmentPath = null;
+            if ($request->hasFile('attachment') && $request->file('attachment')->isValid()) {
+                // Guardar el archivo temporalmente
+                $attachmentPath = $request->file('attachment')->store('temp_attachments');
+            }
+            
+            // Enviar el email con adjunto
+            Mail::to($data['to_email'])->send(new CandidaturaDocente($data, $attachmentPath));
+            
+            // Limpiar archivo temporal después del envío
+            if ($attachmentPath) {
+                Storage::delete($attachmentPath);
+            }
+            
+            return redirect()->back()->with('success', 'Candidatura enviada correctamente');
+            
+        } catch (\Exception $e) {
+            // Limpiar archivo temporal en caso de error
+            if (isset($attachmentPath) && $attachmentPath) {
+                Storage::delete($attachmentPath);
+            }
+            
+            \Log::error('Error enviando candidatura: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al enviar la candidatura: ' . $e->getMessage());
+        }
+    }
 }

@@ -135,6 +135,7 @@ Route::middleware(['auth', 'rol:academia'])
 
     Route::post('/detalle/guardar', [AcademiaController::class,'crearActualizarDetalle'])->name('crearActualizarDetalle');
 
+    
 });
 
 
@@ -164,6 +165,7 @@ Route::middleware(['auth', 'rol:profesor'])
         Route::get('curso/{id}', [ProfesorController::class, 'detalleCurso'])->name('detalleCurso');
        // Route::put('curso/{id}/editar', [ProfesorController::class, 'update'])->name('curso.update');
 
+       Route::post('/enviar-candidatura', [ProfesorController::class, 'enviarCandidatura'])->name('enviar_candidatura');
     });
 
 

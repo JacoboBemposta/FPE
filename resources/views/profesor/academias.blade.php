@@ -87,7 +87,7 @@
                             <th><i class="fas fa-map-marked-alt me-2"></i>Provincia</th>
                             <th><i class="fas fa-calendar-start me-2"></i>Inicio</th>
                             <th><i class="fas fa-calendar-end me-2"></i>Fin</th>
-                            <th><i class="fas fa-envelope me-2"></i>Email</th>
+                            <th><i class="fas fa-envelope me-2"></i>Contacto</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -100,7 +100,19 @@
                                 <td>{{ $cursoAcademico->provincia ?? 'N/A' }}</td>
                                 <td>{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}</td>
                                 <td>{{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}</td>
-                                <td><a href="mailto:{{ $cursoAcademico->email ?? '' }}" class="text-primary">{{ $cursoAcademico->email ?? 'N/A' }}</a></td>
+                                <td>
+                                    <button type="button" class="btn btn-primary btn-sm contact-btn" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#contactModal"
+                                            data-academia-nombre="{{ $cursoAcademico->academia_nombre ?? 'N/A' }}"
+                                            data-curso-nombre="{{ $cursoAcademico->curso_nombre ?? 'N/A' }}"
+                                            data-municipio="{{ $cursoAcademico->municipio ?? 'N/A' }}"
+                                            data-inicio="{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}"
+                                            data-fin="{{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}"
+                                            data-email="{{ $cursoAcademico->email ?? '' }}">
+                                        <i class="fas fa-envelope me-1"></i> Contactar
+                                    </button>
+                                </td>
                             </tr>
                         @empty
                             <tr>
@@ -211,67 +223,287 @@
     </div>
 </div>
 
-<!-- JavaScript mejorado para el buscador -->
+<!-- Modal de Contacto -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title" id="contactModalLabel">
+                    <i class="fas fa-envelope me-2"></i>Enviar Candidatura Docente
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="contactForm" method="POST" action="{{ route('profesor.enviar_candidatura') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="recipientEmail" class="form-label fw-bold">Para:</label>
+                        <input type="email" class="form-control" id="recipientEmail" name="email" value="" required>
+                        <small class="form-text text-muted">Puedes editar este campo para enviar a tu email de prueba</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="emailSubject" class="form-label fw-bold">Asunto:</label>
+                        <input type="text" class="form-control" id="emailSubject" name="subject" value="Candidatura Docente" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="emailMessage" class="form-label fw-bold">Mensaje:</label>
+                        <textarea class="form-control" id="emailMessage" name="message" rows="8" required></textarea>
+                    </div>
+
+                    <!-- Campo para adjuntar archivo -->
+                    <div class="mb-3">
+                        <label for="cvAttachment" class="form-label fw-bold">
+                            <i class="fas fa-paperclip me-1"></i>Adjuntar CV (Opcional)
+                        </label>
+                        <input type="file" class="form-control" id="cvAttachment" name="attachment" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                        <small class="form-text text-muted">
+                            Formatos aceptados: PDF, DOC, DOCX, JPG, PNG. Tamaño máximo: 10MB.
+                        </small>
+                        <div id="filePreview" class="mt-2" style="display: none;">
+                            <div class="alert alert-info py-2">
+                                <i class="fas fa-file me-2"></i>
+                                <span id="fileName"></span>
+                                <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Información del curso (solo lectura) -->
+                    <div class="card bg-light mt-3">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-info-circle me-2"></i>Información del Curso:</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Academia:</strong> <span id="modalAcademiaNombre">-</span></p>
+                                    <p class="mb-1"><strong>Curso:</strong> <span id="modalCursoNombre">-</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Municipio:</strong> <span id="modalMunicipio">-</span></p>
+                                    <p class="mb-1"><strong>Fechas:</strong> <span id="modalFechas">-</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-1"></i> Enviar Candidatura
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript mejorado para el buscador y modal -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Limpiar formulario
-        document.getElementById('clearBtn').addEventListener('click', function() {
+    console.log('DOM cargado - inicializando scripts');
+    const userName = @json(auth()->user()->name);
+    const userEmail = @json(auth()->user()->email);
+
+    // Limpiar formulario de búsqueda
+    const clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
             const form = document.getElementById('searchForm');
             const inputs = form.querySelectorAll('input[type="text"]');
             const select = form.querySelector('select[name="per_page"]');
             
-            inputs.forEach(input => {
-                input.value = '';
-            });
-            select.value = '10'; // Resetear a 10 por página
-            
-            // Enviar el formulario limpio
+            inputs.forEach(input => input.value = '');
+            select.value = '10';
             form.submit();
         });
+    }
 
-        // Validación del formulario antes de enviar
-        document.getElementById('searchForm').addEventListener('submit', function(e) {
+    // Validación del formulario de búsqueda
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
             const academiaInput = document.getElementById('academiaInput');
             const cursoNombreInput = document.getElementById('nombreCursoInput');
             
-            // Convertir a minúsculas y eliminar espacios en blanco
-            if(academiaInput.value) {
+            if(academiaInput && academiaInput.value) {
                 academiaInput.value = academiaInput.value.trim().toLowerCase();
             }
             
-            if(cursoNombreInput.value) {
+            if(cursoNombreInput && cursoNombreInput.value) {
                 cursoNombreInput.value = cursoNombreInput.value.trim().toLowerCase();
             }
         });
+    }
 
-        // Efecto hover en filas de la tabla
-        const tableRows = document.querySelectorAll('.table-hover tbody tr');
-        tableRows.forEach(row => {
-            row.addEventListener('mouseenter', function() {
-                this.style.backgroundColor = 'rgba(0, 123, 255, 0.05)';
-                this.style.transition = 'background-color 0.3s ease';
-            });
+    // ========== MANEJO DEL MODAL DE CONTACTO ==========
+    
+    // Usar event delegation para los botones de contacto
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.contact-btn')) {
+            const button = e.target.closest('.contact-btn');
+            console.log('Botón contactar clickeado', button);
             
-            row.addEventListener('mouseleave', function() {
-                this.style.backgroundColor = '';
+            // Obtener datos del botón
+            const academiaNombre = button.getAttribute('data-academia-nombre');
+            const cursoNombre = button.getAttribute('data-curso-nombre');
+            const municipio = button.getAttribute('data-municipio');
+            const inicio = button.getAttribute('data-inicio');
+            const fin = button.getAttribute('data-fin');
+            const email = button.getAttribute('data-email');
+            
+            console.log('Datos obtenidos:', {
+                academiaNombre,
+                cursoNombre,
+                municipio,
+                inicio,
+                fin,
+                email
             });
+
+            // Actualizar campos del modal inmediatamente
+            const recipientEmail = document.getElementById('recipientEmail');
+            const emailMessage = document.getElementById('emailMessage');
+            
+            if (recipientEmail) recipientEmail.value = email || '';
+            
+            // Actualizar información del curso
+            const modalAcademiaNombre = document.getElementById('modalAcademiaNombre');
+            const modalCursoNombre = document.getElementById('modalCursoNombre');
+            const modalMunicipio = document.getElementById('modalMunicipio');
+            const modalFechas = document.getElementById('modalFechas');
+            
+            if (modalAcademiaNombre) modalAcademiaNombre.textContent = academiaNombre;
+            if (modalCursoNombre) modalCursoNombre.textContent = cursoNombre;
+            if (modalMunicipio) modalMunicipio.textContent = municipio;
+            if (modalFechas) modalFechas.textContent = `${inicio} - ${fin}`;
+
+            // Generar mensaje predeterminado
+            if (emailMessage) {
+                const mensajePredeterminado = `Estimados señores de ${academiaNombre},
+
+Me dirijo a ustedes para expresar mi interés en la plaza docente para el curso "${cursoNombre}" que se imparte en ${municipio}.
+
+He revisado la información del curso con fechas de ${inicio} a ${fin} y considero que mi perfil y experiencia son adecuados para impartir esta formación.
+
+Adjunto mi CV para su consideración y quedo a su disposición para una entrevista personal.
+
+Agradeciendo de antemano su atención, reciban un cordial saludo.
+
+Atentamente,
+    ${userName}
+    Email: ${userEmail}
+    Teléfono: [Su teléfono de contacto]`;
+
+                emailMessage.value = mensajePredeterminado;
+            }
+            
+            // Limpiar archivo adjunto
+            const cvAttachment = document.getElementById('cvAttachment');
+            const filePreview = document.getElementById('filePreview');
+            if (cvAttachment) cvAttachment.value = '';
+            if (filePreview) filePreview.style.display = 'none';
+        }
+    });
+
+    // También mantener el evento del modal por si acaso
+    const contactModal = document.getElementById('contactModal');
+    if (contactModal) {
+        contactModal.addEventListener('show.bs.modal', function(event) {
+            console.log('Evento show.bs.modal disparado');
+            const button = event.relatedTarget;
+            if (!button) return;
+            
+            // Los datos ya se cargaron con el event delegation, pero por si acaso:
+            const email = button.getAttribute('data-email');
+            const recipientEmail = document.getElementById('recipientEmail');
+            if (recipientEmail && !recipientEmail.value && email) {
+                recipientEmail.value = email;
+            }
         });
+    }
 
-        // Efecto en los botones
-        const buttons = document.querySelectorAll('.btn');
-        buttons.forEach(button => {
-            button.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 6px 10px rgba(0, 0, 0, 0.15)';
-            });
+    // Vista previa del archivo seleccionado
+    const cvAttachment = document.getElementById('cvAttachment');
+    if (cvAttachment) {
+        cvAttachment.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const filePreview = document.getElementById('filePreview');
+            const fileName = document.getElementById('fileName');
             
-            button.addEventListener('mouseleave', function() {
-                this.style.transform = '';
-                this.style.boxShadow = '';
-            });
+            if (file && filePreview && fileName) {
+                // Validar tamaño (10MB máximo)
+                const maxSize = 10 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
+                    this.value = '';
+                    return;
+                }
+                
+                // Mostrar vista previa
+                fileName.textContent = file.name;
+                filePreview.style.display = 'block';
+            }
+        });
+    }
+
+    // Función global para eliminar archivo
+    window.removeFile = function() {
+        const cvAttachment = document.getElementById('cvAttachment');
+        const filePreview = document.getElementById('filePreview');
+        if (cvAttachment) cvAttachment.value = '';
+        if (filePreview) filePreview.style.display = 'none';
+    }
+
+    // Validación del formulario de contacto
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            const mensaje = document.getElementById('emailMessage');
+            const archivo = document.getElementById('cvAttachment');
+            
+            if (mensaje && !mensaje.value.trim()) {
+                e.preventDefault();
+                alert('Por favor, complete el mensaje de candidatura.');
+                return;
+            }
+            
+            // Validar tamaño del archivo
+            if (archivo && archivo.files[0]) {
+                const maxSize = 10 * 1024 * 1024;
+                if (archivo.files[0].size > maxSize) {
+                    e.preventDefault();
+                    alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
+                    return;
+                }
+            }
+            
+            // Mostrar indicador de envío
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
+                submitBtn.disabled = true;
+            }
+        });
+    }
+
+    // Efectos visuales (opcionales)
+    const tableRows = document.querySelectorAll('.table-hover tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = 'rgba(0, 123, 255, 0.05)';
+        });
+        row.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
         });
     });
+});
 </script>
+
 
 <!-- Estilos CSS personalizados -->
 <style>
