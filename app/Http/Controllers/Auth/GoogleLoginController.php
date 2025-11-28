@@ -13,23 +13,35 @@ use Illuminate\Support\Facades\Log;
 
 class GoogleLoginController extends Controller
 {
+    /**
+     * Redirige al usuario a Google OAuth para iniciar sesión.
+     */
     public function redirectToGoogle()
     {
         try {
             Log::info('Redirigiendo a Google OAuth');
-            return Socialite::driver('google')->redirect();
+
+            // Forzar selección de cuenta y stateless
+            return Socialite::driver('google')
+                ->stateless()
+                ->with(['prompt' => 'select_account'])
+                ->redirect();
+
         } catch (\Exception $e) {
             Log::error('Error en redirectToGoogle: ' . $e->getMessage());
             return redirect('/login')->with('error', 'Error al conectar con Google');
         }
     }
 
+    /**
+     * Maneja el callback de Google OAuth.
+     */
     public function handleGoogleCallback()
     {
         try {
             Log::info('Iniciando callback de Google OAuth');
 
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')->stateless()->user();
 
             Log::info('Datos recibidos de Google:', [
                 'email' => $googleUser->getEmail(),
@@ -42,7 +54,7 @@ class GoogleLoginController extends Controller
 
             if (!$user) {
                 Log::info('Creando nuevo usuario desde Google: ' . $googleUser->getEmail());
-                
+
                 // Crear usuario con Query Builder para mayor control
                 $userId = DB::table('users')->insertGetId([
                     'name' => $googleUser->getName(),
@@ -62,7 +74,7 @@ class GoogleLoginController extends Controller
                 Log::info('Nuevo usuario creado con ID: ' . $userId);
             } else {
                 Log::info('Usuario existente encontrado: ' . $user->id);
-                
+
                 // Actualizar datos de Google
                 $user->update([
                     'google_id' => $googleUser->getId(),
@@ -73,9 +85,9 @@ class GoogleLoginController extends Controller
 
             // Iniciar sesión
             Auth::login($user, true);
-            
+
             Log::info('Login Google exitoso', [
-                'user_id' => $user->id, 
+                'user_id' => $user->id,
                 'email' => $user->email,
                 'rol' => $user->rol
             ]);
@@ -92,9 +104,9 @@ class GoogleLoginController extends Controller
             Log::error('Error en Google OAuth callback: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return redirect('/login')
-                   ->with('error', 'Error al iniciar sesión con Google: ' . $e->getMessage());
+                ->with('error', 'Error al iniciar sesión con Google: ' . $e->getMessage());
         }
     }
 }

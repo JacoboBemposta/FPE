@@ -87,7 +87,7 @@
                             <th><i class="fas fa-map-marked-alt me-2"></i>Provincia</th>
                             <th><i class="fas fa-calendar-start me-2"></i>Inicio</th>
                             <th><i class="fas fa-calendar-end me-2"></i>Fin</th>
-                            <th><i class="fas fa-envelope me-2"></i>Email</th>                            <th><i class="fas fa-phone me-2"></i>Contacto</th>
+                            <th><i class="fas fa-envelope me-2"></i>Email</th>
                         </tr>
                     </thead>
                     <tbody>
