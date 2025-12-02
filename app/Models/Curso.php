@@ -32,5 +32,13 @@ class Curso extends Model
         return $this->hasMany(Alumno::class);
     }
 
-
+public function academias()
+{
+    return $this->belongsToMany(
+        User::class,
+        'curso_academicos', // tabla intermedia
+        'curso_id', // FK de curso en curso_academicos
+        'academia_id' // FK de user en curso_academicos
+    )->where('rol', 'academia')->distinct();
+}
 }

@@ -60,6 +60,12 @@
                     <!-- BOTÓN SOLO PARA ADMIN -->
                     @if(Auth::user()->rol === 'admin')
                         <li class="nav-item">
+                            <a class="nav-link" href="{{ route('admin.email.stats') }}">
+                                <i class="fas fa-envelope"></i>
+                                <span>Estadísticas Emails</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="btn btn-danger text-white px-3 border-0" href="{{ route('admin.panel') }}">Panel Admin</a>
                         </li>
                     @endif
@@ -67,14 +73,14 @@
                     <!-- BOTÓN SOLO PARA ACADEMIA -->
                     @if(Auth::user()->rol === 'academia')
                         <li class="nav-item">
-                            <a class="nav-link btn btn-primary text-white px-3" href="{{ route('academia.miscursos') }}">Panel Academia</a>
+                            <a class="btn btn-primary text-white px-3" href="{{ route('academia.miscursos') }}">Panel Academia</a>
                         </li>
                     @endif
 
                     <!-- BOTÓN SOLO PARA PROFESOR -->
                     @if(Auth::user()->rol === 'profesor')
                         <li class="nav-item">
-                            <a class="nav-link btn btn-primary text-white px-3" href="{{ route('profesor.miscursos') }}">Panel Docente</a>
+                            <a class="btn btn-primary text-white px-3" href="{{ route('profesor.miscursos') }}">Panel Docente</a>
                         </li>
                     @endif
 

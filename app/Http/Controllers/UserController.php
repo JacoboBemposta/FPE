@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
+
+
+    
     public function updateRole(Request $request)
     {
         Log::info('Iniciando updateRole', ['user_id' => Auth::id()]);
@@ -63,4 +66,34 @@ class UserController extends Controller
                 return redirect('/home');
         }
     }
+
+
+public function estadisticasEmails()
+{
+    $estadisticas = DB::table('emails_enviados')
+        ->select(
+            'contexto',
+            DB::raw('COUNT(*) as total'),
+            DB::raw('SUM(CASE WHEN enviado = 1 THEN 1 ELSE 0 END) as exitosos'),
+            DB::raw('SUM(CASE WHEN enviado = 0 THEN 1 ELSE 0 END) as fallidos'),
+            DB::raw('DATE(created_at) as fecha')
+        )
+        ->groupBy('contexto', 'fecha')
+        ->orderBy('fecha', 'desc')
+        ->get();
+
+    $totales = DB::table('emails_enviados')
+        ->select(
+            DB::raw('COUNT(*) as total_emails'),
+            DB::raw('COUNT(DISTINCT remitente_id) as remitentes_unicos'),
+            DB::raw('COUNT(DISTINCT destinatario_email) as destinatarios_unicos')
+        )
+        ->first();
+
+    return view('estadisticas.emails', compact('estadisticas', 'totales'));
+}    
+
+
+
+
 }

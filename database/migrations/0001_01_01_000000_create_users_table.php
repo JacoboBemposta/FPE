@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->string('rol')->nullable()->change();
+            $table->date('inicio_suscripcion')->nullable();
+            $table->date('fin_suscripcion')->nullable();
             $table->boolean('activo')->default(true);
             $table->boolean('premium')->default(false);
             

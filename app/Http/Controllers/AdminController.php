@@ -17,4 +17,8 @@ class AdminController extends Controller
         // CAMBIA admin.panel por admin.index
         return view('admin.index', compact('familiasProfesionales', 'modulosDisponibles'));
     }
+
+
+
+
 }

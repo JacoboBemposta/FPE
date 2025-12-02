@@ -60,7 +60,27 @@
 }
 </style>
 @section('content')
+
+
 <div class="container">
+
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-envelope"></i> Estadísticas de Emails</h5>
+    </div>
+    <div class="card-body">
+        <p>Consulta las estadísticas de todos los emails enviados en la plataforma:</p>
+        <ul>
+            <li>Emails de academias a docentes</li>
+            <li>Emails de docentes a academias</li>
+            <li>Estados de envío</li>
+            <li>Destinatarios más frecuentes</li>
+        </ul>
+        <a href="{{ route('admin.email.stats') }}" class="btn btn-primary">
+            <i class="fas fa-chart-bar"></i> Ver Estadísticas
+        </a>
+    </div>
+</div>
     <h1>Administración de Cursos</h1>
 
     <!-- Botones para crear nuevos elementos -->

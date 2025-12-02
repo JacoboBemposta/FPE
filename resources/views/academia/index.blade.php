@@ -27,6 +27,7 @@
         overflow: hidden;
         box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
         border: none;
+        font-size: 0.85rem;
     }
     .table-custom thead {
         background: linear-gradient(135deg, #0056b3 0%, #003d7a 100%);
@@ -34,13 +35,14 @@
     }
     .table-custom th {
         border: none;
-        padding: 15px 20px;
+        padding: 12px 10px;
         font-weight: 600;
-        font-size: 0.95rem;
+        font-size: 0.8rem;
+        white-space: nowrap;
     }
     .table-custom td {
         vertical-align: middle;
-        padding: 15px 20px;
+        padding: 12px 10px;
         border-bottom: 1px solid #f0f0f0;
     }
     .table-custom tbody tr:hover {
@@ -48,25 +50,31 @@
     }
     .badge-docente {
         background-color: #17a2b8;
-        font-size: 0.8rem;
-        padding: 0.4em 0.8em;
+        font-size: 0.75rem;
+        padding: 0.4em 0.7em;
     }
     .action-buttons {
         display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
+        gap: 6px;
+        flex-wrap: nowrap;
+        justify-content: center;
     }
     .action-btn {
-        padding: 6px 14px;
-        font-size: 0.85rem;
+        padding: 7px 10px;
+        font-size: 0.8rem;
         border-radius: 6px;
         transition: all 0.2s;
         border: none;
         font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
     }
     .action-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
     .btn-edit {
         background-color: #ffc107;
@@ -94,6 +102,71 @@
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border-bottom: 1px solid #dee2e6;
     }
+    .action-tooltip {
+        position: relative;
+    }
+    .action-tooltip .tooltip-text {
+        visibility: hidden;
+        width: max-content;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 8px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.7rem;
+        white-space: nowrap;
+    }
+    .action-tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+    .table-responsive {
+        border-radius: 10px;
+    }
+    .curso-nombre {
+        max-width: 280px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .docente-col {
+        min-width: 120px;
+    }
+    .acciones-col {
+        min-width: 140px;
+    }
+    @media (max-width: 1200px) {
+        .curso-nombre {
+            max-width: 220px;
+        }
+    }
+    @media (max-width: 992px) {
+        .table-custom {
+            font-size: 0.8rem;
+        }
+        .table-custom th,
+        .table-custom td {
+            padding: 10px 8px;
+        }
+        .curso-nombre {
+            max-width: 200px;
+        }
+    }
+    @media (max-width: 768px) {
+        .hidden-mobile {
+            display: none;
+        }
+        .curso-nombre {
+            max-width: 150px;
+        }
+    }
 </style>
 
 <div class="container mt-4">
@@ -104,11 +177,13 @@
     </div>
 
     <!-- Barra de acciones -->
-    <div class="d-flex justify-content-between mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <a href="{{ route('academia.cursos') }}" class="btn btn-primary btn-action">
                 <i class="fas fa-search me-2"></i>Buscar Cursos
             </a>
+        </div>
+        <div>
             <a href="{{ route('academia.ver_docentes') }}" class="btn btn-primary btn-action">
                 <i class="fas fa-chalkboard-teacher me-2"></i>Buscar Docente
             </a>
@@ -121,30 +196,32 @@
         <table class="table table-custom table-hover">
             <thead>
                 <tr>
-                    <th>Código</th>
-                    <th>Curso</th>
-                    <th>Familia Profesional</th>
-                    <th>Horas</th>
-                    <th>Municipio</th>
-                    <th>Provincia</th>
-                    <th>Inicio</th>
-                    <th>Fin</th>
-                    <th>Docente</th>
-                    <th>Acciones</th>
+                    <th><i class="fas fa-hashtag me-2"></i>Código</th>
+                    <th><i class="fas fa-book me-2"></i>Curso</th>
+                    <th><i class="fas fa-map-marker-alt me-2"></i>Municipio</th>
+                    <th><i class="fas fa-map-marked-alt me-2"></i>Provincia</th>
+                    <th><i class="fas fa-calendar-alt me-2"></i>Inicio</th>
+                    <th><i class="fas fa-calendar-check me-2"></i>Fin</th>
+                    <th><i class="fas fa-chalkboard-teacher me-2"></i>Docente</th>
+                    <th class="acciones-col text-center">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($misCursos as $cursoAcademico)
                 <tr>
                     <td><strong>{{ $cursoAcademico->curso->codigo ?? 'N/A' }}</strong></td>
-                    <td>{{ $cursoAcademico->curso->nombre ?? 'N/A' }}</td>
-                    <td>{{ $cursoAcademico->curso->familiaProfesional->nombre ?? 'N/A' }}</td>
-                    <td><span class="badge bg-secondary">{{ $cursoAcademico->curso->horas ?? 'N/A' }}h</span></td>
+                    <td class="curso-nombre" title="{{ $cursoAcademico->curso->nombre ?? 'N/A' }}">
+                        {{ $cursoAcademico->curso->nombre ?? 'N/A' }}
+                    </td>
                     <td>{{ $cursoAcademico->municipio ?? 'N/A' }}</td>
                     <td>{{ $cursoAcademico->provincia ?? 'N/A' }}</td>
-                    <td>{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}</td>
-                    <td>{{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}</td>
                     <td>
+                        {{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}
+                    </td>
+                    <td>
+                        {{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}
+                    </td>
+                    <td class="docente-col">
                         @php
                             $docente = $cursoAcademico->alumnos->where('es_profesor', 1)->first();
                         @endphp
@@ -154,31 +231,41 @@
                             <span class="badge bg-warning text-dark">Sin asignar</span>
                         @endif
                     </td>
-                    <td>
+                    <td class="acciones-col">
                         <div class="action-buttons">
-                            <!-- Botón para editar curso -->
-                            <button class="btn btn-edit action-btn edit-btn"
-                                    data-id="{{ $cursoAcademico->id }}"
-                                    data-municipio="{{ $cursoAcademico->municipio }}"
-                                    data-provincia="{{ $cursoAcademico->provincia }}"
-                                    data-inicio="{{ $cursoAcademico->inicio }}"
-                                    data-fin="{{ $cursoAcademico->fin }}">
-                                <i class="fas fa-edit me-1"></i>Editar
-                            </button>
-                            
-                            <!-- Botón para eliminar curso -->
-                            <form action="{{ route('academia.curso_academico.destroy', $cursoAcademico->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-delete action-btn" onclick="return confirm('¿Estás seguro de que deseas eliminar este curso?')">
-                                    <i class="fas fa-trash me-1"></i>Eliminar
+                            <!-- Botón para editar curso - RUTA CORREGIDA -->
+                            <div class="action-tooltip">
+                                <button class="btn btn-edit action-btn edit-btn"
+                                        data-id="{{ $cursoAcademico->id }}"
+                                        data-municipio="{{ $cursoAcademico->municipio }}"
+                                        data-provincia="{{ $cursoAcademico->provincia }}"
+                                        data-inicio="{{ $cursoAcademico->inicio }}"
+                                        data-fin="{{ $cursoAcademico->fin }}"
+                                        data-route="{{ route('academia.curso_academico.update', $cursoAcademico->id) }}">
+                                    <i class="fas fa-edit"></i>
                                 </button>
-                            </form>
+                                <span class="tooltip-text">Editar curso</span>
+                            </div>
                             
                             <!-- Botón para ver detalles del curso -->
-                            <a href="{{ route('academia.detalleCurso', $cursoAcademico->id) }}" class="btn btn-view action-btn">
-                                <i class="fas fa-eye me-1"></i>Ver Curso
-                            </a>
+                            <div class="action-tooltip">
+                                <a href="{{ route('academia.detalleCurso', $cursoAcademico->id) }}" class="btn btn-view action-btn">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <span class="tooltip-text">Ver detalles</span>
+                            </div>
+                            
+                            <!-- Botón para eliminar curso - RUTA CORREGIDA -->
+                            <div class="action-tooltip">
+                                <form action="{{ route('academia.curso_academico.destroy', $cursoAcademico->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-delete action-btn" onclick="return confirm('¿Estás seguro de que deseas eliminar este curso?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                                <span class="tooltip-text">Eliminar curso</span>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -249,6 +336,7 @@
                 const provincia = this.getAttribute('data-provincia');
                 const inicio = this.getAttribute('data-inicio');
                 const fin = this.getAttribute('data-fin');
+                const route = this.getAttribute('data-route');
 
                 // Asignar los valores al formulario del modal de curso
                 document.getElementById('curso_id').value = cursoAcademicoId;
@@ -257,8 +345,8 @@
                 document.getElementById('inicio').value = inicio;
                 document.getElementById('fin').value = fin;
 
-                // Actualizar el action del formulario
-                document.getElementById('editForm').setAttribute('action', '/academia/curso/' + cursoAcademicoId + '/editar');
+                // Actualizar el action del formulario con la ruta correcta
+                document.getElementById('editForm').setAttribute('action', route);
 
                 // Mostrar el modal de edición de curso usando Bootstrap 5
                 const editModal = new bootstrap.Modal(document.getElementById('editModal'));

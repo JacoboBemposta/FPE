@@ -2,21 +2,28 @@
 
 namespace App\Http\Controllers;
 
+
 use Illuminate\Http\Request;
+use App\Traits\EnviaEmails;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\CursoAcademico;
 use App\Models\FamiliaProfesional;
 use App\Models\Curso;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\CandidaturaDocente;
+use App\Mail\EmailBase;
+use App\Models\AlumnoCurso;
 use Illuminate\Support\Facades\Storage;
+
+
+
 
 class ProfesorController extends Controller
 {
+    use EnviaEmails;
+
     public function index()
     {
         // Obtener todas las familias profesionales con sus cursos, módulos y unidades formativas asociadas
@@ -93,55 +100,101 @@ class ProfesorController extends Controller
     }
 
 
-    public function verAcademias(Request $request)
-    {
-        $perPage = $request->get('per_page', 10);
 
-        $query = DB::table('users')
-            ->join('curso_academicos', 'users.id', '=', 'curso_academicos.academia_id')
-            ->join('cursos', 'curso_academicos.curso_id', '=', 'cursos.id')
-            ->where('users.rol', 'academia')
+
+public function verAcademias(Request $request)
+{
+    $perPage = $request->get('per_page', 10);
+
+    $query = DB::table('users')
+        ->join('curso_academicos', 'users.id', '=', 'curso_academicos.academia_id')
+        ->join('cursos', 'curso_academicos.curso_id', '=', 'cursos.id')
+        ->leftJoin('alumnos_curso', function($join) {
+            $join->on('curso_academicos.id', '=', 'alumnos_curso.curso_academico_id')
+                 ->where('alumnos_curso.es_profesor', 1);
+        })
+        ->where('users.rol', 'academia')
     
-            // Filtrar por academia_nombre
-            ->when($request->filled('academia_nombre'), fn($q) =>
-                $q->where('users.ident', 'like', '%' . strtolower(trim($request->academia_nombre)) . '%')
-            )
-            // Filtrar por curso_codigo
-            ->when($request->filled('curso_codigo'), fn($q) =>
-                $q->where('cursos.codigo', 'like', '%' . strtolower(trim($request->curso_codigo)) . '%')
-            )
-            // Filtrar por curso_nombre
-            ->when($request->filled('curso_nombre'), fn($q) =>
-                $q->where('cursos.nombre', 'like', '%' . strtolower(trim($request->curso_nombre)) . '%')
-            )
-            // Filtrar por municipio
-            ->when($request->filled('municipio'), fn($q) =>
-                $q->where('curso_academicos.municipio', 'like', '%' . strtolower(trim($request->municipio)) . '%')
-            )
-            // Filtrar por provincia
-            ->when($request->filled('provincia'), fn($q) =>
-                $q->where('curso_academicos.provincia', 'like', '%' . strtolower(trim($request->provincia)) . '%')
-            )
-            // Seleccionar columnas
-            ->select([
-                'users.id as academia_id',
-                'users.ident as academia_nombre',
-                'users.email',
-                'curso_academicos.id as curso_acad_id',
-                'curso_academicos.municipio',
-                'curso_academicos.provincia',
-                'curso_academicos.inicio',
-                'curso_academicos.fin',
-                'cursos.nombre as curso_nombre',
-                'cursos.codigo as curso_codigo',
-            ])
-            ->orderBy('cursos.codigo');
+        // Filtrar por academia_nombre
+        ->when($request->filled('academia_nombre'), function($q) use ($request) {
+            $q->where('users.ident', 'like', '%' . strtolower(trim($request->academia_nombre)) . '%');
+        })
+        // Filtrar por curso_codigo
+        ->when($request->filled('curso_codigo'), function($q) use ($request) {
+            $q->where('cursos.codigo', 'like', '%' . strtolower(trim($request->curso_codigo)) . '%');
+        })
+        // Filtrar por curso_nombre
+        ->when($request->filled('curso_nombre'), function($q) use ($request) {
+            $q->where('cursos.nombre', 'like', '%' . strtolower(trim($request->curso_nombre)) . '%');
+        })
+        // Filtrar por municipio
+        ->when($request->filled('municipio'), function($q) use ($request) {
+            $q->where('curso_academicos.municipio', 'like', '%' . strtolower(trim($request->municipio)) . '%');
+        })
+        // Filtrar por provincia
+        ->when($request->filled('provincia'), function($q) use ($request) {
+            $q->where('curso_academicos.provincia', 'like', '%' . strtolower(trim($request->provincia)) . '%');
+        })
+        // Filtrar por docente asignado (con/sin)
+        ->when($request->filled('docente_asignado') && $request->docente_asignado != 'todos', function($q) use ($request) {
+            if ($request->docente_asignado == 'con') {
+                $q->whereNotNull('alumnos_curso.nombre');
+            } elseif ($request->docente_asignado == 'sin') {
+                $q->whereNull('alumnos_curso.nombre');
+            }
+        })
+        // Seleccionar columnas
+        ->select([
+            'users.id as academia_id',
+            'users.ident as academia_nombre',
+            'curso_academicos.id as curso_acad_id',
+            'curso_academicos.municipio',
+            'curso_academicos.provincia',
+            'curso_academicos.inicio',
+            'curso_academicos.fin',
+            'cursos.nombre as curso_nombre',
+            'cursos.codigo as curso_codigo',
+            // Agregar el docente desde alumnos_curso
+            'alumnos_curso.nombre as docente_nombre',
+        ])
+        ->orderBy('users.inicio_suscripcion', 'desc')
+        ->orderBy('cursos.codigo');
     
-        $cursosAcademicos = $query->paginate($perPage);
-    
-        return view('profesor.academias', compact('cursosAcademicos'));
+    $cursosAcademicos = $query->paginate($perPage);
+
+    return view('profesor.academias', compact('cursosAcademicos'));
+}
+
+
+
+
+
+public function obtenerEmailAcademia($academiaId)
+    {
+        try {
+            // Verificar que el usuario es profesor
+            if (Auth::user()->rol !== 'profesor') {
+                return response()->json(['error' => 'No autorizado'], 403);
+            }
+
+            // Obtener el email de la academia
+            $academia = DB::table('users')
+                ->where('id', $academiaId)
+                ->where('rol', 'academia')
+                ->select('email')
+                ->first();
+
+            if (!$academia) {
+                return response()->json(['error' => 'Academia no encontrada'], 404);
+            }
+
+            return response()->json(['email' => $academia->email]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error interno'], 500);
+        }
     }
-    
+
 
     public function destroy($id)
     {
@@ -194,56 +247,35 @@ class ProfesorController extends Controller
 
 
 
-
+    public function docente()
+    {
+        return $this->hasOne(AlumnoCurso::class, 'curso_academico_id')
+                    ->where('es_profesor', 1);
+    }
 
     
 
     public function enviarCandidatura(Request $request)
     {
-        // Validar los datos
+        
+        
         $request->validate([
             'email' => 'required|email',
-            'subject' => 'required',
-            'message' => 'required',
-            'attachment' => 'nullable|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png' // 10MB máximo
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
         ]);
-        
-        try {
-            // Datos del formulario
-            $data = [
-                'to_email' => $request->email,
-                'to_name' => 'Academia', // Puedes ajustar esto si tienes el nombre
-                'subject' => $request->subject,
-                'message' => $request->message,
-                'from_name' => Auth::user()->name,
-                'from_email' => Auth::user()->email
-            ];
-            
-            // Manejar el archivo adjunto
-            $attachmentPath = null;
-            if ($request->hasFile('attachment') && $request->file('attachment')->isValid()) {
-                // Guardar el archivo temporalmente
-                $attachmentPath = $request->file('attachment')->store('temp_attachments');
-            }
-            
-            // Enviar el email con adjunto
-            Mail::to($data['to_email'])->send(new CandidaturaDocente($data, $attachmentPath));
-            
-            // Limpiar archivo temporal después del envío
-            if ($attachmentPath) {
-                Storage::delete($attachmentPath);
-            }
-            
-            return redirect()->back()->with('success', 'Candidatura enviada correctamente');
-            
-        } catch (\Exception $e) {
-            // Limpiar archivo temporal en caso de error
-            if (isset($attachmentPath) && $attachmentPath) {
-                Storage::delete($attachmentPath);
-            }
-            
-            \Log::error('Error enviando candidatura: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error al enviar la candidatura: ' . $e->getMessage());
+
+        $exito = $this->enviarEmailRegistrado([
+            'destinatario_email' => $request->email,
+            'asunto' => $request->subject,
+            'mensaje' => $request->message,
+            'contexto' => 'profesor_a_academia',
+        ]);
+
+        if ($exito) {
+            return redirect()->back()->with('success', 'Candidatura enviada correctamente.');
+        } else {
+            return redirect()->back()->with('error', 'Error al enviar la candidatura.');
         }
     }
 }

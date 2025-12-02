@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{{-- <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -17,4 +17,4 @@
     <hr>
     <p><small>Este mensaje fue enviado a través del sistema de candidaturas.</small></p>
 </body>
-</html>
+</html> --}}

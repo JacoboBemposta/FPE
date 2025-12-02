@@ -15,18 +15,35 @@ class CheckUserRole
         if (Auth::check()) {
             $user = Auth::user();
             
-
-            
             // Si el usuario no tiene rol, mostrar el modal
             if (is_null($user->rol)) {
                 session(['show_role_modal' => true]);
                 
                 // Si está intentando acceder a rutas protegidas sin rol, redirigir a home
-                if ($request->is('academia/*') || $request->is('profesor/*')) {
-                    return redirect('/home');
+                if ($request->is('academia/*') || $request->is('profesor/*') || $request->is('alumno/*') || $request->is('admin/*')) {
+                    return redirect('/')->with('error', 'Debes seleccionar un rol primero');
                 }
-                if ($request->is('admin/*') && $user->rol !== 'admin') {
-                    return redirect('/home')->with('error', 'No tienes permisos de administrador');
+            }
+            // Si el usuario TIENE rol, verificar que pueda acceder a la ruta
+            else {
+                $rol = $user->rol;
+                $ruta = $request->path();
+                
+                // Verificar acceso basado en rol
+                if (str_starts_with($ruta, 'admin/') && $rol !== 'admin') {
+                    abort(403, 'No tienes permisos de administrador');
+                }
+                
+                if (str_starts_with($ruta, 'academia/') && $rol !== 'academia') {
+                    abort(403, 'Acceso reservado para academias');
+                }
+                
+                if (str_starts_with($ruta, 'profesor/') && $rol !== 'profesor') {
+                    abort(403, 'Acceso reservado para profesores');
+                }
+                
+                if (str_starts_with($ruta, 'alumno/') && $rol !== 'alumno') {
+                    abort(403, 'Acceso reservado para alumnos');
                 }
             }
         }

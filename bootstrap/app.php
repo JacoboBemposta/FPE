@@ -10,12 +10,17 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware) {
+    ->withMiddleware(function (Illuminate\Foundation\Configuration\Middleware $middleware) {
+        // Añade tus middlewares personalizados AQUÍ
         $middleware->alias([
-            'rol' => \App\Http\Middleware\CheckRole::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'alumno' => \App\Http\Middleware\AlumnoMiddleware::class,
+            // Agrega otros si los necesitas
         ]);
+        
+        // Si necesitas middleware global (opcional)
+        // $middleware->append(\App\Http\Middleware\CheckUserRole::class);
     })
-    ->withExceptions(function (Exceptions $exceptions) {
+    ->withExceptions(function (Illuminate\Foundation\Configuration\Exceptions $exceptions) {
         //
     })->create();
-

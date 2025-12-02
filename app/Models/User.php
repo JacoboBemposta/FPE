@@ -82,10 +82,7 @@ class User extends Authenticatable
         return $this->rol === 'alumno';
     }
 
-    // public function cursoAcademico()
-    // {
-    //     return $this->hasMany(CursoAcademico::class, 'academia_id'); // Usamos 'academia_id' aquí
-    // }
+
 
     // Relación de un profesor con los cursos académicos que imparte
     public function cursosAcademicos()
@@ -187,5 +184,25 @@ private function redirectByRole($rol)
             return redirect('/home');
     }
 }    
+
+// En App\Models\User.php
+
+// Relación de academia con los cursos académicos que gestiona
+// En App\Models\User.php, añade:
+public function cursosAcademicosComoAcademia()
+{
+    return $this->hasMany(CursoAcademico::class, 'academia_id');
+}
+// Otra opción (si prefieres no usar wherePivot)
+public function cursosGestionados()
+{
+    return $this->belongsToMany(
+        CursoAcademico::class,
+        'academia_curso', // Si tienes una tabla específica para academia-curso
+        'user_id',
+        'curso_academico_id'
+    )
+    ->withTimestamps();
+}
 }
 

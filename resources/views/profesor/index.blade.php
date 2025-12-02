@@ -65,7 +65,7 @@
     <!-- Filtros y acciones -->
     <div class="d-flex justify-content-between mb-4">
         <a href="{{ route('profesor.cursos') }}" class="btn btn-primary btn-custom">
-            <i class="fas fa-search me-2"></i>Buscar Cursos
+            <i class="fas fa-search me-2"></i>Asignar mis Cursos
         </a>
         <a href="{{ route('profesor.ver_academias') }}" class="btn btn-info btn-custom">
             <i class="fas fa-school me-2"></i>Buscar Academias

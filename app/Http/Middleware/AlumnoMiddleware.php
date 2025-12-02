@@ -6,18 +6,22 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class AdminMiddleware
+class AlumnoMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        // Verifica que el usuario esté autenticado y sea admin
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
-        // Asumiendo que tienes un campo 'rol' en tu tabla users
-        if (Auth::user()->rol !== 'admin') {
-            abort(403, 'Acceso no autorizado');
+        $user = Auth::user();
+        
+        if (!$user->rol) {
+            return redirect('/home')->with('error', 'Debes seleccionar un rol primero');
+        }
+        
+        if ($user->rol !== 'alumno') {
+            abort(403, 'Acceso reservado para alumnos');
         }
 
         return $next($request);

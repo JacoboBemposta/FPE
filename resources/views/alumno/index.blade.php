@@ -5,12 +5,12 @@
     <div class="card shadow-lg border-0 rounded-lg">
         <!-- Encabezado con gradiente -->
         <div class="card-header bg-gradient-primary text-white">
-            <h2 class="text-center my-2"><i class="fas fa-university me-2"></i>Academias relacionadas a cursos</h2>
+            <h2 class="text-center my-2"><i class="fas fa-graduation-cap me-2"></i>Cursos Académicos Disponibles</h2>
         </div>
 
         <div class="card-body">
             <!-- Buscador Avanzado con diseño moderno -->
-            <form id="searchForm" method="GET" action="{{ route('profesor.ver_academias') }}" class="mb-5">
+            <form id="searchForm" method="GET" action="{{ route('alumno.index') }}" class="mb-5">
                 <div class="row g-3">
                     <div class="col-md-4">
                         <div class="form-floating">
@@ -42,15 +42,17 @@
                             <label for="municipioInput"><i class="fas fa-map-marker-alt me-2"></i>Municipio</label>
                         </div>
                     </div>
-
                     <div class="col-md-4">
                         <div class="form-floating">
-                            <select name="docente_asignado" class="form-control" id="docenteAsignadoSelect">
-                                <option value="todos" {{ request('docente_asignado', 'todos') == 'todos' ? 'selected' : '' }}>Todos los cursos</option>
-                                <option value="con" {{ request('docente_asignado') == 'con' ? 'selected' : '' }}>Con docente asignado</option>
-                                <option value="sin" {{ request('docente_asignado') == 'sin' ? 'selected' : '' }}>Sin docente asignado</option>
+                            <select name="familia" class="form-control" id="familiaSelect">
+                                <option value="">Todas las familias</option>
+                                @foreach($familias as $familia)
+                                    <option value="{{ $familia->id }}" {{ request('familia') == $familia->id ? 'selected' : '' }}>
+                                        {{ $familia->nombre }}
+                                    </option>
+                                @endforeach
                             </select>
-                            <label for="docenteAsignadoSelect"><i class="fas fa-chalkboard-teacher me-2"></i>Docente asignado</label>
+                            <label for="familiaSelect"><i class="fas fa-layer-group me-2"></i>Familia Profesional</label>
                         </div>
                     </div>
                     <!-- Selector de elementos por página -->
@@ -86,57 +88,51 @@
                 </div>
             </div>
 
-            <!-- Tabla de Academias con diseño moderno -->
+            <!-- Tabla de Cursos Académicos con diseño moderno -->
             <div class="table-responsive">
                 <table class="table table-hover table-striped align-middle">
                     <thead class="table-dark">
                         <tr>
-                            {{-- <th><i class="fas fa-school me-2"></i>Academia</th> --}}
+                            <th><i class="fas fa-school me-2"></i>Academia</th>
                             <th><i class="fas fa-hashtag me-2"></i>Código</th>
                             <th><i class="fas fa-book me-2"></i>Curso</th>
                             <th><i class="fas fa-map-marker-alt me-2"></i>Municipio</th>
                             <th><i class="fas fa-map-marked-alt me-2"></i>Provincia</th>
                             <th><i class="fas fa-calendar-alt me-2"></i>Inicio</th>
                             <th><i class="fas fa-calendar-check me-2"></i>Fin</th>
-                            <th><i class="fas fa-chalkboard-teacher me-2"></i>Docente</th>
-                            <th><i class="fas fa-envelope me-2"></i>Contacto</th>
+                            <th><i class="fas fa-layer-group me-2"></i>Familia</th>
+                            <th><i class="fas fa-envelope me-2"></i>Acción</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($cursosAcademicos as $cursoAcademico) 
                             <tr>
-                                {{-- <td>{{ $cursoAcademico->academia_nombre ?? 'N/A' }}</td> --}}
-                                <td>{{ $cursoAcademico->curso_codigo ?? 'N/A' }}</td>
-                                <td>{{ $cursoAcademico->curso_nombre ?? 'N/A' }}</td>
+                                <td>{{ $cursoAcademico->academia->name ?? 'N/A' }}</td>
+                                <td>{{ $cursoAcademico->curso->codigo ?? 'N/A' }}</td>
+                                <td>{{ $cursoAcademico->curso->nombre ?? 'N/A' }}</td>
                                 <td>{{ $cursoAcademico->municipio ?? 'N/A' }}</td>
                                 <td>{{ $cursoAcademico->provincia ?? 'N/A' }}</td>
                                 <td>{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}</td>
                                 <td>{{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}</td>
-                                <td class="docente-col">
-                                    @if($cursoAcademico->docente_nombre)
-                                        <span class="badge bg-success text-dark">asignado</span>
-                                    @else
-                                        <span class="badge bg-warning text-dark">Sin asignar</span>
-                                    @endif
+                                <td>{{ $cursoAcademico->curso->familiaProfesional->nombre ?? 'N/A' }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary btn-sm contact-btn" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#contactModal"
+                                            data-academia-id="{{ $cursoAcademico->academia->id ?? '' }}"
+                                            data-academia-nombre="{{ $cursoAcademico->academia->name ?? 'N/A' }}"
+                                            data-curso-nombre="{{ $cursoAcademico->curso->nombre ?? 'N/A' }}"
+                                            data-municipio="{{ $cursoAcademico->municipio ?? 'N/A' }}"
+                                            data-inicio="{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}"
+                                            data-fin="{{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}">
+                                        <i class="fas fa-envelope me-1"></i> Contactar
+                                    </button>
                                 </td>
-<td>
-    <button type="button" class="btn btn-primary btn-sm contact-btn" 
-            data-bs-toggle="modal" 
-            data-bs-target="#contactModal"
-            data-academia-id="{{ $cursoAcademico->academia_id ?? '' }}"
-            data-academia-nombre="{{ $cursoAcademico->academia_nombre ?? 'N/A' }}"
-            data-curso-nombre="{{ $cursoAcademico->curso_nombre ?? 'N/A' }}"
-            data-municipio="{{ $cursoAcademico->municipio ?? 'N/A' }}"
-            data-inicio="{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}"
-            data-fin="{{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}">
-        <i class="fas fa-envelope me-1"></i> Contactar
-    </button>
-</td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="9" class="text-center py-4">
-                                    <i class="fas fa-university fa-2x text-muted mb-3"></i>
+                                    <i class="fas fa-graduation-cap fa-2x text-muted mb-3"></i>
                                     <p class="text-muted mb-0">No se encontraron resultados</p>
                                 </td>
                             </tr>
@@ -152,7 +148,7 @@
                     Página <strong>{{ $cursosAcademicos->currentPage() }}</strong> de <strong>{{ $cursosAcademicos->lastPage() }}</strong>
                 </div>
                 
-                <nav aria-label="Paginación de academias">
+                <nav aria-label="Paginación de cursos">
                     <ul class="pagination justify-content-center mb-0">
                         <!-- Enlace anterior -->
                         <li class="page-item {{ $cursosAcademicos->onFirstPage() ? 'disabled' : '' }}">
@@ -209,15 +205,11 @@
                 <!-- Selector de página rápida -->
                 <div class="d-flex align-items-center">
                     <span class="text-muted me-2">Ir a:</span>
-                    <form method="GET" action="{{ route('profesor.ver_academias') }}" class="d-flex">
-                        <input type="hidden" name="academia_nombre" value="{{ request('academia_nombre') }}">
-                        <input type="hidden" name="curso_codigo" value="{{ request('curso_codigo') }}">
-                        <input type="hidden" name="curso_nombre" value="{{ request('curso_nombre') }}">
-                        <input type="hidden" name="provincia" value="{{ request('provincia') }}">
-                        <input type="hidden" name="municipio" value="{{ request('municipio') }}">
-                        <input type="hidden" name="docente_asignado" value="{{ request('docente_asignado', 'todos') }}">
-                        <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
-                        
+                    <form method="GET" action="{{ route('alumno.index') }}" class="d-flex">
+                        <!-- Mantener los parámetros de búsqueda -->
+                        @foreach(request()->except('page') as $key => $value)
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endforeach
                         
                         <input type="number" 
                                name="page" 
@@ -236,63 +228,44 @@
 
             <!-- Botón Volver -->
             <div class="d-flex justify-content-end mt-4">
-                <a href="{{ route('profesor.miscursos') }}" class="btn btn-success px-4">
-                    <i class="fas fa-arrow-left me-2"></i>Volver a Mis Cursos
+                <a href="{{ route('home') }}" class="btn btn-success px-4">
+                    <i class="fas fa-arrow-left me-2"></i>Volver al Inicio
                 </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal de Contacto -->
+<!-- Modal de Contacto para Alumno -->
 <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-gradient-primary text-white">
                 <h5 class="modal-title" id="contactModalLabel">
-                    <i class="fas fa-envelope me-2"></i>Enviar Candidatura Docente
+                    <i class="fas fa-envelope me-2"></i>Contactar Academia
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="contactForm" method="POST" action="{{ route('profesor.enviar_candidatura') }}" enctype="multipart/form-data">
+            <form id="contactForm" method="POST" action="{{ route('alumno.academia.enviar_email') }}">
                 @csrf
+                <input type="hidden" name="academia_id" id="academia_id" value="">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="recipientEmail" class="form-label fw-bold">Para:</label>
                         <input type="email" class="form-control" id="recipientEmail" name="email" value="" required>
-                        <small class="form-text text-muted">Puedes editar este campo para enviar a tu email de prueba</small>
+                        <small class="form-text text-muted">Ingresa el email de la academia (ej: jacobo.bemposta@gmail.com)</small>
                     </div>
                     
                     <div class="mb-3">
                         <label for="emailSubject" class="form-label fw-bold">Asunto:</label>
-                        <input type="text" class="form-control" id="emailSubject" name="subject" value="Candidatura Docente" readonly>
+                        <input type="text" class="form-control" id="emailSubject" name="asunto" value="" required>
                     </div>
                     
                     <div class="mb-3">
                         <label for="emailMessage" class="form-label fw-bold">Mensaje:</label>
-                        <textarea class="form-control" id="emailMessage" name="message" rows="8" required></textarea>
+                        <textarea class="form-control" id="emailMessage" name="mensaje" rows="8" required></textarea>
                     </div>
 
-                    <!-- Campo para adjuntar archivo -->
-                    <div class="mb-3">
-                        <label for="cvAttachment" class="form-label fw-bold">
-                            <i class="fas fa-paperclip me-1"></i>Adjuntar CV (Opcional)
-                        </label>
-                        <input type="file" class="form-control" id="cvAttachment" name="attachment" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                        <small class="form-text text-muted">
-                            Formatos aceptados: PDF, DOC, DOCX, JPG, PNG. Tamaño máximo: 10MB.
-                        </small>
-                        <div id="filePreview" class="mt-2" style="display: none;">
-                            <div class="alert alert-info py-2">
-                                <i class="fas fa-file me-2"></i>
-                                <span id="fileName"></span>
-                                <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeFile()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
                     <!-- Información del curso (solo lectura) -->
                     <div class="card bg-light mt-3">
                         <div class="card-body">
@@ -315,18 +288,16 @@
                         <i class="fas fa-times me-1"></i> Cancelar
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-paper-plane me-1"></i> Enviar Candidatura
+                        <i class="fas fa-paper-plane me-1"></i> Enviar Mensaje
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-<!-- JavaScript mejorado para el buscador y modal -->
+<!-- JavaScript para el buscador y modal -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM cargado - inicializando scripts');
     const userName = @json(auth()->user()->name);
     const userEmail = @json(auth()->user()->email);
 
@@ -345,8 +316,8 @@ document.addEventListener('DOMContentLoaded', function() {
             selects.forEach(select => {
                 if (select.name === 'per_page') {
                     select.value = '10';
-                } else if (select.name === 'docente_asignado') {
-                    select.value = 'todos';
+                } else if (select.name === 'familia') {
+                    select.value = '';
                 }
             });
             
@@ -358,32 +329,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchForm = document.getElementById('searchForm');
     if (searchForm) {
         searchForm.addEventListener('submit', function(e) {
-            const academiaInput = document.getElementById('academiaInput');
-            const cursoNombreInput = document.getElementById('nombreCursoInput');
-            const cursoCodigoInput = document.getElementById('codigoInput');
-            const provinciaInput = document.getElementById('provinciaInput');
-            const municipioInput = document.getElementById('municipioInput');
+            const inputs = form.querySelectorAll('input[type="text"]');
             
             // Normalizar todos los campos de texto a minúsculas y trim
-            if(academiaInput && academiaInput.value) {
-                academiaInput.value = academiaInput.value.trim().toLowerCase();
-            }
-            
-            if(cursoNombreInput && cursoNombreInput.value) {
-                cursoNombreInput.value = cursoNombreInput.value.trim().toLowerCase();
-            }
-            
-            if(cursoCodigoInput && cursoCodigoInput.value) {
-                cursoCodigoInput.value = cursoCodigoInput.value.trim().toLowerCase();
-            }
-            
-            if(provinciaInput && provinciaInput.value) {
-                provinciaInput.value = provinciaInput.value.trim().toLowerCase();
-            }
-            
-            if(municipioInput && municipioInput.value) {
-                municipioInput.value = municipioInput.value.trim().toLowerCase();
-            }
+            inputs.forEach(input => {
+                if(input.value) {
+                    input.value = input.value.trim().toLowerCase();
+                }
+            });
         });
     }
 
@@ -391,7 +344,6 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('click', async function(e) {
     if (e.target.closest('.contact-btn')) {
         const button = e.target.closest('.contact-btn');
-        console.log('Botón contactar clickeado', button);
         
         // Obtener datos del botón
         const academiaId = button.getAttribute('data-academia-id');
@@ -401,90 +353,71 @@ document.addEventListener('click', async function(e) {
         const inicio = button.getAttribute('data-inicio');
         const fin = button.getAttribute('data-fin');
 
-        console.log('Datos del botón:', {
-            academiaId,
-            academiaNombre,
-            cursoNombre,
-            municipio,
-            inicio,
-            fin
-        });
+        // Actualizar información del curso en el modal
+        document.getElementById('modalAcademiaNombre').textContent = academiaNombre;
+        document.getElementById('modalCursoNombre').textContent = cursoNombre;
+        document.getElementById('modalMunicipio').textContent = municipio;
+        document.getElementById('modalFechas').textContent = `${inicio} - ${fin}`;
 
-        // Actualizar información del curso en el modal (sin email aún)
-        const modalAcademiaNombre = document.getElementById('modalAcademiaNombre');
-        const modalCursoNombre = document.getElementById('modalCursoNombre');
-        const modalMunicipio = document.getElementById('modalMunicipio');
-        const modalFechas = document.getElementById('modalFechas');
-        
-        if (modalAcademiaNombre) modalAcademiaNombre.textContent = academiaNombre;
-        if (modalCursoNombre) modalCursoNombre.textContent = cursoNombre;
-        if (modalMunicipio) modalMunicipio.textContent = municipio;
-        if (modalFechas) modalFechas.textContent = `${inicio} - ${fin}`;
+        // Actualizar campo de academia_id en el formulario
+        document.getElementById('academia_id').value = academiaId;
 
-        // Limpiar y preparar campo de email
+        // Preparar campo de email
         const emailInput = document.getElementById('recipientEmail');
         if (emailInput) {
-            emailInput.value = '';
-            emailInput.placeholder = "Cargando email de la academia...";
-            emailInput.disabled = true;
+            emailInput.value = ''; // Limpiar el campo
+            emailInput.placeholder = "Ingresa el email de la academia";
+            emailInput.disabled = false; // Permitir editar
         }
 
+        // Asunto predeterminado
+        document.getElementById('emailSubject').value = `Consulta sobre el curso: ${cursoNombre}`;
+
+        // Generar mensaje predeterminado
+        const mensajePredeterminado = `Estimados señores de ${academiaNombre},
+
+Me dirijo a ustedes para solicitar más información sobre el curso "${cursoNombre}" que se imparte en ${municipio} con fechas de ${inicio} a ${fin}.
+
+Agradecería que me enviaran información detallada sobre el programa, requisitos de inscripción, coste y cualquier otra información relevante.
+
+Quedo a la espera de su respuesta.
+
+Atentamente,
+${userName}
+${userEmail}`;
+        document.getElementById('emailMessage').value = mensajePredeterminado;
+
+        // Realizar petición AJAX para obtener el email
         try {
-            // Obtener email de la academia por AJAX
             if (academiaId) {
-                console.log('Solicitando email para academia ID:', academiaId);
-                
-                // Usar la ruta correcta - IMPORTANTE
-                const url = `/profesor/obtener-email/${academiaId}`;
-                console.log('URL de la solicitud:', url);
-                
-                const response = await fetch(url, {
+                const response = await fetch(`/alumno/obtener-email/${academiaId}`, {
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
                 
-                console.log('Respuesta recibida:', response);
-                
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Datos de la respuesta:', data);
                     
-                    if (data.email) {
-                        // Email obtenido correctamente
-                        if (emailInput) {
-                            emailInput.value = data.email;
-                            emailInput.placeholder = "";
-                            emailInput.disabled = false;
-                            console.log('Email cargado exitosamente:', data.email);
-                        }
-                    } else if (data.error) {
-                        // Error del servidor
-                        console.error('Error del servidor:', data.error);
-                        if (emailInput) {
-                            emailInput.value = '';
-                            emailInput.placeholder = `Error: ${data.error}. Ingresa manualmente.`;
-                            emailInput.disabled = false;
-                        }
-                    }
-                } else {
-                    // Error HTTP
-                    console.error('Error HTTP:', response.status, response.statusText);
-                    if (emailInput) {
+                    if (data.email && emailInput) {
+                        emailInput.value = data.email;
+                        emailInput.placeholder = "";
+                        emailInput.disabled = false;
+                    } else if (data.error && emailInput) {
                         emailInput.value = '';
-                        emailInput.placeholder = `Error ${response.status}. Ingresa manualmente.`;
+                        emailInput.placeholder = `Error: ${data.error}. Ingresa manualmente.`;
                         emailInput.disabled = false;
                     }
-                }
-            } else {
-                // No hay academiaId
-                console.error('No se encontró academiaId en el botón');
-                if (emailInput) {
+                } else if (emailInput) {
                     emailInput.value = '';
-                    emailInput.placeholder = "Error: ID de academia no encontrado. Ingresa manualmente.";
+                    emailInput.placeholder = `Error al cargar el email. Ingresa manualmente.`;
                     emailInput.disabled = false;
                 }
+            } else if (emailInput) {
+                emailInput.value = '';
+                emailInput.placeholder = "No hay ID de academia. Ingresa manualmente.";
+                emailInput.disabled = false;
             }
         } catch (error) {
             console.error('Error en la petición AJAX:', error);
@@ -494,89 +427,33 @@ document.addEventListener('click', async function(e) {
                 emailInput.disabled = false;
             }
         }
-
-        // Generar mensaje predeterminado
-        const emailMessage = document.getElementById('emailMessage');
-        if (emailMessage) {
-            const mensajePredeterminado = `Estimados señores de ${academiaNombre},
-
-Me dirijo a ustedes para expresar mi interés en la plaza docente para el curso "${cursoNombre}" que se imparte en ${municipio}.
-
-He revisado la información del curso con fechas de ${inicio} a ${fin} y considero que mi perfil y experiencia son adecuados para impartir esta formación.
-
-Adjunto mi CV para su consideración y quedo a su disposición para una entrevista personal.
-
-Agradeciendo de antemano su atención, reciban un cordial saludo.
-
-Atentamente,
-    ${userName}
-    Email: ${userEmail}
-    Teléfono: [Su teléfono de contacto]`;
-
-            emailMessage.value = mensajePredeterminado;
-        }
-        
-        // Limpiar archivo adjunto
-        const cvAttachment = document.getElementById('cvAttachment');
-        const filePreview = document.getElementById('filePreview');
-        if (cvAttachment) cvAttachment.value = '';
-        if (filePreview) filePreview.style.display = 'none';
     }
 });
-
-    // ========== VISTA PREVIA DEL ARCHIVO ADJUNTO ==========
-    const cvAttachment = document.getElementById('cvAttachment');
-    if (cvAttachment) {
-        cvAttachment.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const filePreview = document.getElementById('filePreview');
-            const fileName = document.getElementById('fileName');
-            
-            if (file && filePreview && fileName) {
-                // Validar tamaño (10MB máximo)
-                const maxSize = 10 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
-                    this.value = '';
-                    return;
-                }
-                
-                // Mostrar vista previa
-                fileName.textContent = file.name;
-                filePreview.style.display = 'block';
-            }
-        });
-    }
-
-    // ========== FUNCIÓN PARA ELIMINAR ARCHIVO ==========
-    window.removeFile = function() {
-        const cvAttachment = document.getElementById('cvAttachment');
-        const filePreview = document.getElementById('filePreview');
-        if (cvAttachment) cvAttachment.value = '';
-        if (filePreview) filePreview.style.display = 'none';
-    }
 
     // ========== VALIDACIÓN DEL FORMULARIO DE CONTACTO ==========
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
         contactForm.addEventListener('submit', function(e) {
+            const email = document.getElementById('recipientEmail');
+            const asunto = document.getElementById('emailSubject');
             const mensaje = document.getElementById('emailMessage');
-            const archivo = document.getElementById('cvAttachment');
             
-            if (mensaje && !mensaje.value.trim()) {
+            if (email && !email.value.trim()) {
                 e.preventDefault();
-                alert('Por favor, complete el mensaje de candidatura.');
+                alert('No se encontró el email de la academia. Por favor, ingréselo manualmente.');
                 return;
             }
             
-            // Validar tamaño del archivo
-            if (archivo && archivo.files[0]) {
-                const maxSize = 10 * 1024 * 1024;
-                if (archivo.files[0].size > maxSize) {
-                    e.preventDefault();
-                    alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
-                    return;
-                }
+            if (asunto && !asunto.value.trim()) {
+                e.preventDefault();
+                alert('Por favor, ingrese el asunto del mensaje.');
+                return;
+            }
+            
+            if (mensaje && !mensaje.value.trim()) {
+                e.preventDefault();
+                alert('Por favor, complete el mensaje.');
+                return;
             }
             
             // Mostrar indicador de envío
@@ -588,19 +465,24 @@ Atentamente,
         });
     }
 
-    // ========== EFECTOS VISUALES (OPCIONALES) ==========
-    const tableRows = document.querySelectorAll('.table-hover tbody tr');
-    tableRows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = 'rgba(0, 123, 255, 0.05)';
+    // ========== HACER EL CAMPO DE EMAIL EDITABLE SI ESTÁ VACÍO ==========
+    const emailInput = document.getElementById('recipientEmail');
+    if (emailInput) {
+        emailInput.addEventListener('focus', function() {
+            if (!this.value.trim()) {
+                this.readOnly = false;
+                this.placeholder = "Ingrese el email de la academia";
+            }
         });
-        row.addEventListener('mouseleave', function() {
-            this.style.backgroundColor = '';
+        
+        emailInput.addEventListener('blur', function() {
+            if (this.value.trim()) {
+                this.readOnly = true;
+            }
         });
-    });
+    }
 });
 </script>
-
 
 <!-- Estilos CSS personalizados -->
 <style>
@@ -638,34 +520,14 @@ Atentamente,
         transition: all 0.3s ease;
     }
     
-    /* Mejora para inputs de búsqueda */
-    #academiaInput, #nombreCursoInput {
-        text-transform: lowercase;
-    }
-    
-    /* Estilos para paginación */
-    .page-item.active .page-link {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
-    
-    .page-link {
-        color: #0d6efd;
-        border: 1px solid #dee2e6;
-    }
-    
-    .page-link:hover {
-        color: #0a58ca;
-        background-color: #e9ecef;
-        border-color: #dee2e6;
-    }
-    
-    .pagination {
-        margin-bottom: 0;
-    }
-    
     .bg-gradient-primary {
         background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    }
+    
+    /* Estilo para campo de email readonly */
+    input[readonly] {
+        background-color: #f8f9fa;
+        cursor: not-allowed;
     }
 </style>
 @endsection

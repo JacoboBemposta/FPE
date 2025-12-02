@@ -4,28 +4,27 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
     use AuthenticatesUsers;
 
     /**
-     * Where to redirect users after login.
-     *
-     * @var string
+     * Donde redirigir después del login.
      */
-    protected $redirectTo = '/home';
+    protected function redirectTo()
+    {
+        $user = Auth::user();
+        
+        // Solo admin va a su panel, todos los demás a welcome
+        if ($user->rol === 'admin') {
+            return '/admin';
+        }
+        
+        // Para todos los demás roles, ir a welcome
+        return '/';
+    }
 
     /**
      * Create a new controller instance.
@@ -35,11 +34,5 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
-        $this->middleware('auth')->only('logout');
-    }
-
-    protected function redirectTo()
-    {
-        return '/'; // Página de inicio
     }
 }

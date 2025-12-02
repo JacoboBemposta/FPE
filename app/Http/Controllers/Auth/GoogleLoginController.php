@@ -53,7 +53,7 @@ class GoogleLoginController extends Controller
             $user = User::where('email', $googleUser->getEmail())->first();
 
             if (!$user) {
-                Log::info('Creando nuevo usuario desde Google: ' . $googleUser->getEmail());
+                
 
                 // Crear usuario con Query Builder para mayor control
                 $userId = DB::table('users')->insertGetId([
@@ -71,9 +71,9 @@ class GoogleLoginController extends Controller
                 ]);
 
                 $user = User::find($userId);
-                Log::info('Nuevo usuario creado con ID: ' . $userId);
+            
             } else {
-                Log::info('Usuario existente encontrado: ' . $user->id);
+              
 
                 // Actualizar datos de Google
                 $user->update([
@@ -86,19 +86,14 @@ class GoogleLoginController extends Controller
             // Iniciar sesión
             Auth::login($user, true);
 
-            Log::info('Login Google exitoso', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'rol' => $user->rol
-            ]);
+
 
             // Forzar modal si no tiene rol
             if (is_null($user->rol)) {
                 session(['show_role_modal' => true]);
-                Log::info('Usuario sin rol - Modal activado');
             }
 
-            return redirect('/home');
+            return redirect('/');
 
         } catch (\Exception $e) {
             Log::error('Error en Google OAuth callback: ' . $e->getMessage(), [

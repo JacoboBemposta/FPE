@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CursoController;
+use App\Http\Controllers\AlumnoController;
 use App\Http\Controllers\FamiliaProfesionalController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\UnidadFormativaController;
@@ -11,21 +12,53 @@ use App\Http\Controllers\CursoAcademicoController;
 use App\Http\Controllers\ActaController;
 use App\Http\Controllers\CalificacionController;
 use App\Http\Controllers\ProfesorController;
+use App\Http\Controllers\EmailStatsController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\ProfesorCursoController;
 use App\Http\Controllers\CursoModuloController;
 use App\Http\Controllers\Auth\GoogleLoginController;
-
 use Illuminate\Support\Facades\Auth;
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+    Route::get('/', function () {
+        $user = Auth::user();
+        
+        // Si no hay usuario autenticado, mostrar welcome normal
+        if (!$user) {
+            return view('welcome');
+        }
 
-Auth::routes();
+        // Si el usuario no tiene rol, mostrar welcome con modal
+        if (is_null($user->rol)) {
+            session(['show_role_modal' => true]);
+            return view('welcome', [
+                'user' => $user,
+                'userRole' => $user->rol,
+                'userName' => $user->name,
+                'showRoleModal' => true,
+            ]);
+        }
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+        // Si el usuario es admin, redirigir a admin.panel
+        if ($user->rol === 'admin') {
+            return redirect()->route('admin.panel');
+        }
+
+        // Para los demás roles, mostrar welcome personalizado
+        return view('welcome', [
+            'user' => $user,
+            'userRole' => $user->rol,
+            'userName' => $user->name,
+            'showRoleModal' => false,
+        ]);
+    });
+
+    Auth::routes();
+
+
+    Route::get('/home', function () {
+        return redirect('/');
+    })->name('home');  
 
 
 // Rutas para cada panel según el rol
@@ -42,16 +75,13 @@ Route::get('/alumno/dashboard', function () {
 })->name('alumno.dashboard');
 
 
-// Route::get('/dashboard', function () {
-//     return view('welcome'); 
-// })->middleware(['auth'])->name('welcome');
 
 
 
 
 
 // Grupo protegido por middleware y con prefijo
-Route::middleware(['auth', 'rol:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':admin'])->prefix('admin')->name('admin.')->group(function () {
     
     // Ruta al panel (index principal del admin)
     Route::get('/', [AdminController::class, 'index'])->name('panel'); 
@@ -90,15 +120,14 @@ Route::middleware(['auth', 'rol:admin'])->prefix('admin')->name('admin.')->group
     Route::get('/cursos/{curso}/modulos', [App\Http\Controllers\CursoController::class, 'getModulosByCurso'])->name('cursos.modulos');
     Route::get('/modulos/{modulo}/unidades', [App\Http\Controllers\ModuloController::class, 'getUnidadesByModulo'])->name('modulos.unidades');
 
-
-;
-
-
+    Route::get('/email-stats', [EmailStatsController::class, 'index'])->name('email.stats');
+    Route::get('/email-stats/{contexto}', [EmailStatsController::class, 'detalleContexto'])->name('email.stats.contexto'); // ← AÑADE ESTA
+    Route::get('/email-search', [EmailStatsController::class, 'buscar'])->name('email.search'); 
 });
 
 
 
-Route::middleware(['auth', 'rol:academia'])
+Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':academia'])
     ->prefix('academia')
     ->name('academia.')
     ->group(function () {
@@ -106,36 +135,26 @@ Route::middleware(['auth', 'rol:academia'])
         Route::get('/mis-cursos', [AcademiaController::class, 'misCursos'])->name('miscursos');
         Route::post('/asignar-curso/{curso}', [AcademiaController::class, 'asignarCurso'])->name('asignar_curso');
         Route::get('/mis-cursos/{cursoAcademico}', [AcademiaController::class, 'detalleCurso'])->name('detalleCurso');
-        Route::put('curso/{id}/editar', [AcademiaController::class, 'actualizarCurso'])->name('curso.update');
         Route::get('/cursos', [AcademiaController::class, 'cursos'])->name('cursos');
-        //Route::put('/curso/{id}/editar', [AcademiaController::class, 'actualizarCurso'])->name('actualizarCurso');
-        //Route::get('/agregar-alumno', [AcademiaController::class, 'agregarAlumno'])->name('agregarAlumno');
         Route::post('/agregar-alumno', [AcademiaController::class, 'guardarAlumno'])->name('guardarAlumno');
-        // Route::get('/curso/{id}/alumnos', [AcademiaController::class, 'getAlumnos'])->name('getAlumnos');
         Route::put('/alumno/{id}/editar', [AcademiaController::class, 'actualizarAlumno'])->name('editarAlumno'); 
         Route::delete('/eliminar-alumno/{id}', [AcademiaController::class, 'eliminarAlumno'])->name('eliminarAlumno');
-        // Route::get('/curso/{cursoAcademico}/detalles', [AcademiaController::class, 'detallesCurso'])->name('academia.detallesCurso');
-        // Route::get('/curso/{cursoAcademicoId}/detalles', [AcademiaController::class, 'showCursoDetalles'])->name('academia.showCursoDetalles');
-        // Route::get('/curso/{id}/detalles', [AcademiaController::class, 'verDetalles'])->name('detalles');
-        // Route::post('/curso/{id}/detalles', [AcademiaController::class, 'guardarDetallesCurso'])->name('guardarDetalles');
         Route::post('/actualizar-detalle', [AcademiaController::class, 'actualizarDetalle'])->name('actualizarDetalle');
         Route::post('/crear-detalle', [AcademiaController::class, 'crearDetalle'])->name('crearDetalle');
         Route::get('/calificaciones/{cursoAcademicoId}', [AcademiaController::class, 'showCalificaciones'])->name('calificaciones');
-        // Route::post('/calificaciones', [AcademiaController::class, 'storeCalificacion'])->name('calificaciones.store');
         Route::get('ver-docentes', [AcademiaController::class, 'verDocentes'])->name('ver_docentes');
-        Route::delete('/academia/curso/{id}', [AcademiaController::class, 'destroyCursoAcademico'])->name('curso_academico.destroy');
-
+        Route::put('/curso/{id}', [AcademiaController::class, 'actualizarCurso'])->name('curso_academico.update');
+        Route::delete('/curso/{id}', [AcademiaController::class, 'destroyCursoAcademico'])->name('curso_academico.destroy');
         // Para unidades formativas
-    Route::post('/guardar-nota', [AcademiaController::class, 'guardarNota'])->name('guardarNota');
+        Route::post('/guardar-nota', [AcademiaController::class, 'guardarNota'])->name('guardarNota');
 
-    // Para módulos sin UF
+   
     //Route::post('/calificaciones/guardar-modulo', [AcademiaController::class, 'guardarNotaModulo'])->name('guardarNotaModulo');
     Route::post('/guardar-nota', [AcademiaController::class, 'guardarNotaModulo'])->name('guardarNotaModulo');
     Route::post('/eliminar-calificacion', [AcademiaController::class, 'eliminarCalificacion'])->name('eliminarCalificacion');
-
     Route::post('/detalle/guardar', [AcademiaController::class,'crearActualizarDetalle'])->name('crearActualizarDetalle');
-
-    
+    Route::get('/obtener-email-docente/{docenteId}', [AcademiaController::class, 'obtenerEmailDocente'])->name('obtener-email-docente');
+    Route::post('/enviar-mensaje-docente', [AcademiaController::class, 'enviarMensajeDocente'])->name('enviar_mensaje_docente');    
 });
 
 
@@ -150,46 +169,62 @@ Route::put('/calificaciones/{calificacion}', [CalificacionController::class, 'up
 Route::post('/generar-actas/{grado}', [ActaController::class, 'generarActas'])->name('generar.actas');
 
 
-Route::middleware(['auth', 'rol:profesor'])
+Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':profesor'])
     ->prefix('profesor')
     ->name('profesor.') 
     ->group(function () {
         Route::get('/mis-cursos', [ProfesorController::class, 'misCursos'])->name('miscursos');
         Route::get('/cursos', [ProfesorController::class, 'cursos'])->name('cursos');
-        //Route::get('/cursos', [AcademiaController::class, 'cursos'])->name('academia.cursos');
         Route::post('/asignar-curso/{curso}', [ProfesorController::class, 'asignarCurso'])->name('asignar_curso');
         Route::delete('/curso/{id}', [ProfesorController::class, 'destroy'])->name('curso.destroy');
         Route::get('/ver-academias', [ProfesorController::class, 'verAcademias'])->name('ver_academias');
-
         Route::put('curso/{id}/editar', [ProfesorController::class, 'actualizarCurso'])->name('curso.update');
         Route::get('curso/{id}', [ProfesorController::class, 'detalleCurso'])->name('detalleCurso');
-       // Route::put('curso/{id}/editar', [ProfesorController::class, 'update'])->name('curso.update');
-
-       Route::post('/enviar-candidatura', [ProfesorController::class, 'enviarCandidatura'])->name('enviar_candidatura');
+        Route::post('/enviar-candidatura', [ProfesorController::class, 'enviarCandidatura'])->name('enviar_candidatura');
+  
+        // CORRECCIÓN: Quita '/profesor/' porque ya está en el prefijo
+        Route::get('/obtener-email/{academiaId}', [ProfesorController::class, 'obtenerEmailAcademia'])->name('obtener-email');
     });
 
 
-// Rutas de Google OAuth
-Route::get('/auth/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('login.google');
-Route::get('/auth/google/callback', [GoogleLoginController::class, 'handleGoogleCallback']);
+    // Rutas de Google OAuth
+    Route::get('/auth/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('login.google');
+    Route::get('/auth/google/callback', [GoogleLoginController::class, 'handleGoogleCallback']);
 
 
-Route::post('/calificaciones', [CalificacionController::class, 'storeCalificacion'])->name('calificaciones.store');
+    Route::post('/calificaciones', [CalificacionController::class, 'storeCalificacion'])->name('calificaciones.store');
 
 
-Route::post('/user/update-role', [App\Http\Controllers\UserController::class, 'updateRole'])
-    ->name('user.updateRole')
-    ->middleware('auth');
+    Route::post('/user/update-role', [App\Http\Controllers\UserController::class, 'updateRole'])
+        ->name('user.updateRole')
+        ->middleware('auth');
 
 
 
-Route::get('/debug-middleware', function() {
-    return [
-        'kernel_exists' => file_exists(app_path('Http/Kernel.php')),
-        'middlewares' => [
-            'TrustProxies' => file_exists(app_path('Http/Middleware/TrustProxies.php')),
-            'CheckUserRole' => file_exists(app_path('Http/Middleware/CheckUserRole.php')),
-            // ... otros
-        ]
-    ];
-});
+    Route::get('/debug-middleware', function() {
+        return [
+            'kernel_exists' => file_exists(app_path('Http/Kernel.php')),
+            'middlewares' => [
+                'TrustProxies' => file_exists(app_path('Http/Middleware/TrustProxies.php')),
+                'CheckUserRole' => file_exists(app_path('Http/Middleware/CheckUserRole.php')),
+
+            ]
+        ];
+    });
+
+    // Rutas para alumnos
+    Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':alumno'])->group(function () {
+        Route::get('/alumno', [AlumnoController::class, 'index'])->name('alumno.index');
+        Route::get('/alumno/academias', [AlumnoController::class, 'listarAcademias'])->name('alumno.academias');
+        Route::get('/alumno/academia/{id}', [AlumnoController::class, 'verAcademia'])->name('alumno.academia.ver');
+        Route::post('/alumno/contactar-academia', [AlumnoController::class, 'enviarEmailAcademia'])->name('alumno.academia.enviar_email');
+        Route::get('/alumno/obtener-email/{id}', [AlumnoController::class, 'obtenerEmailAcademia'])->name('alumno.obtener.email');
+    });
+
+
+
+
+
+
+
+

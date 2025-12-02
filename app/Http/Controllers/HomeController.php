@@ -16,26 +16,18 @@ class HomeController extends Controller
 
         $user = Auth::user();
         
-
-
         // Si el usuario no tiene rol, mostrar home con modal
         if (is_null($user->rol)) {
             session(['show_role_modal' => true]);
-            return view('home');
+            return redirect('/')->with('info', 'Por favor, selecciona tu rol');
         }
 
-        // Si tiene rol, redirigir según el rol
-        switch ($user->rol) {
-            case 'admin':
-                return redirect()->route('admin.panel');
-            case 'academia':
-                return redirect()->route('academia.index');
-            case 'profesor':
-                return redirect()->route('profesor.miscursos');
-            case 'alumno':
-                return view('home')->with('info', 'Bienvenido como alumno');
-            default:
-                return view('home');
+        // SOLO admin va a su panel, los demás se quedan en welcome
+        if ($user->rol === 'admin') {
+            return redirect()->route('admin.panel');
         }
+        
+        // Para todos los demás roles, mostrar welcome
+        return redirect('/')->with('success', "¡Bienvenido {$user->name}!");
     }
 }

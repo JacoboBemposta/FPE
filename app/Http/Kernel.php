@@ -6,6 +6,9 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
 {
+    /**
+     * The application's global HTTP middleware stack.
+     */
     protected $middleware = [
         \App\Http\Middleware\TrustProxies::class,
         \Illuminate\Http\Middleware\HandleCors::class,
@@ -15,6 +18,9 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];
 
+    /**
+     * The application's route middleware groups.
+     */
     protected $middlewareGroups = [
         'web' => [
             \App\Http\Middleware\EncryptCookies::class,
@@ -23,7 +29,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \App\Http\Middleware\CheckUserRole::class, // 👈 AGREGADO
+            // \App\Http\Middleware\CheckUserRole::class, // ← COMENTA TEMPORALMENTE
         ],
 
         'api' => [
@@ -32,7 +38,10 @@ class Kernel extends HttpKernel
         ],
     ];
 
-    protected $routeMiddleware = [
+    /**
+     * The application's middleware aliases.
+     */
+    protected $middlewareAliases = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
@@ -43,6 +52,12 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'rol' => \App\Http\Middleware\CheckRole::class,
+    'rol' => \App\Http\Middleware\CheckRole::class, // ← Mantén por si acaso
+    'checkuserrole' => \App\Http\Middleware\CheckUserRole::class,
+        // TUS MIDDLEWARES PERSONALIZADOS
+    'admin' => \App\Http\Middleware\AdminMiddleware::class,
+    'academia' => \App\Http\Middleware\AcademiaMiddleware::class, 
+    'profesor' => \App\Http\Middleware\ProfesorMiddleware::class,
+    'alumno' => \App\Http\Middleware\AlumnoMiddleware::class,
     ];
 }
