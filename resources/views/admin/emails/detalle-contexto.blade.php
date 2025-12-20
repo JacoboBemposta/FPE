@@ -100,8 +100,8 @@
 <script>
 function verDetalle(id) {
     // Implementa la función para cargar los detalles del email
-    // Puedes reutilizar la función que hicimos en la vista principal
-    fetch(`/admin/email-stats/detalle/${id}`)  // Necesitarás crear esta ruta y método si quieres un modal dinámico
+
+    fetch(`/admin/email-stats/detalle/${id}`)  
         .then(response => response.json())
         .then(data => {
             // Mostrar datos en el modal

@@ -102,9 +102,7 @@ public function enviarEmailAcademia(Request $request)
         'mensaje' => 'required|string',
     ]);
 
-    // Debug: Ver qué email se está usando
-    Log::info('Enviando email a: ' . $request->email);
-    Log::info('Datos del formulario:', $request->all());
+
 
     $datos = [
         'destinatario_email' => $request->email, // Usar el email del formulario

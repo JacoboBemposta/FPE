@@ -14,7 +14,7 @@ class UserController extends Controller
     
     public function updateRole(Request $request)
     {
-        Log::info('Iniciando updateRole', ['user_id' => Auth::id()]);
+        
 
         // Validación que excluye 'admin'
         $request->validate([
@@ -33,10 +33,7 @@ class UserController extends Controller
             $user->rol = $request->rol;
             $user->save();
 
-            Log::info('Rol actualizado exitosamente', [
-                'user_id' => $user->id, 
-                'nuevo_rol' => $user->rol
-            ]);
+
 
             // Limpiar sesión del modal
             session()->forget('show_role_modal');
@@ -53,7 +50,7 @@ class UserController extends Controller
 
     private function redirectByRole($rol)
     {
-        Log::info('Redirigiendo por rol', ['rol' => $rol]);
+       
         
         switch ($rol) {
             case 'academia':

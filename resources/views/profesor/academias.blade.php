@@ -105,6 +105,7 @@
                     <tbody>
                         @forelse ($cursosAcademicos as $cursoAcademico) 
                             <tr>
+                                
                                 {{-- <td>{{ $cursoAcademico->academia_nombre ?? 'N/A' }}</td> --}}
                                 <td>{{ $cursoAcademico->curso_codigo ?? 'N/A' }}</td>
                                 <td>{{ $cursoAcademico->curso_nombre ?? 'N/A' }}</td>
@@ -120,17 +121,24 @@
                                     @endif
                                 </td>
 <td>
-    <button type="button" class="btn btn-primary btn-sm contact-btn" 
-            data-bs-toggle="modal" 
-            data-bs-target="#contactModal"
-            data-academia-id="{{ $cursoAcademico->academia_id ?? '' }}"
-            data-academia-nombre="{{ $cursoAcademico->academia_nombre ?? 'N/A' }}"
-            data-curso-nombre="{{ $cursoAcademico->curso_nombre ?? 'N/A' }}"
-            data-municipio="{{ $cursoAcademico->municipio ?? 'N/A' }}"
-            data-inicio="{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}"
-            data-fin="{{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}">
-        <i class="fas fa-envelope me-1"></i> Contactar
-    </button>
+    @if($cursoAcademico->ya_enviado_cv)
+        <span class="badge bg-success" style="font-size: 0.875rem; padding: 0.375rem 0.75rem;">
+            <i class="fas fa-check-circle me-1"></i> Mail Enviado
+        </span>
+    @else
+        <button type="button" class="btn btn-primary btn-sm contact-btn" 
+                data-bs-toggle="modal" 
+                data-bs-target="#contactModal"
+                data-academia-id="{{ $cursoAcademico->academia_id ?? '' }}"
+                data-academia-nombre="{{ $cursoAcademico->academia_nombre ?? 'N/A' }}"
+                data-curso-acad-id="{{ $cursoAcademico->curso_acad_id ?? '' }}"
+                data-curso-nombre="{{ $cursoAcademico->curso_nombre ?? 'N/A' }}"
+                data-municipio="{{ $cursoAcademico->municipio ?? 'N/A' }}"
+                data-inicio="{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}"
+                data-fin="{{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}">
+            <i class="fas fa-envelope me-1"></i> Contactar
+        </button>
+    @endif
 </td>
                             </tr>
                         @empty
@@ -256,6 +264,7 @@
             </div>
             <form id="contactForm" method="POST" action="{{ route('profesor.enviar_candidatura') }}" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="curso_acad_id" id="cursoAcadIdInput">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="recipientEmail" class="form-label fw-bold">Para:</label>
@@ -326,7 +335,7 @@
 <!-- JavaScript mejorado para el buscador y modal -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM cargado - inicializando scripts');
+  
     const userName = @json(auth()->user()->name);
     const userEmail = @json(auth()->user()->email);
 
@@ -391,26 +400,25 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('click', async function(e) {
     if (e.target.closest('.contact-btn')) {
         const button = e.target.closest('.contact-btn');
-        console.log('Botón contactar clickeado', button);
+  
         
         // Obtener datos del botón
         const academiaId = button.getAttribute('data-academia-id');
+        const cursoAcadId = button.getAttribute('data-curso-acad-id');
         const academiaNombre = button.getAttribute('data-academia-nombre');
         const cursoNombre = button.getAttribute('data-curso-nombre');
         const municipio = button.getAttribute('data-municipio');
         const inicio = button.getAttribute('data-inicio');
         const fin = button.getAttribute('data-fin');
 
-        console.log('Datos del botón:', {
-            academiaId,
-            academiaNombre,
-            cursoNombre,
-            municipio,
-            inicio,
-            fin
-        });
+
 
         // Actualizar información del curso en el modal (sin email aún)
+        const cursoAcadIdInput = document.getElementById('cursoAcadIdInput');
+        if (cursoAcadIdInput && cursoAcadId) {
+            cursoAcadIdInput.value = cursoAcadId;
+
+        }
         const modalAcademiaNombre = document.getElementById('modalAcademiaNombre');
         const modalCursoNombre = document.getElementById('modalCursoNombre');
         const modalMunicipio = document.getElementById('modalMunicipio');
@@ -432,11 +440,11 @@ document.addEventListener('click', async function(e) {
         try {
             // Obtener email de la academia por AJAX
             if (academiaId) {
-                console.log('Solicitando email para academia ID:', academiaId);
+       
                 
                 // Usar la ruta correcta - IMPORTANTE
                 const url = `/profesor/obtener-email/${academiaId}`;
-                console.log('URL de la solicitud:', url);
+        
                 
                 const response = await fetch(url, {
                     headers: {
@@ -445,11 +453,11 @@ document.addEventListener('click', async function(e) {
                     }
                 });
                 
-                console.log('Respuesta recibida:', response);
+       
                 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Datos de la respuesta:', data);
+               
                     
                     if (data.email) {
                         // Email obtenido correctamente
@@ -457,7 +465,7 @@ document.addEventListener('click', async function(e) {
                             emailInput.value = data.email;
                             emailInput.placeholder = "";
                             emailInput.disabled = false;
-                            console.log('Email cargado exitosamente:', data.email);
+                  
                         }
                     } else if (data.error) {
                         // Error del servidor

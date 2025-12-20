@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FamiliaProfesional;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
 
 class FamiliaProfesionalController extends Controller
 {
@@ -57,7 +58,7 @@ class FamiliaProfesionalController extends Controller
 
             return response()->json($cursos);
         } catch (\Exception $e) {
-           // \Log::error('Error en getCursosByFamilia: ' . $e->getMessage());
+            Log::error('Error en getCursosByFamilia: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Error al cargar los cursos',
                 'message' => $e->getMessage()

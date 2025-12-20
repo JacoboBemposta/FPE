@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\EmailBase;
 use App\Models\AlumnoCurso;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -105,6 +105,8 @@ class ProfesorController extends Controller
 public function verAcademias(Request $request)
 {
     $perPage = $request->get('per_page', 10);
+    
+    $userId = auth()->id();
 
     $query = DB::table('users')
         ->join('curso_academicos', 'users.id', '=', 'curso_academicos.academia_id')
@@ -143,7 +145,7 @@ public function verAcademias(Request $request)
                 $q->whereNull('alumnos_curso.nombre');
             }
         })
-        // Seleccionar columnas
+        // Seleccionar columnas - Añadir campo calculado para saber si ya envió CV
         ->select([
             'users.id as academia_id',
             'users.ident as academia_nombre',
@@ -154,9 +156,15 @@ public function verAcademias(Request $request)
             'curso_academicos.fin',
             'cursos.nombre as curso_nombre',
             'cursos.codigo as curso_codigo',
-            // Agregar el docente desde alumnos_curso
             'alumnos_curso.nombre as docente_nombre',
         ])
+        // Añadir campo calculado para saber si ya envió CV
+        ->addSelect(DB::raw('EXISTS(
+            SELECT 1 FROM emails_enviados 
+            WHERE emails_enviados.curso_id = curso_academicos.id 
+            AND emails_enviados.remitente_id = ' . $userId . '
+            AND emails_enviados.contexto = "profesor_a_academia"
+        ) as ya_enviado_cv'))
         ->orderBy('users.inicio_suscripcion', 'desc')
         ->orderBy('cursos.codigo');
     
@@ -164,7 +172,6 @@ public function verAcademias(Request $request)
 
     return view('profesor.academias', compact('cursosAcademicos'));
 }
-
 
 
 
@@ -263,6 +270,7 @@ public function obtenerEmailAcademia($academiaId)
             'email' => 'required|email',
             'subject' => 'required|string|max:255',
             'message' => 'required|string',
+            'curso_acad_id' => 'required|integer|exists:curso_academicos,id',
         ]);
 
         $exito = $this->enviarEmailRegistrado([
@@ -270,6 +278,7 @@ public function obtenerEmailAcademia($academiaId)
             'asunto' => $request->subject,
             'mensaje' => $request->message,
             'contexto' => 'profesor_a_academia',
+            'curso_id' => $request->curso_acad_id,
         ]);
 
         if ($exito) {

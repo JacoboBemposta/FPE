@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('remitente_id')->nullable()->change();
             $table->string('remitente_tipo'); // 'academia' o 'profesor'
             $table->string('remitente_email');
+            $table->foreignId('curso_id')->nullable();
             $table->string('remitente_nombre');
             
             // Información del destinatario

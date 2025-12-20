@@ -64,79 +64,79 @@ class AcademiaController extends Controller
         return view('academia.index', compact('misCursos'));
     }
         
-public function verDocentes(Request $request)
-{
-    $perPage = $request->get('per_page', 10);
+    public function verDocentes(Request $request)
+    {
+        $perPage = $request->get('per_page', 10);
 
-    $query = DB::table('users')
-        ->join('curso_academicos', 'users.id', '=', 'curso_academicos.academia_id')
-        ->join('cursos', 'curso_academicos.curso_id', '=', 'cursos.id')
-        ->where('users.rol', 'profesor')
-    
-        // filtros opcionales
-        ->when($request->filled('docente_nombre'), fn($q) =>
-            $q->where('users.name', 'like', '%' . strtolower(trim($request->docente_nombre)) . '%')
-        )
-        ->when($request->filled('codigo'), fn($q) =>
-            $q->where('cursos.codigo', 'like', '%' . strtolower(trim($request->codigo)) . '%')
-        )
-        ->when($request->filled('nombre'), fn($q) =>
-            $q->where('cursos.nombre', 'like', '%' . strtolower(trim($request->nombre)) . '%')
-        )
-        ->when($request->filled('municipio'), fn($q) =>
-            $q->where('curso_academicos.municipio', 'like', '%' . strtolower(trim($request->municipio)) . '%')
-        )
-        ->when($request->filled('provincia'), fn($q) =>
-            $q->where('curso_academicos.provincia', 'like', '%' . strtolower(trim($request->provincia)) . '%')
-        )
-        ->select([
-            'users.id as docente_id',
-            'users.name as docente_nombre',
-            'users.email as docente_email',
-            'curso_academicos.id as curso_acad_id',
-            'curso_academicos.municipio',
-            'curso_academicos.provincia',
-            'curso_academicos.inicio',
-            'curso_academicos.fin',
-            'cursos.nombre as curso_nombre',
-            'cursos.codigo as curso_codigo',
-        ])
-        // Ordenar por fecha de suscripción más reciente primero
-        // Nota: inicio_suscripcion existe, fin_suscripcion tiene typo (fin_suscrpcion)
-        ->orderBy('users.inicio_suscripcion', 'desc')
-        ->orderBy('users.name');
-    
-    $docentesConCursos = $query->paginate($perPage);
+        $query = DB::table('users')
+            ->join('curso_academicos', 'users.id', '=', 'curso_academicos.academia_id')
+            ->join('cursos', 'curso_academicos.curso_id', '=', 'cursos.id')
+            ->where('users.rol', 'profesor')
+        
+            // filtros opcionales
+            ->when($request->filled('docente_nombre'), fn($q) =>
+                $q->where('users.name', 'like', '%' . strtolower(trim($request->docente_nombre)) . '%')
+            )
+            ->when($request->filled('codigo'), fn($q) =>
+                $q->where('cursos.codigo', 'like', '%' . strtolower(trim($request->codigo)) . '%')
+            )
+            ->when($request->filled('nombre'), fn($q) =>
+                $q->where('cursos.nombre', 'like', '%' . strtolower(trim($request->nombre)) . '%')
+            )
+            ->when($request->filled('municipio'), fn($q) =>
+                $q->where('curso_academicos.municipio', 'like', '%' . strtolower(trim($request->municipio)) . '%')
+            )
+            ->when($request->filled('provincia'), fn($q) =>
+                $q->where('curso_academicos.provincia', 'like', '%' . strtolower(trim($request->provincia)) . '%')
+            )
+            ->select([
+                'users.id as docente_id',
+                'users.name as docente_nombre',
+                'users.email as docente_email',
+                'curso_academicos.id as curso_acad_id',
+                'curso_academicos.municipio',
+                'curso_academicos.provincia',
+                'curso_academicos.inicio',
+                'curso_academicos.fin',
+                'cursos.nombre as curso_nombre',
+                'cursos.codigo as curso_codigo',
+            ])
+            // Ordenar por fecha de suscripción más reciente primero
+            // Nota: inicio_suscripcion existe, fin_suscripcion tiene typo (fin_suscrpcion)
+            ->orderBy('users.inicio_suscripcion', 'desc')
+            ->orderBy('users.name');
+        
+        $docentesConCursos = $query->paginate($perPage);
 
-    return view('academia.docentes', compact('docentesConCursos'));
-}
-
-
-public function obtenerEmailDocente($docenteId)
-{
-    try {
-        // Verificar que el usuario es academia
-        if (Auth::user()->rol !== 'academia') {
-            return response()->json(['error' => 'No autorizado'], 403);
-        }
-
-        // Obtener el email del docente
-        $docente = DB::table('users')
-            ->where('id', $docenteId)
-            ->where('rol', 'profesor')
-            ->select('email')
-            ->first();
-
-        if (!$docente) {
-            return response()->json(['error' => 'Docente no encontrado'], 404);
-        }
-
-        return response()->json(['email' => $docente->email]);
-
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Error interno'], 500);
+        return view('academia.docentes', compact('docentesConCursos'));
     }
-}
+
+
+    public function obtenerEmailDocente($docenteId)
+    {
+        try {
+            // Verificar que el usuario es academia
+            if (Auth::user()->rol !== 'academia') {
+                return response()->json(['error' => 'No autorizado'], 403);
+            }
+
+            // Obtener el email del docente
+            $docente = DB::table('users')
+                ->where('id', $docenteId)
+                ->where('rol', 'profesor')
+                ->select('email')
+                ->first();
+
+            if (!$docente) {
+                return response()->json(['error' => 'Docente no encontrado'], 404);
+            }
+
+            return response()->json(['email' => $docente->email]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error interno'], 500);
+        }
+    }
 
 
 

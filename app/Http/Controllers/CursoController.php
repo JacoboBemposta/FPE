@@ -8,6 +8,7 @@ use App\Models\FamiliaProfesional;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Modulo;
+use Illuminate\Support\Facades\Log;
 
 class CursoController extends Controller
 {
@@ -115,7 +116,7 @@ class CursoController extends Controller
 
             return response()->json($modulos);
         } catch (\Exception $e) {
-            \Log::error('Error en getModulosByCurso: ' . $e->getMessage());
+            Log::error('Error en getModulosByCurso: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Error al cargar los módulos',
                 'message' => $e->getMessage()

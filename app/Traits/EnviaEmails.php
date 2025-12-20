@@ -12,29 +12,13 @@ trait EnviaEmails
 {
 public function enviarEmailRegistrado($datos)
 {
-    // Verificar que el usuario está autenticado
-    if (!Auth::check()) {
-        Log::error('Usuario no autenticado al enviar email');
-        return false;
-    }
-    
-    Log::info('Datos recibidos en EnviaEmails:', $datos);
-    Log::info('Usuario autenticado:', [
-        'id' => Auth::id(),
-        'name' => Auth::user()->name,
-        'ident' => Auth::user()->ident ?? 'No tiene ident',
-        'email' => Auth::user()->email,
-    ]);
-    
-    // Preparar variables para el log
+
+
+
     $remitente_nombre = Auth::user()->ident ?? Auth::user()->name;
     $remitente_email = Auth::user()->email;
     
-    Log::info('Variables preparadas:', [
-        'remitente_nombre' => $remitente_nombre,
-        'remitente_email' => $remitente_email,
-    ]);
-    
+
     $variables = [
         'asunto' => $datos['asunto'] ?? 'Sin asunto',
         'mensaje' => $datos['mensaje'] ?? 'Sin mensaje',
@@ -43,16 +27,17 @@ public function enviarEmailRegistrado($datos)
         'remitente_tipo' => Auth::user()->rol ?? 'usuario',
         'destinatario_tipo' => $datos['destinatario_tipo'] ?? null,
         'destinatario_email' => $datos['destinatario_email'],
-        'contexto' => $datos['contexto'] ?? 'generico',
         'fecha' => now()->format('d/m/Y H:i'),
+        'curso_id' => $datos['curso_id'] ?? null,
     ];
 
-    Log::info('Variables para insertar en BD:', $variables);
+
 
     try {
         // Insertar registro en la base de datos
         $id = DB::table('emails_enviados')->insertGetId([
             'remitente_id' => Auth::id(),
+            'curso_id' => $datos['curso_id'] ?? null,
             'destinatario_email' => $datos['destinatario_email'],
             'template' => $datos['contexto'] ?? 'generico',
             'variables' => json_encode($variables),
@@ -64,7 +49,7 @@ public function enviarEmailRegistrado($datos)
             'updated_at' => now(),
         ]);
         
-        Log::info('Registro insertado en BD con ID: ' . $id);
+
 
     } catch (\Exception $e) {
         Log::error('Error insertando email en BD: ' . $e->getMessage());
@@ -72,28 +57,18 @@ public function enviarEmailRegistrado($datos)
     }
 
     try {
-        Log::info('Preparando para enviar EmailBase con datos:', [
-            'asunto' => $datos['asunto'] ?? 'Sin asunto',
-            'mensaje' => $datos['mensaje'] ?? 'Sin mensaje',
-            'contexto' => $datos['contexto'] ?? 'generico',
-            'remitente_nombre' => $remitente_nombre,
-            'remitente_email' => $remitente_email,
-        ]);
+
         
         // Enviar el email
         Mail::to($datos['destinatario_email'])
             ->send(new EmailBase([
                 'asunto' => $datos['asunto'] ?? 'Sin asunto',
                 'mensaje' => $datos['mensaje'] ?? 'Sin mensaje',
-                'contexto' => $datos['contexto'] ?? 'generico',
                 'remitente_nombre' => $remitente_nombre,
                 'remitente_email' => $remitente_email,
             ]));
         
-        Log::info('Email enviado correctamente', [
-            'para' => $datos['destinatario_email'],
-            'contexto' => $datos['contexto'] ?? 'generico'
-        ]);
+
         
         return true;
 

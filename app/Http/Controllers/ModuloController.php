@@ -8,6 +8,7 @@ use App\Models\Modulo;
 use App\Models\Curso;
 use App\Models\UnidadFormativa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ModuloController extends Controller
 {
@@ -134,7 +135,7 @@ class ModuloController extends Controller
 
             return response()->json($unidades);
         } catch (\Exception $e) {
-            \Log::error('Error en getUnidadesByModulo: ' . $e->getMessage());
+            Log::error('Error en getUnidadesByModulo: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Error al cargar las unidades',
                 'message' => $e->getMessage()
