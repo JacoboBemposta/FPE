@@ -14,8 +14,6 @@ class AdminMiddleware
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-
-        // Asumiendo que tienes un campo 'rol' en tu tabla users
         if (Auth::user()->rol !== 'admin') {
             abort(403, 'Acceso no autorizado');
         }

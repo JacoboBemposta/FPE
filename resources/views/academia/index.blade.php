@@ -184,8 +184,11 @@
             </a>
         </div>
         <div>
-            <a href="{{ route('academia.ver_docentes') }}" class="btn btn-primary btn-action">
+            <a href="{{ route('academia.ver_docentes') }}" class="btn btn-primary btn-action me-2">
                 <i class="fas fa-chalkboard-teacher me-2"></i>Buscar Docente
+            </a>
+            <a href="{{ route('academia.cursos_archivados') }}" class="btn btn-secondary btn-action">
+                <i class="fas fa-archive me-2"></i>Ver Cursos Archivados
             </a>
         </div>
     </div>
@@ -255,18 +258,17 @@
                                 <span class="tooltip-text">Ver detalles</span>
                             </div>
                             
-                            <!-- Botón para eliminar curso - RUTA CORREGIDA -->
+                            <!-- Botón para archivar curso - MODIFICADO -->
                             <div class="action-tooltip">
-                                <form action="{{ route('academia.curso_academico.destroy', $cursoAcademico->id) }}" method="POST" class="d-inline">
+                                <form action="{{ route('academia.curso_academico.archive', $cursoAcademico->id) }}" method="POST" class="d-inline">
                                     @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-delete action-btn" onclick="return confirm('¿Estás seguro de que deseas eliminar este curso?')">
-                                        <i class="fas fa-trash"></i>
+                                    @method('PUT')
+                                    <button type="submit" class="btn btn-warning action-btn" onclick="return confirm('¿Estás seguro de que deseas archivar este curso?')">
+                                        <i class="fas fa-archive"></i>
                                     </button>
                                 </form>
-                                <span class="tooltip-text">Eliminar curso</span>
+                                <span class="tooltip-text">Archivar curso</span>
                             </div>
-                        </div>
                     </td>
                 </tr>
                 @endforeach

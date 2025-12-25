@@ -30,7 +30,7 @@ return new class extends Migration
             $table->string('avatar')->nullable();
             $table->string('provider')->nullable(); // 'google'
 
-
+            $table->timestamp('email_verified_at')->nullable();
 
         
             $table->rememberToken();

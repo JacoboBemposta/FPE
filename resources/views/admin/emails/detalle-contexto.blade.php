@@ -28,7 +28,6 @@
                                     <th>Destinatario</th>
                                     <th>Estado</th>
                                     <th>Fecha</th>
-                                    <th>IP</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -52,13 +51,13 @@
                                             ($email->status == 'failed' ? 'danger' : 
                                             ($email->status == 'delivered' ? 'info' : 'warning'))
                                         }}">
-                                            {{ ucfirst($email->status) }}
+                                            <small class="text-muted">{{ ucfirst($email->status) }}</small>
                                         </span>
                                     </td>
                                     <td>
                                         <small>{{ \Carbon\Carbon::parse($email->created_at)->format('d/m/Y H:i') }}</small>
                                     </td>
-                                    <td><small class="text-muted">{{ $email->ip }}</small></td>
+
                                     <td>
                                         <button class="btn btn-sm btn-outline-info" onclick="verDetalle({{ $email->id }})">
                                             <i class="fas fa-eye"></i>

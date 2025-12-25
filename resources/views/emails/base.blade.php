@@ -14,15 +14,6 @@
     
     <p><small>Enviado el: {{ $fecha ?? now()->format('d/m/Y H:i') }}</small></p>
     
-    <!-- Depuración (solo en desarrollo) -->
-    @if(app()->environment('local'))
-    <hr>
-    <p><small>DEBUG:</small></p>
-    <p><small>Asunto: {{ $asunto ?? 'NULL' }}</small></p>
-    <p><small>Remitente nombre: {{ $remitente_nombre ?? 'NULL' }}</small></p>
-    <p><small>Remitente email: {{ $remitente_email ?? 'NULL' }}</small></p>
-    <p><small>Contexto: {{ $contexto ?? 'NULL' }}</small></p>
-    <p><small>Fecha: {{ $fecha ?? 'NULL' }}</small></p>
-    @endif
+
 </body>
 </html>

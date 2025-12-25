@@ -11,10 +11,10 @@ class CheckUserRole
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Solo verificar si el usuario está autenticado
+        
         if (Auth::check()) {
             $user = Auth::user();
-            
+
             // Si el usuario no tiene rol, mostrar el modal
             if (is_null($user->rol)) {
                 session(['show_role_modal' => true]);

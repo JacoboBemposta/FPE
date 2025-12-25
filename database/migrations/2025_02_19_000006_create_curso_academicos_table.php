@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('provincia', 100)->nullable();;
             $table->date('inicio')->nullable();
             $table->date('fin')->nullable();
+            $table->boolean('archivado')->default(false)->after('fin');
+            $table->timestamp('archivado_en')->nullable()->after('archivado');
             $table->timestamps();
 
             // Opcional: índice compuesto para evitar duplicados

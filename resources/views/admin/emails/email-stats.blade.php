@@ -5,13 +5,262 @@
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-chart-bar mr-2"></i>Estadísticas de Emails
+                <i class="fas fa-chart-bar mr-2"></i>Panel de Estadísticas
             </h1>
-            <p class="text-muted">Panel de administración de emails enviados</p>
+            <p class="text-muted">Estadísticas completas de la plataforma</p>
         </div>
     </div>
 
-    {{-- Tarjetas de estadísticas --}}
+    {{-- SECCIÓN DE ESTADÍSTICAS DE USUARIOS --}}
+    <div class="row mb-4">
+        <div class="col-12 mb-3">
+            <h4 class="h5 mb-0 text-gray-800">
+                <i class="fas fa-users mr-2"></i>Estadísticas de Usuarios
+            </h4>
+            <hr class="mt-2">
+        </div>
+
+        {{-- Tarjetas de usuarios totales --}}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Usuarios</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['total_usuarios']) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Academias</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['total_academias']) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-university fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Docentes</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['total_profesores']) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Alumnos</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['total_alumnos']) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Tarjetas adicionales de usuarios --}}
+
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Activos</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['usuarios_activos']) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Inactivos</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['usuarios_inactivos']) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Distribución de usuarios por rol --}}
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-pie mr-2"></i>Distribución de Usuarios por Rol
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Rol</th>
+                                    <th>Cantidad</th>
+                                    <th>Porcentaje</th>
+                                    <th>Gráfico</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php $totalUsers = $userStats['total_usuarios']; @endphp
+                                @foreach($usuariosPorRol as $rol)
+                                @php 
+                                    $porcentaje = $totalUsers > 0 ? ($rol->total / $totalUsers) * 100 : 0;
+                                    $color = match($rol->rol) {
+                                        'academia' => 'primary',
+                                        'profesor' => 'success',
+                                        'alumno' => 'info',
+                                        default => 'secondary'
+                                    };
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <span class="badge badge-{{ $color }}">
+                                            @if($rol->rol === 'academia')
+                                                Academia
+                                            @elseif($rol->rol === 'profesor')
+                                                Docente
+                                            @elseif($rol->rol === 'alumno')
+                                                Alumno
+                                            @else
+                                                {{ $rol->rol }}
+                                            @endif
+                                        </span>
+                                    </td>
+                                    <td>{{ number_format($rol->total) }}</td>
+                                    <td>{{ number_format($porcentaje, 1) }}%</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-{{ $color }}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ $porcentaje }}%"
+                                                 aria-valuenow="{{ $porcentaje }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-active">
+                                    <th>Total</th>
+                                    <th>{{ number_format($totalUsers) }}</th>
+                                    <th>100%</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-line mr-2"></i>Evolución de Registros (últimos 6 meses)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Mes</th>
+                                    <th>Nuevos Usuarios</th>
+                                    <th>Gráfico</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php $maxUsuarios = $evolucionUsuarios->max('total'); @endphp
+                                @foreach($evolucionUsuarios as $item)
+                                @php
+                                    $width = $maxUsuarios > 0 ? ($item->total / $maxUsuarios) * 100 : 0;
+                                @endphp
+                                <tr>
+                                    <td>{{ \Carbon\Carbon::parse($item->mes . '-01')->format('M Y') }}</td>
+                                    <td>{{ $item->total }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-info" 
+                                                 role="progressbar" 
+                                                 style="width: {{ $width }}%"
+                                                 aria-valuenow="{{ $item->total }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="{{ $maxUsuarios }}">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Título para sección de emails --}}
+    <div class="row mb-4">
+        <div class="col-12 mb-3">
+            <h4 class="h5 mb-0 text-gray-800">
+                <i class="fas fa-envelope mr-2"></i>Estadísticas de Emails
+            </h4>
+            <hr class="mt-2">
+        </div>
+    </div>
+
+    {{-- Tarjetas de estadísticas de emails (código existente) --}}
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
@@ -82,9 +331,9 @@
         </div>
     </div>
 
-    {{-- Gráficos y estadísticas detalladas --}}
+    {{-- Resto del código existente (secciones de emails) --}}
+    {{-- Distribución por contexto --}}
     <div class="row mb-4">
-        {{-- Distribución por contexto --}}
         <div class="col-lg-6 mb-4">
             <div class="card shadow">
                 <div class="card-header py-3">
@@ -337,7 +586,6 @@
                                     <th>Contexto</th>
                                     <th>Estado</th>
                                     <th>Fecha</th>
-                                    <th>IP</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -378,7 +626,6 @@
                                     <td>
                                         <small>{{ \Carbon\Carbon::parse($email->created_at)->format('d/m/Y H:i') }}</small>
                                     </td>
-                                    <td><small class="text-muted">{{ $email->ip }}</small></td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-info" 
                                                 onclick="verDetalle({{ $email->id }})"
@@ -427,14 +674,11 @@ function verDetalle(id) {
                         <p><strong>ID:</strong> ${data.id}</p>
                         <p><strong>Estado:</strong> <span class="badge badge-${data.status === 'sent' ? 'success' : 'danger'}">${data.status}</span></p>
                         <p><strong>Contexto:</strong> ${data.contexto}</p>
-                        <p><strong>Template:</strong> ${data.template}</p>
                     </div>
                     <div class="col-md-6">
                         <h6>Remitente/Destinatario</h6>
                         <p><strong>Remitente ID:</strong> ${data.remitente_id}</p>
                         <p><strong>Destinatario:</strong> ${data.destinatario_email}</p>
-                        <p><strong>IP:</strong> ${data.ip}</p>
-                        <p><strong>User Agent:</strong> <small>${data.user_agent}</small></p>
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -463,8 +707,6 @@ function verDetalle(id) {
             document.getElementById('detalleContent').innerHTML = '<div class="alert alert-danger">Error al cargar los detalles</div>';
         });
 }
-
-// Añadir ruta para obtener detalles
 </script>
 @endpush
 
@@ -474,7 +716,7 @@ function verDetalle(id) {
 }
 .badge {
     font-size: 0.8em;
-    color:black;
+    color: black;
 }
 .progress {
     height: 20px;

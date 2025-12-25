@@ -251,19 +251,18 @@
                 <input type="hidden" name="academia_id" id="academia_id" value="">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="recipientEmail" class="form-label fw-bold">Para:</label>
-                        <input type="email" class="form-control" id="recipientEmail" name="email" value="" required>
-                        <small class="form-text text-muted">Ingresa el email de la academia (ej: jacobo.bemposta@gmail.com)</small>
+
+                        <input type="email" class="form-control" id="recipientEmail" name="email" value="" required hidden>
                     </div>
                     
                     <div class="mb-3">
                         <label for="emailSubject" class="form-label fw-bold">Asunto:</label>
-                        <input type="text" class="form-control" id="emailSubject" name="asunto" value="" required>
+                        <input type="text" class="form-control" id="emailSubject" name="asunto" value="" required readonly>
                     </div>
                     
                     <div class="mb-3">
                         <label for="emailMessage" class="form-label fw-bold">Mensaje:</label>
-                        <textarea class="form-control" id="emailMessage" name="mensaje" rows="8" required></textarea>
+                        <textarea class="form-control" id="emailMessage" name="mensaje" rows="8" required readonly></textarea>
                     </div>
 
                     <!-- Información del curso (solo lectura) -->
@@ -374,15 +373,15 @@ document.addEventListener('click', async function(e) {
         document.getElementById('emailSubject').value = `Consulta sobre el curso: ${cursoNombre}`;
 
         // Generar mensaje predeterminado
-        const mensajePredeterminado = `Estimados señores de ${academiaNombre},
+        const mensajePredeterminado = `Estimado equipo responsable,
 
-Me dirijo a ustedes para solicitar más información sobre el curso "${cursoNombre}" que se imparte en ${municipio} con fechas de ${inicio} a ${fin}.
+Me pongo en contacto con ustedes para solicitar información adicional sobre el curso «${cursoNombre}», que se impartirá en ${municipio} entre las fechas ${inicio} y ${fin}.
 
-Agradecería que me enviaran información detallada sobre el programa, requisitos de inscripción, coste y cualquier otra información relevante.
+Agradecería que pudieran facilitarme detalles sobre el contenido del programa, los requisitos de inscripción y cualquier otra información que consideren relevante.
 
-Quedo a la espera de su respuesta.
+Quedo a su disposición para ampliar cualquier dato que necesiten y agradezco de antemano su atención.
 
-Atentamente,
+Reciban un cordial saludo,
 ${userName}
 ${userEmail}`;
         document.getElementById('emailMessage').value = mensajePredeterminado;

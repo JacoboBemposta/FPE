@@ -12,7 +12,7 @@ class AlumnoCurso extends Model
     protected $fillable = ['curso_academico_id','dni', 'nombre','email', 'telefono','es_profesor'];
 
 
-    // Definir relación con CursoAcademico
+    //Relación con CursoAcademico
     public function cursoAcademico()
     {
         return $this->belongsTo(CursoAcademico::class, 'curso_academico_id');

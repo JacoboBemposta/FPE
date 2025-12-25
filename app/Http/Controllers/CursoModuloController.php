@@ -21,7 +21,7 @@ class CursoModuloController extends Controller
 
     public function store(Request $request, Curso $curso)
     {
-        // Validación básica (sin unique en código)
+        
         $request->validate([
             'curso_id' => 'required|exists:cursos,id',
             'codigo' => 'required|string|max:50',
@@ -30,7 +30,7 @@ class CursoModuloController extends Controller
         ]);
     
         try {
-            // Limpieza de inputs
+           
             $codigo = htmlspecialchars(strip_tags($request->codigo));
             $nombre = htmlspecialchars(strip_tags($request->nombre));
             $horas = $request->horas ? (int)htmlspecialchars(strip_tags($request->horas)) : null;

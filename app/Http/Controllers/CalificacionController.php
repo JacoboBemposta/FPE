@@ -8,24 +8,7 @@ use Illuminate\Http\Request;
 
 class CalificacionController extends Controller
 {
-    // public function showCalificaciones($curso_academico_id)
-    // {
-    //     $cursoAcademico = CursoAcademico::with(['curso.modulos.unidades', 'alumnos'])->findOrFail($curso_academico_id);
-    //     return view('calificaciones.index', compact('cursoAcademico'));
-    // }
 
-    // public function updateCalificacion(Request $request, $calificacion_id)
-    // {
-    //     $calificacion = Calificacion::findOrFail($calificacion_id);
-    //     $calificacion->nota = $request->nota;
-    //     $calificacion->save();
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Calificación actualizada correctamente',
-    //         'nota' => $calificacion->nota
-    //     ]);
-    // }
     public function update(Request $request, Calificacion $calificacion)
     {
         $request->validate([

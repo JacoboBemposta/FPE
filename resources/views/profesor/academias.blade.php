@@ -2,48 +2,55 @@
 
 @section('content')
 <div class="container py-5">
+    <div class="page-header-modern bg-gradient-primary rounded-3 p-4 mb-4 shadow-sm">
+        <h1 class="text-white mb-2"><i class="fas fa-university me-2"></i>Cursos que se van a impartir</h1>
+        <p class="text-white-50 mb-0"><small><i class="fas fa-info-circle me-1"></i> Solo se muestran cursos que no han iniciado</small></p>
+    </div>
     <div class="card shadow-lg border-0 rounded-lg">
-        <!-- Encabezado con gradiente -->
-        <div class="card-header bg-gradient-primary text-white">
-            <h2 class="text-center my-2"><i class="fas fa-university me-2"></i>Academias relacionadas a cursos</h2>
-        </div>
-
         <div class="card-body">
-            <!-- Buscador Avanzado con diseño moderno -->
+            <!-- Buscador Avanzado  -->
             <form id="searchForm" method="GET" action="{{ route('profesor.ver_academias') }}" class="mb-5">
                 <div class="row g-3">
-                    <div class="col-md-4">
-                        <div class="form-floating">
-                            <input type="text" name="academia_nombre" class="form-control" id="academiaInput" placeholder="Academia" value="{{ request('academia_nombre') }}">
-                            <label for="academiaInput"><i class="fas fa-school me-2"></i>Academia</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-floating">
                             <input type="text" name="curso_codigo" class="form-control" id="codigoInput" placeholder="Código" value="{{ request('curso_codigo') }}">
                             <label for="codigoInput"><i class="fas fa-hashtag me-2"></i>Código del Curso</label>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-floating">
                             <input type="text" name="curso_nombre" class="form-control" id="nombreCursoInput" placeholder="Nombre" value="{{ request('curso_nombre') }}">
                             <label for="nombreCursoInput"><i class="fas fa-book me-2"></i>Nombre del Curso</label>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    
+                    <!-- NUEVO: Filtro por nivel de cualificación -->
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <select name="nivel_cualificacion" class="form-control" id="nivelCualificacionSelect">
+                                <option value="todos" {{ request('nivel_cualificacion', 'todos') == 'todos' ? 'selected' : '' }}>Todos los niveles</option>
+                                <option value="1" {{ request('nivel_cualificacion') == '1' ? 'selected' : '' }}>Nivel 1</option>
+                                <option value="2" {{ request('nivel_cualificacion') == '2' ? 'selected' : '' }}>Nivel 2</option>
+                                <option value="3" {{ request('nivel_cualificacion') == '3' ? 'selected' : '' }}>Nivel 3</option>
+                            </select>
+                            <label for="nivelCualificacionSelect"><i class="fas fa-layer-group me-2"></i>Nivel de cualificación</label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
                         <div class="form-floating">
                             <input type="text" name="provincia" class="form-control" id="provinciaInput" placeholder="Provincia" value="{{ request('provincia') }}">
                             <label for="provinciaInput"><i class="fas fa-map-marked-alt me-2"></i>Provincia</label>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-floating">
                             <input type="text" name="municipio" class="form-control" id="municipioInput" placeholder="Municipio" value="{{ request('municipio') }}">
                             <label for="municipioInput"><i class="fas fa-map-marker-alt me-2"></i>Municipio</label>
                         </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-floating">
                             <select name="docente_asignado" class="form-control" id="docenteAsignadoSelect">
                                 <option value="todos" {{ request('docente_asignado', 'todos') == 'todos' ? 'selected' : '' }}>Todos los cursos</option>
@@ -53,8 +60,9 @@
                             <label for="docenteAsignadoSelect"><i class="fas fa-chalkboard-teacher me-2"></i>Docente asignado</label>
                         </div>
                     </div>
+                    
                     <!-- Selector de elementos por página -->
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-floating">
                             <select name="per_page" class="form-control" id="perPageSelect" onchange="this.form.submit()">
                                 <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 por página</option>
@@ -62,18 +70,41 @@
                                 <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 por página</option>
                                 <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100 por página</option>
                             </select>
-                            <label for="perPageSelect">Resultados por página</label>
+                            <label for="perPageSelect"><i class="fas fa-list-ol me-2"></i>Resultados por página</label>
                         </div>
                     </div>
                 </div>
                 
-                <div class="d-flex justify-content-end mt-4">
-                    <button type="submit" class="btn btn-primary me-2 px-4">
-                        <i class="fas fa-search me-2"></i>Buscar
-                    </button>
-                    <button type="button" id="clearBtn" class="btn btn-outline-secondary px-4">
-                        <i class="fas fa-broom me-2"></i>Limpiar
-                    </button>
+                <div class="d-flex justify-content-between mt-4">
+                    <!-- Contador de resultados activos -->
+                    @if(request()->hasAny(['curso_codigo', 'curso_nombre', 'nivel_cualificacion', 'provincia', 'municipio', 'docente_asignado']))
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-primary rounded-pill me-2">Filtros activos</span>
+                        <small class="text-muted">
+                            @php
+                                $filtrosActivos = 0;
+                                if(request('curso_codigo')) $filtrosActivos++;
+                                if(request('curso_nombre')) $filtrosActivos++;
+                                if(request('nivel_cualificacion') && request('nivel_cualificacion') != 'todos') $filtrosActivos++;
+                                if(request('provincia')) $filtrosActivos++;
+                                if(request('municipio')) $filtrosActivos++;
+                                if(request('docente_asignado') && request('docente_asignado') != 'todos') $filtrosActivos++;
+                            @endphp
+                            {{ $filtrosActivos }} filtro(s) aplicado(s)
+                        </small>
+                    </div>
+                    @else
+                    <div></div> <!-- Espaciador -->
+                    @endif
+                    
+                    <div class="d-flex">
+                        <button type="submit" class="btn btn-primary me-2 px-4 btn-modern-action">
+                            <i class="fas fa-search me-2"></i>Buscar
+                        </button>
+                        <button type="button" id="clearBtn" class="btn btn-outline-secondary px-4">
+                            <i class="fas fa-broom me-2"></i>Limpiar
+                        </button>
+                    </div>
                 </div>
             </form>
 
@@ -91,9 +122,9 @@
                 <table class="table table-hover table-striped align-middle">
                     <thead class="table-dark">
                         <tr>
-                            {{-- <th><i class="fas fa-school me-2"></i>Academia</th> --}}
                             <th><i class="fas fa-hashtag me-2"></i>Código</th>
                             <th><i class="fas fa-book me-2"></i>Curso</th>
+                            <th><i class="fas fa-layer-group me-2"></i>Nivel</th>
                             <th><i class="fas fa-map-marker-alt me-2"></i>Municipio</th>
                             <th><i class="fas fa-map-marked-alt me-2"></i>Provincia</th>
                             <th><i class="fas fa-calendar-alt me-2"></i>Inicio</th>
@@ -105,41 +136,55 @@
                     <tbody>
                         @forelse ($cursosAcademicos as $cursoAcademico) 
                             <tr>
-                                
-                                {{-- <td>{{ $cursoAcademico->academia_nombre ?? 'N/A' }}</td> --}}
                                 <td>{{ $cursoAcademico->curso_codigo ?? 'N/A' }}</td>
                                 <td>{{ $cursoAcademico->curso_nombre ?? 'N/A' }}</td>
+                                <td>
+                                    @php
+                                        $nivel = '';
+                                        if(isset($cursoAcademico->cualificacion)) {
+                                            $ultimoDigito = substr($cursoAcademico->cualificacion, -1);
+                                            if(in_array($ultimoDigito, ['1', '2', '3'])) {
+                                                $nivel = $ultimoDigito;
+                                            }
+                                        }
+                                    @endphp
+                                    @if($nivel)
+                                        <span class="badge nivel-badge nivel-{{ $nivel }}">
+                                            Nivel {{ $nivel }}
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary">N/A</span>
+                                    @endif
+                                </td>
                                 <td>{{ $cursoAcademico->municipio ?? 'N/A' }}</td>
                                 <td>{{ $cursoAcademico->provincia ?? 'N/A' }}</td>
                                 <td>{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}</td>
                                 <td>{{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}</td>
                                 <td class="docente-col">
                                     @if($cursoAcademico->docente_nombre)
-                                        <span class="badge bg-success text-dark">asignado</span>
+                                        <span class="badge bg-success">Asignado</span>
                                     @else
                                         <span class="badge bg-warning text-dark">Sin asignar</span>
                                     @endif
                                 </td>
-<td>
-    @if($cursoAcademico->ya_enviado_cv)
-        <span class="badge bg-success" style="font-size: 0.875rem; padding: 0.375rem 0.75rem;">
-            <i class="fas fa-check-circle me-1"></i> Mail Enviado
-        </span>
-    @else
-        <button type="button" class="btn btn-primary btn-sm contact-btn" 
-                data-bs-toggle="modal" 
-                data-bs-target="#contactModal"
-                data-academia-id="{{ $cursoAcademico->academia_id ?? '' }}"
-                data-academia-nombre="{{ $cursoAcademico->academia_nombre ?? 'N/A' }}"
-                data-curso-acad-id="{{ $cursoAcademico->curso_acad_id ?? '' }}"
-                data-curso-nombre="{{ $cursoAcademico->curso_nombre ?? 'N/A' }}"
-                data-municipio="{{ $cursoAcademico->municipio ?? 'N/A' }}"
-                data-inicio="{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}"
-                data-fin="{{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}">
-            <i class="fas fa-envelope me-1"></i> Contactar
-        </button>
-    @endif
-</td>
+                                <td>
+                                    @if($cursoAcademico->ya_enviado_cv)
+                                        <span class="badge bg-success" style="font-size: 0.875rem; padding: 0.375rem 0.75rem;">
+                                            <i class="fas fa-check-circle me-1"></i> Mail Enviado
+                                        </span>
+                                    @else
+                                        <button type="button" class="btn btn-primary btn-sm contact-btn btn-modern-action" 
+                                                data-academia-id="{{ $cursoAcademico->academia_id ?? '' }}"
+                                                data-academia-nombre="{{ $cursoAcademico->academia_nombre ?? 'N/A' }}"
+                                                data-curso-acad-id="{{ $cursoAcademico->curso_acad_id ?? '' }}"
+                                                data-curso-nombre="{{ $cursoAcademico->curso_nombre ?? 'N/A' }}"
+                                                data-municipio="{{ $cursoAcademico->municipio ?? 'N/A' }}"
+                                                data-inicio="{{ $cursoAcademico->inicio ? \Carbon\Carbon::parse($cursoAcademico->inicio)->format('d/m/Y') : 'N/A' }}"
+                                                data-fin="{{ $cursoAcademico->fin ? \Carbon\Carbon::parse($cursoAcademico->fin)->format('d/m/Y') : 'N/A' }}">
+                                            <i class="fas fa-envelope me-1"></i> Contactar
+                                        </button>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
@@ -218,14 +263,13 @@
                 <div class="d-flex align-items-center">
                     <span class="text-muted me-2">Ir a:</span>
                     <form method="GET" action="{{ route('profesor.ver_academias') }}" class="d-flex">
-                        <input type="hidden" name="academia_nombre" value="{{ request('academia_nombre') }}">
                         <input type="hidden" name="curso_codigo" value="{{ request('curso_codigo') }}">
                         <input type="hidden" name="curso_nombre" value="{{ request('curso_nombre') }}">
+                        <input type="hidden" name="nivel_cualificacion" value="{{ request('nivel_cualificacion', 'todos') }}">
                         <input type="hidden" name="provincia" value="{{ request('provincia') }}">
                         <input type="hidden" name="municipio" value="{{ request('municipio') }}">
                         <input type="hidden" name="docente_asignado" value="{{ request('docente_asignado', 'todos') }}">
                         <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
-                        
                         
                         <input type="number" 
                                name="page" 
@@ -234,7 +278,7 @@
                                min="1" 
                                max="{{ $cursosAcademicos->lastPage() }}"
                                value="{{ $cursosAcademicos->currentPage() }}">
-                        <button type="submit" class="btn btn-sm btn-primary ms-2">
+                        <button type="submit" class="btn btn-sm btn-primary ms-2 btn-modern-action">
                             <i class="fas fa-arrow-right"></i>
                         </button>
                     </form>
@@ -243,10 +287,20 @@
             @endif
 
             <!-- Botón Volver -->
-            <div class="d-flex justify-content-end mt-4">
-                <a href="{{ route('profesor.miscursos') }}" class="btn btn-success px-4">
-                    <i class="fas fa-arrow-left me-2"></i>Volver a Mis Cursos
-                </a>
+            <div class="text-center mt-4 pt-3 border-top">
+                @if(Auth::user()?->rol === 'academia')
+                    <a href="{{ route('academia.miscursos') }}" class="btn btn-secondary btn-modern-back">
+                        <i class="fas fa-arrow-left me-2"></i> Volver a Mis Cursos
+                    </a>
+                @elseif(Auth::user()?->rol === 'profesor')
+                    <a href="{{ route('profesor.miscursos') }}" class="btn btn-secondary btn-modern-back">
+                        <i class="fas fa-arrow-left me-2"></i> Volver a Mis Cursos
+                    </a>
+                @else
+                    <a href="{{ url()->previous() }}" class="btn btn-secondary btn-modern-back">
+                        <i class="fas fa-arrow-left me-2"></i> Volver
+                    </a>
+                @endif
             </div>
         </div>
     </div>
@@ -274,7 +328,7 @@
                     
                     <div class="mb-3">
                         <label for="emailSubject" class="form-label fw-bold">Asunto:</label>
-                        <input type="text" class="form-control" id="emailSubject" name="subject" value="Candidatura Docente" readonly>
+                        <input type="text" class="form-control" id="emailSubject" name="subject" value="Candidatura Docente" >
                     </div>
                     
                     <div class="mb-3">
@@ -323,7 +377,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-times me-1"></i> Cancelar
                     </button>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary btn-modern-action">
                         <i class="fas fa-paper-plane me-1"></i> Enviar Candidatura
                     </button>
                 </div>
@@ -332,289 +386,191 @@
     </div>
 </div>
 
-<!-- JavaScript mejorado para el buscador y modal -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  
-    const userName = @json(auth()->user()->name);
-    const userEmail = @json(auth()->user()->email);
+// Pasar el estado del sistema desde PHP a JavaScript
+window.sistemaSuscripcionesActivo = @json($sistema_suscripciones_activo);
+window.userRol = @json($user->rol);
 
-    // ========== LIMPIAR FORMULARIO DE BÚSQUEDA ==========
-    const clearBtn = document.getElementById('clearBtn');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-            const form = document.getElementById('searchForm');
-            const inputs = form.querySelectorAll('input[type="text"]');
-            const selects = form.querySelectorAll('select');
-            
-            // Limpiar inputs de texto
-            inputs.forEach(input => input.value = '');
-            
-            // Resetear selects a valores por defecto
-            selects.forEach(select => {
-                if (select.name === 'per_page') {
-                    select.value = '10';
-                } else if (select.name === 'docente_asignado') {
-                    select.value = 'todos';
-                }
-            });
-            
-            form.submit();
-        });
-    }
+console.log('Estado del sistema para docente:', window.sistemaSuscripcionesActivo);
+console.log('Rol del usuario:', window.userRol);
 
-    // ========== VALIDACIÓN DEL FORMULARIO DE BÚSQUEDA ==========
-    const searchForm = document.getElementById('searchForm');
-    if (searchForm) {
-        searchForm.addEventListener('submit', function(e) {
-            const academiaInput = document.getElementById('academiaInput');
-            const cursoNombreInput = document.getElementById('nombreCursoInput');
-            const cursoCodigoInput = document.getElementById('codigoInput');
-            const provinciaInput = document.getElementById('provinciaInput');
-            const municipioInput = document.getElementById('municipioInput');
-            
-            // Normalizar todos los campos de texto a minúsculas y trim
-            if(academiaInput && academiaInput.value) {
-                academiaInput.value = academiaInput.value.trim().toLowerCase();
+// Función para abrir el modal de contacto (solo se llama cuando sistema está inactivo)
+function abrirModalContactoDocente(academiaId, academiaNombre, cursoAcadId, cursoNombre, municipio, inicio, fin) {
+    // Llenar los datos en el modal
+    document.getElementById('modalAcademiaNombre').textContent = academiaNombre;
+    document.getElementById('modalCursoNombre').textContent = cursoNombre;
+    document.getElementById('modalMunicipio').textContent = municipio;
+    document.getElementById('modalFechas').textContent = `${inicio} - ${fin}`;
+    
+    // Establecer el ID del curso académico
+    document.getElementById('cursoAcadIdInput').value = cursoAcadId;
+    
+    // Obtener el email de la academia
+    const emailInput = document.getElementById('recipientEmail');
+    emailInput.value = '';
+    emailInput.placeholder = "Cargando email de la academia...";
+    emailInput.disabled = true;
+    
+    // Llamar a AJAX para obtener el email de la academia
+    fetch(`/profesor/obtener-email/${academiaId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
             }
-            
-            if(cursoNombreInput && cursoNombreInput.value) {
-                cursoNombreInput.value = cursoNombreInput.value.trim().toLowerCase();
-            }
-            
-            if(cursoCodigoInput && cursoCodigoInput.value) {
-                cursoCodigoInput.value = cursoCodigoInput.value.trim().toLowerCase();
-            }
-            
-            if(provinciaInput && provinciaInput.value) {
-                provinciaInput.value = provinciaInput.value.trim().toLowerCase();
-            }
-            
-            if(municipioInput && municipioInput.value) {
-                municipioInput.value = municipioInput.value.trim().toLowerCase();
-            }
-        });
-    }
-
-// ========== MANEJO DEL MODAL DE CONTACTO CON AJAX ==========
-document.addEventListener('click', async function(e) {
-    if (e.target.closest('.contact-btn')) {
-        const button = e.target.closest('.contact-btn');
-  
-        
-        // Obtener datos del botón
-        const academiaId = button.getAttribute('data-academia-id');
-        const cursoAcadId = button.getAttribute('data-curso-acad-id');
-        const academiaNombre = button.getAttribute('data-academia-nombre');
-        const cursoNombre = button.getAttribute('data-curso-nombre');
-        const municipio = button.getAttribute('data-municipio');
-        const inicio = button.getAttribute('data-inicio');
-        const fin = button.getAttribute('data-fin');
-
-
-
-        // Actualizar información del curso en el modal (sin email aún)
-        const cursoAcadIdInput = document.getElementById('cursoAcadIdInput');
-        if (cursoAcadIdInput && cursoAcadId) {
-            cursoAcadIdInput.value = cursoAcadId;
-
-        }
-        const modalAcademiaNombre = document.getElementById('modalAcademiaNombre');
-        const modalCursoNombre = document.getElementById('modalCursoNombre');
-        const modalMunicipio = document.getElementById('modalMunicipio');
-        const modalFechas = document.getElementById('modalFechas');
-        
-        if (modalAcademiaNombre) modalAcademiaNombre.textContent = academiaNombre;
-        if (modalCursoNombre) modalCursoNombre.textContent = cursoNombre;
-        if (modalMunicipio) modalMunicipio.textContent = municipio;
-        if (modalFechas) modalFechas.textContent = `${inicio} - ${fin}`;
-
-        // Limpiar y preparar campo de email
-        const emailInput = document.getElementById('recipientEmail');
-        if (emailInput) {
-            emailInput.value = '';
-            emailInput.placeholder = "Cargando email de la academia...";
-            emailInput.disabled = true;
-        }
-
-        try {
-            // Obtener email de la academia por AJAX
-            if (academiaId) {
-       
-                
-                // Usar la ruta correcta - IMPORTANTE
-                const url = `/profesor/obtener-email/${academiaId}`;
-        
-                
-                const response = await fetch(url, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                
-       
-                
-                if (response.ok) {
-                    const data = await response.json();
-               
-                    
-                    if (data.email) {
-                        // Email obtenido correctamente
-                        if (emailInput) {
-                            emailInput.value = data.email;
-                            emailInput.placeholder = "";
-                            emailInput.disabled = false;
-                  
-                        }
-                    } else if (data.error) {
-                        // Error del servidor
-                        console.error('Error del servidor:', data.error);
-                        if (emailInput) {
-                            emailInput.value = '';
-                            emailInput.placeholder = `Error: ${data.error}. Ingresa manualmente.`;
-                            emailInput.disabled = false;
-                        }
-                    }
-                } else {
-                    // Error HTTP
-                    console.error('Error HTTP:', response.status, response.statusText);
-                    if (emailInput) {
-                        emailInput.value = '';
-                        emailInput.placeholder = `Error ${response.status}. Ingresa manualmente.`;
-                        emailInput.disabled = false;
-                    }
-                }
+            return response.json();
+        })
+        .then(data => {
+            if (data.email) {
+                emailInput.value = data.email;
+                emailInput.placeholder = "";
             } else {
-                // No hay academiaId
-                console.error('No se encontró academiaId en el botón');
-                if (emailInput) {
-                    emailInput.value = '';
-                    emailInput.placeholder = "Error: ID de academia no encontrado. Ingresa manualmente.";
-                    emailInput.disabled = false;
-                }
-            }
-        } catch (error) {
-            console.error('Error en la petición AJAX:', error);
-            if (emailInput) {
                 emailInput.value = '';
-                emailInput.placeholder = "Error de conexión. Ingresa manualmente.";
-                emailInput.disabled = false;
+                emailInput.placeholder = "Error al obtener email. Ingrese manualmente.";
             }
-        }
+            emailInput.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            emailInput.value = '';
+            emailInput.placeholder = "Error de conexión. Ingrese manualmente.";
+            emailInput.disabled = false;
+        });
+    
+    // Generar mensaje predeterminado
+    const userName = "{{ Auth::user()->name }}";
+    const userEmail = "{{ Auth::user()->email }}";
+    const emailMessage = document.getElementById('emailMessage');
+    
+    if (emailMessage) {
+        const mensajePredeterminado = `Estimado equipo de ${academiaNombre},
 
-        // Generar mensaje predeterminado
-        const emailMessage = document.getElementById('emailMessage');
-        if (emailMessage) {
-            const mensajePredeterminado = `Estimados señores de ${academiaNombre},
+Me pongo en contacto con ustedes para manifestar mi interés en la plaza docente correspondiente al curso «${cursoNombre}», que se impartirá en ${municipio}.
 
-Me dirijo a ustedes para expresar mi interés en la plaza docente para el curso "${cursoNombre}" que se imparte en ${municipio}.
+Tras revisar la información disponible sobre la formación, prevista entre las fechas ${inicio} y ${fin}, considero que mi perfil profesional y experiencia docente se ajustan adecuadamente a los objetivos del curso.
 
-He revisado la información del curso con fechas de ${inicio} a ${fin} y considero que mi perfil y experiencia son adecuados para impartir esta formación.
-
-Adjunto mi CV para su consideración y quedo a su disposición para una entrevista personal.
+Adjunto mi currículum vitae para su valoración y quedo a su disposición para ampliar cualquier información o concertar una entrevista cuando lo estimen oportuno.
 
 Agradeciendo de antemano su atención, reciban un cordial saludo.
 
-Atentamente,
+
     ${userName}
     Email: ${userEmail}
     Teléfono: [Su teléfono de contacto]`;
 
-            emailMessage.value = mensajePredeterminado;
+        emailMessage.value = mensajePredeterminado;
+    }
+    
+    // Abrir el modal
+    const modal = new bootstrap.Modal(document.getElementById('contactModal'));
+    modal.show();
+}
+
+// Manejador de clic para el botón "Contactar"
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.contact-btn')) {
+        const button = e.target.closest('.contact-btn');
+        
+        // Verificar primero si el sistema está activo
+        if (window.sistemaSuscripcionesActivo) {
+            // Sistema ACTIVO: redirigir a la vista de planes
+            console.log('Sistema de suscripciones ACTIVO - redirigiendo a planes');
+            window.location.href = '{{ route("suscripcion.planes") }}';
+            return; // Salir de la función
         }
         
-        // Limpiar archivo adjunto
-        const cvAttachment = document.getElementById('cvAttachment');
-        const filePreview = document.getElementById('filePreview');
-        if (cvAttachment) cvAttachment.value = '';
-        if (filePreview) filePreview.style.display = 'none';
+        // Sistema INACTIVO: abrir modal de contacto
+        console.log('Sistema de suscripciones INACTIVO - abriendo modal de contacto');
+        
+        // Obtener datos del botón
+        const academiaId = button.getAttribute('data-academia-id');
+        const academiaNombre = button.getAttribute('data-academia-nombre');
+        const cursoAcadId = button.getAttribute('data-curso-acad-id');
+        const cursoNombre = button.getAttribute('data-curso-nombre');
+        const municipio = button.getAttribute('data-municipio');
+        const inicio = button.getAttribute('data-inicio');
+        const fin = button.getAttribute('data-fin');
+        
+        // Llamar a la función para abrir el modal
+        abrirModalContactoDocente(academiaId, academiaNombre, cursoAcadId, cursoNombre, municipio, inicio, fin);
     }
 });
 
-    // ========== VISTA PREVIA DEL ARCHIVO ADJUNTO ==========
-    const cvAttachment = document.getElementById('cvAttachment');
-    if (cvAttachment) {
-        cvAttachment.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const filePreview = document.getElementById('filePreview');
-            const fileName = document.getElementById('fileName');
-            
-            if (file && filePreview && fileName) {
-                // Validar tamaño (10MB máximo)
-                const maxSize = 10 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
-                    this.value = '';
-                    return;
-                }
-                
-                // Mostrar vista previa
-                fileName.textContent = file.name;
-                filePreview.style.display = 'block';
-            }
-        });
-    }
-
-    // ========== FUNCIÓN PARA ELIMINAR ARCHIVO ==========
-    window.removeFile = function() {
-        const cvAttachment = document.getElementById('cvAttachment');
+// ========== VISTA PREVIA DEL ARCHIVO ADJUNTO ==========
+const cvAttachment = document.getElementById('cvAttachment');
+if (cvAttachment) {
+    cvAttachment.addEventListener('change', function(e) {
+        const file = e.target.files[0];
         const filePreview = document.getElementById('filePreview');
-        if (cvAttachment) cvAttachment.value = '';
-        if (filePreview) filePreview.style.display = 'none';
-    }
-
-    // ========== VALIDACIÓN DEL FORMULARIO DE CONTACTO ==========
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            const mensaje = document.getElementById('emailMessage');
-            const archivo = document.getElementById('cvAttachment');
-            
-            if (mensaje && !mensaje.value.trim()) {
-                e.preventDefault();
-                alert('Por favor, complete el mensaje de candidatura.');
+        const fileName = document.getElementById('fileName');
+        
+        if (file && filePreview && fileName) {
+            // Validar tamaño (10MB máximo)
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
+                this.value = '';
                 return;
             }
             
-            // Validar tamaño del archivo
-            if (archivo && archivo.files[0]) {
-                const maxSize = 10 * 1024 * 1024;
-                if (archivo.files[0].size > maxSize) {
-                    e.preventDefault();
-                    alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
-                    return;
-                }
-            }
-            
-            // Mostrar indicador de envío
-            const submitBtn = this.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
-                submitBtn.disabled = true;
-            }
-        });
-    }
-
-    // ========== EFECTOS VISUALES (OPCIONALES) ==========
-    const tableRows = document.querySelectorAll('.table-hover tbody tr');
-    tableRows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = 'rgba(0, 123, 255, 0.05)';
-        });
-        row.addEventListener('mouseleave', function() {
-            this.style.backgroundColor = '';
-        });
+            // Mostrar vista previa
+            fileName.textContent = file.name;
+            filePreview.style.display = 'block';
+        }
     });
-});
-</script>
+}
 
+// ========== FUNCIÓN PARA ELIMINAR ARCHIVO ==========
+window.removeFile = function() {
+    const cvAttachment = document.getElementById('cvAttachment');
+    const filePreview = document.getElementById('filePreview');
+    if (cvAttachment) cvAttachment.value = '';
+    if (filePreview) filePreview.style.display = 'none';
+}
+
+// ========== VALIDACIÓN DEL FORMULARIO DE CONTACTO ==========
+const contactForm = document.getElementById('contactForm');
+if (contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+        const mensaje = document.getElementById('emailMessage');
+        const archivo = document.getElementById('cvAttachment');
+        
+        if (mensaje && !mensaje.value.trim()) {
+            e.preventDefault();
+            alert('Por favor, complete el mensaje de candidatura.');
+            return;
+        }
+        
+        // Validar tamaño del archivo
+        if (archivo && archivo.files[0]) {
+            const maxSize = 10 * 1024 * 1024;
+            if (archivo.files[0].size > maxSize) {
+                e.preventDefault();
+                alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
+                return;
+            }
+        }
+        
+        // Mostrar indicador de envío
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
+            submitBtn.disabled = true;
+        }
+    });
+}
+</script>
 
 <!-- Estilos CSS personalizados -->
 <style>
+    .page-header-modern {
+        background: linear-gradient(135deg, #4361ee, #3a0ca3) !important;
+    }
+    
     .card {
         border: none;
         overflow: hidden;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     }
     
     .card-header {
@@ -630,42 +586,111 @@ Atentamente,
         left: 1rem;
         top: 50%;
         transform: translateY(-50%);
-        color: #6c757d;
+        color: #4361ee;
     }
     
     .form-control:focus {
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        border-color: #4361ee;
     }
     
     .table th {
         white-space: nowrap;
+        background-color: #4361ee;
+        color: white;
+        border: none;
     }
     
-    .btn {
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(67, 97, 238, 0.05);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(67, 97, 238, 0.1) !important;
+    }
+    
+    /* Estilos para badges de nivel */
+    .nivel-badge {
+        font-weight: 600;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+    }
+    
+    .nivel-1 {
+        background-color: #4ade80;
+        color: #065f46;
+    }
+    
+    .nivel-2 {
+        background-color: #60a5fa;
+        color: #1e40af;
+    }
+    
+    .nivel-3 {
+        background-color: #f87171;
+        color: #7f1d1d;
+    }
+    
+    /* Estilos para botones modernos (consistentes con vistas anteriores) */
+    .btn-modern-action {
+        background-color: #4361ee;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        color: white;
+    }
+    
+    .btn-modern-action:hover {
+        background-color: #3a56d4;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+        color: white;
+    }
+    
+    .btn-modern-back {
+        border-radius: 6px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+        background-color: #6c757d;
+        border: none;
+        color: white;
         transition: all 0.3s ease;
     }
     
+    .btn-modern-back:hover {
+        background-color: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+        color: white;
+    }
+    
     /* Mejora para inputs de búsqueda */
-    #academiaInput, #nombreCursoInput {
+    #nombreCursoInput, #codigoInput {
         text-transform: lowercase;
     }
     
     /* Estilos para paginación */
     .page-item.active .page-link {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
+        background-color: #4361ee;
+        border-color: #4361ee;
     }
     
     .page-link {
-        color: #0d6efd;
+        color: #4361ee;
         border: 1px solid #dee2e6;
+        border-radius: 6px;
+        margin: 0 2px;
+        transition: all 0.2s ease;
     }
     
     .page-link:hover {
-        color: #0a58ca;
-        background-color: #e9ecef;
-        border-color: #dee2e6;
+        color: white;
+        background-color: #4361ee;
+        border-color: #4361ee;
+        transform: translateY(-1px);
     }
     
     .pagination {
@@ -673,7 +698,32 @@ Atentamente,
     }
     
     .bg-gradient-primary {
-        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+        background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%) !important;
+    }
+    
+    /* Badge para filtros activos */
+    .badge.bg-primary {
+        background-color: #4361ee !important;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+        
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .d-flex.justify-content-between > div:first-child {
+            order: 2;
+        }
+        
+        .d-flex.justify-content-between > div:last-child {
+            order: 1;
+        }
     }
 </style>
 @endsection

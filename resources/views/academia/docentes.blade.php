@@ -94,8 +94,6 @@
                                 <td>{{ $docente->provincia ?? 'N/A' }}</td>
                                 <td>
                                     <button type="button" class="btn btn-primary btn-sm contact-btn" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#contactModal"
                                             data-docente-id="{{ $docente->docente_id }}"
                                             data-docente-nombre="{{ $docente->docente_nombre }}"
                                             data-curso-codigo="{{ $docente->curso_codigo }}"
@@ -272,223 +270,122 @@
     </div>
 </div>
 
-<!-- JavaScript mejorado para el buscador y modal -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM cargado - inicializando scripts');
-    const userName = @json(auth()->user()->name);
-    const userEmail = @json(auth()->user()->email);
-    const academiaNombre = @json(auth()->user()->ident);
+// Pasar el estado del sistema desde PHP a JavaScript
+window.sistemaSuscripcionesActivo = @json($sistema_suscripciones_activo);
+window.userRol = @json($user->rol);
 
-    // ========== LIMPIAR FORMULARIO DE BÚSQUEDA ==========
-    const clearBtn = document.getElementById('clearBtn');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-            const form = document.getElementById('searchForm');
-            const inputs = form.querySelectorAll('input[type="text"]');
-            const selects = form.querySelectorAll('select');
-            
-            // Limpiar inputs de texto
-            inputs.forEach(input => input.value = '');
-            
-            // Resetear selects a valores por defecto
-            selects.forEach(select => {
-                if (select.name === 'per_page') {
-                    select.value = '10';
-                } else if (select.name === 'estado_suscripcion') {
-                    select.value = 'todos';
-                }
-            });
-            
-            form.submit();
-        });
-    }
+console.log('Estado del sistema para academia:', window.sistemaSuscripcionesActivo);
+console.log('Rol del usuario:', window.userRol);
 
-    // ========== VALIDACIÓN DEL FORMULARIO DE BÚSQUEDA ==========
-    const searchForm = document.getElementById('searchForm');
-    if (searchForm) {
-        searchForm.addEventListener('submit', function(e) {
-            const codigoInput = document.getElementById('codigoInput');
-            const nombreInput = document.getElementById('nombreInput');
-            const docenteInput = document.getElementById('docenteInput');
-            const provinciaInput = document.getElementById('provinciaInput');
-            
-            // Normalizar todos los campos de texto a minúsculas y trim
-            if(codigoInput && codigoInput.value) {
-                codigoInput.value = codigoInput.value.trim().toLowerCase();
+// Función para abrir el modal de contacto (solo se llama cuando sistema está inactivo)
+function abrirModalContactoDocente(docenteId, docenteNombre, cursoCodigo, cursoNombre, provincia) {
+    // Llenar los datos en el modal
+    document.getElementById('modalDocenteNombre').textContent = docenteNombre;
+    document.getElementById('modalCursoNombre').textContent = cursoNombre;
+    document.getElementById('modalCursoCodigo').textContent = cursoCodigo;
+    document.getElementById('modalProvincia').textContent = provincia;
+    
+    // Obtener el email del docente
+    const emailInput = document.getElementById('recipientEmail');
+    emailInput.value = '';
+    emailInput.placeholder = "Cargando email del docente...";
+    emailInput.disabled = true;
+    
+    // Llamar a AJAX para obtener el email del docente
+    fetch(`/academia/obtener-email-docente/${docenteId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
             }
-            
-            if(nombreInput && nombreInput.value) {
-                nombreInput.value = nombreInput.value.trim().toLowerCase();
-            }
-            
-            if(docenteInput && docenteInput.value) {
-                docenteInput.value = docenteInput.value.trim().toLowerCase();
-            }
-            
-            if(provinciaInput && provinciaInput.value) {
-                provinciaInput.value = provinciaInput.value.trim().toLowerCase();
-            }
-        });
-    }
-
-    // ========== MANEJO DEL MODAL DE CONTACTO CON AJAX ==========
-    document.addEventListener('click', async function(e) {
-        if (e.target.closest('.contact-btn')) {
-            const button = e.target.closest('.contact-btn');
-            console.log('Botón contactar clickeado', button);
-            
-            // Obtener datos del botón
-            const docenteId = button.getAttribute('data-docente-id');
-            const docenteNombre = button.getAttribute('data-docente-nombre');
-            const cursoCodigo = button.getAttribute('data-curso-codigo');
-            const cursoNombre = button.getAttribute('data-curso-nombre');
-            const provincia = button.getAttribute('data-provincia');
-
-            console.log('Datos del botón:', {
-                docenteId,
-                docenteNombre,
-                cursoCodigo,
-                cursoNombre,
-                provincia
-            });
-
-            // Actualizar información del contacto en el modal
-            const modalDocenteNombre = document.getElementById('modalDocenteNombre');
-            const modalCursoNombre = document.getElementById('modalCursoNombre');
-            const modalCursoCodigo = document.getElementById('modalCursoCodigo');
-            const modalProvincia = document.getElementById('modalProvincia');
-            
-            if (modalDocenteNombre) modalDocenteNombre.textContent = docenteNombre;
-            if (modalCursoNombre) modalCursoNombre.textContent = cursoNombre;
-            if (modalCursoCodigo) modalCursoCodigo.textContent = cursoCodigo;
-            if (modalProvincia) modalProvincia.textContent = provincia;
-
-            // Limpiar y preparar campo de email
-            const emailInput = document.getElementById('recipientEmail');
-            if (emailInput) {
+            return response.json();
+        })
+        .then(data => {
+            if (data.email) {
+                emailInput.value = data.email;
+                emailInput.placeholder = "";
+            } else {
                 emailInput.value = '';
-                emailInput.placeholder = "Cargando email del docente...";
-                emailInput.disabled = true;
+                emailInput.placeholder = "Error al obtener email. Ingrese manualmente.";
             }
+            emailInput.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            emailInput.value = '';
+            emailInput.placeholder = "Error de conexión. Ingrese manualmente.";
+            emailInput.disabled = false;
+        });
+    
+    // Generar mensaje predeterminado
+    const userName = "{{ Auth::user()->name }}";
+    const userEmail = "{{ Auth::user()->email }}";
+    const academiaNombre = "{{ Auth::user()->ident }}";
+    const emailMessage = document.getElementById('emailMessage');
+    
+    if (emailMessage) {
+        const mensajePredeterminado = `Estimado/a ${docenteNombre},\n\n` +
+            `Nos ponemos en contacto con usted para ofrecerle la posibilidad de impartir el curso "${cursoNombre}" (Código: ${cursoCodigo}) en nuestra academia "${academiaNombre}".\n\n` +
+            `Hemos visto su perfil y consideramos que podría adaptarse adecuadamente a este curso. \n\n` +
+            `Quedamos a su disposición para cualquier información adicional.\n\n` +
+            `Atentamente,\n${userName}\n${userEmail}`;
+        
+        emailMessage.value = mensajePredeterminado;
+    }
+    
+    // Abrir el modal
+    const modal = new bootstrap.Modal(document.getElementById('contactModal'));
+    modal.show();
+}
 
-            try {
-                // Obtener email del docente por AJAX
-                if (docenteId) {
-                    console.log('Solicitando email para docente ID:', docenteId);
-                    
-                    const url = `/academia/obtener-email-docente/${docenteId}`;
-                    console.log('URL de la solicitud:', url);
-                    
-                    const response = await fetch(url, {
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-                    
-                    console.log('Respuesta recibida:', response);
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log('Datos de la respuesta:', data);
-                        
-                        if (data.email) {
-                            // Email obtenido correctamente
-                            if (emailInput) {
-                                emailInput.value = data.email;
-                                emailInput.placeholder = "";
-                                emailInput.disabled = false;
-                                console.log('Email cargado exitosamente:', data.email);
-                            }
-                        } else if (data.error) {
-                            // Error del servidor
-                            console.error('Error del servidor:', data.error);
-                            if (emailInput) {
-                                emailInput.value = '';
-                                emailInput.placeholder = `Error: ${data.error}. Ingresa manualmente.`;
-                                emailInput.disabled = false;
-                            }
-                        }
-                    } else {
-                        // Error HTTP
-                        console.error('Error HTTP:', response.status, response.statusText);
-                        if (emailInput) {
-                            emailInput.value = '';
-                            emailInput.placeholder = `Error ${response.status}. Ingresa manualmente.`;
-                            emailInput.disabled = false;
-                        }
-                    }
-                } else {
-                    // No hay docenteId
-                    console.error('No se encontró docenteId en el botón');
-                    if (emailInput) {
-                        emailInput.value = '';
-                        emailInput.placeholder = "Error: ID de docente no encontrado. Ingresa manualmente.";
-                        emailInput.disabled = false;
-                    }
-                }
-            } catch (error) {
-                console.error('Error en la petición AJAX:', error);
-                if (emailInput) {
-                    emailInput.value = '';
-                    emailInput.placeholder = "Error de conexión. Ingresa manualmente.";
-                    emailInput.disabled = false;
-                }
-            }
+// Manejador de clic para el botón "Contactar"
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.contact-btn')) {
+        const button = e.target.closest('.contact-btn');
+        
+        // Verificar primero si el sistema está activo
+        if (window.sistemaSuscripcionesActivo) {
+            // Sistema ACTIVO: redirigir a la vista de planes
+            console.log('Sistema de suscripciones ACTIVO - redirigiendo a planes');
+            window.location.href = '{{ route("suscripcion.planes") }}';
+            return; // Salir de la función
+        }
+        
+        // Sistema INACTIVO: abrir modal de contacto
+        console.log('Sistema de suscripciones INACTIVO - abriendo modal de contacto');
+        
+        // Obtener datos del botón
+        const docenteId = button.getAttribute('data-docente-id');
+        const docenteNombre = button.getAttribute('data-docente-nombre');
+        const cursoCodigo = button.getAttribute('data-curso-codigo');
+        const cursoNombre = button.getAttribute('data-curso-nombre');
+        const provincia = button.getAttribute('data-provincia');
+        
+        // Llamar a la función para abrir el modal
+        abrirModalContactoDocente(docenteId, docenteNombre, cursoCodigo, cursoNombre, provincia);
+    }
+});
 
-            // Generar mensaje predeterminado
-            const emailMessage = document.getElementById('emailMessage');
-            if (emailMessage) {
-                const mensajePredeterminado = `Estimado/a ${docenteNombre},\n\n` +
-                    `Nos ponemos en contacto con usted para ofrecerle la posibilidad de impartir el curso "${cursoNombre}" (Código: ${cursoCodigo}) en nuestra academia "${academiaNombre}".\n\n` +
-                    `Hemos visto su perfil y consideramos que podría adaptarse adecuadamente a este curso. \n\n` +
-                    `Quedamos a su disposición para cualquier información adicional.\n\n` +
-                    `Atentamente,\n${userName}\n${userEmail}`;
-                
-                emailMessage.value = mensajePredeterminado;
-            }
+// ========== VALIDACIÓN DEL FORMULARIO DE CONTACTO ==========
+const contactForm = document.getElementById('contactForm');
+if (contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+        const mensaje = document.getElementById('emailMessage');
+        
+        if (mensaje && !mensaje.value.trim()) {
+            e.preventDefault();
+            alert('Por favor, complete el mensaje.');
+            return;
+        }
+        
+        // Mostrar indicador de envío
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
+            submitBtn.disabled = true;
         }
     });
-
-    // ========== VALIDACIÓN DEL FORMULARIO DE CONTACTO ==========
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            const mensaje = document.getElementById('emailMessage');
-            
-            if (mensaje && !mensaje.value.trim()) {
-                e.preventDefault();
-                alert('Por favor, complete el mensaje.');
-                return;
-            }
-            
-            // Mostrar indicador de envío
-            const submitBtn = this.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
-                submitBtn.disabled = true;
-            }
-        });
-    }
-
-    // ========== EFECTOS VISUALES (OPCIONALES) ==========
-    const tableRows = document.querySelectorAll('.table-hover tbody tr');
-    tableRows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = 'rgba(0, 123, 255, 0.05)';
-        });
-        row.addEventListener('mouseleave', function() {
-            this.style.backgroundColor = '';
-        });
-    });
-
-    // Activar tooltips de Bootstrap
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-});
+}
 </script>
 
 <!-- Estilos CSS personalizados -->

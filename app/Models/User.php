@@ -10,8 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
@@ -204,5 +205,28 @@ public function cursosGestionados()
     )
     ->withTimestamps();
 }
+
+
+
+
+    public function tieneSuscripcionActiva()
+    {
+        // Verifica si la fecha fin_suscripcion es mayor a hoy
+        if ($this->fin_suscripcion) {
+            return now()->lessThan($this->fin_suscripcion);
+        }
+        
+        return false;
+    }
+
+    // Método para obtener la fecha de fin de suscripción formateada
+    public function getFinSuscripcionFormatted()
+    {
+        if ($this->fin_suscripcion) {
+            return $this->fin_suscripcion->format('d/m/Y');
+        }
+        
+        return null;
+    }
 }
 

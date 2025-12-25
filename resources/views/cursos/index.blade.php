@@ -35,12 +35,12 @@
                 </h2>
             </div>
 
-            <div id="familiaCollapse{{ $familia->id }}" class="collapse" 
+            <div id="familiaCollapse{{ $familia->id }}" class="collapse accordion-collapse" 
                  aria-labelledby="familiaHeading{{ $familia->id }}" 
                  data-bs-parent="#familiasAccordion">
                 <div class="card-body p-3">
                     @foreach($familia->cursos as $curso)
-                    <div class="card course-card-modern mb-2">
+                    <div class="card course-card-modern mb-2 course-expanded">
                         <div class="card-body">
                             <div class="row align-items-center">
                                 <div class="col-md-8">
@@ -57,7 +57,7 @@
                                     </p>
                                 </div>
                                 <div class="col-md-4 text-md-end mt-2 mt-md-0">
-                                    <form action="{{ Auth::user()->rol == 'academia' 
+                                    <form action="{{ Auth::user()?->rol == 'academia' 
                                         ? route('academia.asignar_curso', $curso->id) 
                                         : route('profesor.asignar_curso', $curso->id) }}" 
                                     method="POST" class="d-inline">
@@ -79,11 +79,11 @@
 
     <!-- Botón Volver -->
     <div class="text-center mt-4 pt-3 border-top">
-        @if(Auth::user()->rol === 'academia')
+        @if(Auth::user()?->rol === 'academia')
             <a href="{{ route('academia.miscursos') }}" class="btn btn-secondary btn-modern-back">
                 <i class="fas fa-arrow-left me-2"></i> Volver a Mis Cursos
             </a>
-        @elseif(Auth::user()->rol === 'profesor')
+        @elseif(Auth::user()?->rol === 'profesor')
             <a href="{{ route('profesor.miscursos') }}" class="btn btn-secondary btn-modern-back">
                 <i class="fas fa-arrow-left me-2"></i> Volver a Mis Cursos
             </a>
@@ -116,6 +116,7 @@
         background-color: white;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         cursor: pointer;
+        border-radius: 10px 10px 0 0 !important;
     }
     
     .family-header-modern .btn-link {
@@ -137,6 +138,7 @@
         color: #4361ee;
         background-color: rgba(67, 97, 238, 0.05);
         box-shadow: none;
+        border-radius: 10px 10px 0 0 !important;
     }
     
     .family-header-modern .btn-link:focus {
@@ -157,16 +159,55 @@
         transform: rotate(180deg);
     }
     
+    /* Estilos para cursos en estado normal */
     .course-card-modern {
         border: none;
         border-radius: 8px;
         box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
         transition: all 0.2s ease;
         border-left: 3px solid #4361ee;
+        background-color: white;
     }
     
     .course-card-modern:hover {
         box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    /* Estilos específicos para cursos cuando están expandidos */
+    .accordion-collapse.show .course-card-modern {
+        transform: scale(0.98);
+        margin: 0.5rem 0.5rem;
+        background-color: #f8f9fa;
+        border-left: 4px solid #3a56d4;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 0.75rem 1rem;
+    }
+    
+    .accordion-collapse.show .course-card-modern:hover {
+        transform: scale(0.99);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    
+    /* Ajustar tamaño de los elementos dentro de cursos expandidos */
+    .accordion-collapse.show .course-card-modern h5 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .accordion-collapse.show .course-card-modern .text-muted {
+        font-size: 0.85rem;
+    }
+    
+    .accordion-collapse.show .course-card-modern .course-code-modern {
+        font-size: 0.9rem;
+        color: #3a56d4;
+    }
+    
+    /* Ajustar botón dentro de cursos expandidos */
+    .accordion-collapse.show .btn-modern-action {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
     }
     
     .course-code-modern {
@@ -195,10 +236,6 @@
         font-weight: 500;
     }
     
-    .empty-state-modern {
-        border: 2px dashed #dee2e6;
-    }
-    
     /* Asegurar que el acordeón funcione correctamente */
     .accordion > .card {
         overflow: visible;
@@ -211,6 +248,19 @@
     
     .collapse {
         visibility: visible !important;
+    }
+    
+    /* Estilos para cuando se abre una familia */
+    .accordion-collapse.show {
+        background-color: #f8fafc;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 0 0 10px 10px;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Animación para el acordeón */
+    .accordion-collapse {
+        transition: all 0.3s ease;
     }
     
     @media (max-width: 768px) {
@@ -226,48 +276,17 @@
         .family-header-modern .btn-link {
             padding: 1rem 0.75rem;
         }
+        
+        .accordion-collapse.show .course-card-modern {
+            margin: 0.3rem 0.3rem;
+            transform: scale(0.97);
+        }
     }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Inicializando acordeón...');
-    
-    // Inicializar manualmente el acordeón de Bootstrap
-    const accordionButtons = document.querySelectorAll('.family-header-modern .btn-link');
-    
-    accordionButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            console.log('Botón de acordeón clickeado');
-            
-            // Obtener el target del collapse
-            const targetId = this.getAttribute('data-bs-target');
-            const targetCollapse = document.querySelector(targetId);
-            
-            if (targetCollapse) {
-                // Usar la API de Bootstrap Collapse
-                const collapse = new bootstrap.Collapse(targetCollapse, {
-                    toggle: true
-                });
-            }
-            
-            // Actualizar el ícono
-            const icon = this.querySelector('.accordion-icon-modern');
-            if (this.classList.contains('collapsed')) {
-                icon.style.transform = 'rotate(0deg)';
-            } else {
-                icon.style.transform = 'rotate(180deg)';
-            }
-        });
-        
-        // Asegurar que el estado inicial sea correcto
-        const icon = button.querySelector('.accordion-icon-modern');
-        if (button.classList.contains('collapsed')) {
-            icon.style.transform = 'rotate(0deg)';
-        } else {
-            icon.style.transform = 'rotate(180deg)';
-        }
-    });
+    console.log('Inicializando acordeón de cursos...');
     
     // Debug: Verificar que Bootstrap esté cargado
     if (typeof bootstrap !== 'undefined') {
@@ -275,6 +294,45 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.error('Bootstrap no está cargado');
     }
+    
+    // Eliminar cualquier listener duplicado que pueda interferir
+    // Dejar que Bootstrap maneje el acordeón por sí solo
+    
+    // Añadir clase cuando se expande y quitarla cuando se colapsa
+    const accordionButtons = document.querySelectorAll('.family-header-modern .btn-link');
+    
+    accordionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            console.log('Familia clickeada:', this.getAttribute('data-bs-target'));
+            
+            // Bootstrap manejará automáticamente el colapso/expansión
+            // No necesitamos hacer nada más
+            
+            // Opcional: Añadir feedback visual adicional
+            const targetId = this.getAttribute('data-bs-target');
+            const targetCollapse = document.querySelector(targetId);
+            
+            if (targetCollapse) {
+                // Esperar a que Bootstrap complete la transición
+                setTimeout(() => {
+                    if (targetCollapse.classList.contains('show')) {
+                        console.log('Familia expandida');
+                    } else {
+                        console.log('Familia colapsada');
+                    }
+                }, 350); // Tiempo aproximado de la transición de Bootstrap
+            }
+        });
+    });
+    
+    // Asegurar que todos los acordeones comiencen colapsados
+    const collapses = document.querySelectorAll('.accordion-collapse');
+    collapses.forEach(collapse => {
+        if (!collapse.classList.contains('show')) {
+            collapse.style.height = '0';
+            collapse.style.overflow = 'hidden';
+        }
+    });
 });
 </script>
 @endsection

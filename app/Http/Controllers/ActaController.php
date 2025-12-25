@@ -9,6 +9,7 @@ use App\Models\Modulo; // Asegúrate de que el modelo Modulo existe
 use App\Models\Calificacion;
 use App\Models\AlumnoCurso;
 use App\Models\CursoAcademico;
+use Illuminate\Container\Attributes\Auth;
 
 class ActaController extends Controller
 {
@@ -36,7 +37,7 @@ class ActaController extends Controller
             $alumnosIds = $request->alumnos ?? [];
  
             $alumnos = AlumnoCurso::whereIn('id', $alumnosIds) 
-            ->with('alumno') // Aquí debe ser "alumno", no "alumnos_curso"
+            ->with('alumno') 
             ->get();
 
             // Recolectar calificaciones por unidad
@@ -51,7 +52,7 @@ class ActaController extends Controller
             }
 
 
-            $unidadId = $unidades->last()->id; // o la unidad que estés utilizando
+            $unidadId = $unidades->last()->id; 
 
             // Obtener la fecha de finalización de la tabla detalles_curso
             $detalleCurso = \App\Models\DetalleCurso::where('curso_academico_id', $cursoAcademicoId)
@@ -70,12 +71,12 @@ class ActaController extends Controller
                         
             $fechaInicial = $detalleCurso ? $detalleCurso->inicio : null; //
 
-            $unidadId = $unidades->last()->id; // o la unidad que estés utilizando
+            $unidadId = $unidades->last()->id; 
 
-            // Obtener la fecha de finalización de la tabla detalles_curso
-            $detalleCurso = \App\Models\DetalleCurso::where('curso_academico_id', $cursoAcademicoId)
-                ->where('unidad_formativa_id', $unidadId)
-                ->first();
+            // // Obtener la fecha de finalización de la tabla detalles_curso
+            // $detalleCurso = \App\Models\DetalleCurso::where('curso_academico_id', $cursoAcademicoId)
+            //     ->where('unidad_formativa_id', $unidadId)
+            //     ->first();
                         
             $examenFinal = $detalleCurso ? $detalleCurso->ExamenF : null; //
 
@@ -87,7 +88,7 @@ class ActaController extends Controller
                 'alumnos' => $alumnos,
                 'calificaciones' => $calificaciones,
                 'cursoAcademico' => $cursoAcademico,
-                'centroFormacion' => auth()->user(),
+                'centroFormacion' => Auth::user(),
                 'fechaFinal' => $fechaFinal,
                 'fechaInicial' => $fechaInicial,
                 'examenFinal' => $examenFinal

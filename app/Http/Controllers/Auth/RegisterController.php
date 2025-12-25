@@ -7,6 +7,9 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
@@ -40,7 +43,6 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'ident' => ['nullable', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -48,18 +50,78 @@ class RegisterController extends Controller
         ]);
     }
 
+    public function showRegistrationForm()
+    {
+        return view('auth.register');
+    }
+
+    
+   public function register(Request $request)
+    {
+        // Validar los datos
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'rol' => ['required', 'string', 'in:academia,profesor,alumno'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+    
+        // Crear el usuario
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'rol' => $request->rol,
+            'premium' => false,
+            'email_verified_at' => null, // Asegurar que no está verificado
+        ]);
+Log::info('Implementa MustVerifyEmail? ' . ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail ? 'Sí' : 'No'));
+        // Disparar evento de registro (envía email de verificación)
+        event(new Registered($user));
+        
+$user->sendEmailVerificationNotification();
+Log::info('Notificación de verificación enviada manualmente');
+
+        return redirect()->route('verification.notice');
+    }
+
+
+
+
+
     protected function create(array $data)
     {
-        return User::create([
-            'ident' => $data['ident'] ?? null,
+        
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'rol' => $data['rol'],
-            'activo' => true,
             'premium' => false,
-            // Campos eliminados del formulario de registro
+            'email_verified_at' => null,
         ]);
+
+        Log::info('Usuario creado:', [
+        'id' => $user->id,
+        'email' => $user->email,
+        'email_verified_at' => $user->email_verified_at
+    ]);
+
+        event(new Registered($user));
+
+        Log::info('Evento Registered disparado para el usuario:', [
+        'id' => $user->id,
+        'email' => $user->email
+    ]);
+    
+        return $user;
     }
 
 

@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Traits\EnviaEmails;
-
+use App\Helpers\SistemaHelper;
 
 class AcademiaController extends Controller
 {
@@ -40,8 +40,9 @@ class AcademiaController extends Controller
         // Obtener los cursos académicos del usuario (para la tabla)
         $misCursos = CursoAcademico::where('academia_id', $user->id)->get();
         
-        // Pasar ambas variables a la vista
-        return view('academia.index', compact('familias_profesionales', 'misCursos'));
+        $sistemaSuscripcionesActivo = SistemaHelper::sistemaSuscripcionesActivo();
+        
+        return view('academia.index', compact('familias_profesionales', 'misCursos', 'sistemaSuscripcionesActivo'));
     }
 
 
@@ -53,13 +54,18 @@ class AcademiaController extends Controller
             return redirect()->route('login');
         }
     
-        // Verificar si el usuario tiene el rol de academia
         if ($user->rol !== 'academia') {
             return back()->withErrors(['error' => 'No tienes permisos para acceder a esta sección.']);
         }
     
         // Obtener los cursos académicos del usuario
-        $misCursos = CursoAcademico::where('academia_id', $user->id)->get();
+        $misCursos = CursoAcademico::where('academia_id', Auth::id())
+            ->where('archivado', false)
+            ->with(['curso', 'alumnos' => function($query) {
+                $query->where('es_profesor', 1);
+            }])
+            ->orderBy('inicio', 'desc')
+            ->get();
 
         return view('academia.index', compact('misCursos'));
     }
@@ -101,12 +107,18 @@ class AcademiaController extends Controller
                 'cursos.nombre as curso_nombre',
                 'cursos.codigo as curso_codigo',
             ])
-            // Ordenar por fecha de suscripción más reciente primero
-            // Nota: inicio_suscripcion existe, fin_suscripcion tiene typo (fin_suscrpcion)
             ->orderBy('users.inicio_suscripcion', 'desc')
             ->orderBy('users.name');
         
         $docentesConCursos = $query->paginate($perPage);
+
+    $sistema_suscripciones_activo = \App\Helpers\SistemaHelper::sistemaSuscripcionesActivo();
+    
+    return view('academia.docentes', [
+        'docentesConCursos' => $docentesConCursos,
+        'sistema_suscripciones_activo' => $sistema_suscripciones_activo,
+        'user' => Auth::user()
+    ]);
 
         return view('academia.docentes', compact('docentesConCursos'));
     }
@@ -115,7 +127,6 @@ class AcademiaController extends Controller
     public function obtenerEmailDocente($docenteId)
     {
         try {
-            // Verificar que el usuario es academia
             if (Auth::user()->rol !== 'academia') {
                 return response()->json(['error' => 'No autorizado'], 403);
             }
@@ -169,20 +180,19 @@ class AcademiaController extends Controller
     {
         $user = Auth::user();
         
-        // Validación de usuario
+
         if (!$user || $user->rol !== 'academia') {
             return redirect()->route('login')->withErrors(['error' => 'Acceso no autorizado']);
         }
     
-        // Verificar si el curso existe
+   
         $curso = Curso::find($curso_id);
         if (!$curso) {
             return back()->withErrors(['error' => 'El curso no existe']);
         }
     
-        // Crear el curso académico con valores por defecto
         $cursoAcademico = CursoAcademico::create([
-            'curso_id' => $curso->id, // Aquí se pasa correctamente el curso_id
+            'curso_id' => $curso->id, 
             'academia_id' => $user->id,
 
         ]);
@@ -212,7 +222,7 @@ class AcademiaController extends Controller
         // Obtener todas las familias profesionales con sus cursos, módulos y unidades formativas asociadas
         $familias_profesionales = FamiliaProfesional::with('cursos.modulos.unidades')->get();
     
-        // Obtener todos los cursos disponibles
+        
         $cursosDisponibles = Curso::all();
     
         return view('cursos.index', compact('familias_profesionales', 'cursosDisponibles'));
@@ -228,11 +238,11 @@ class AcademiaController extends Controller
                 DetalleCurso::create([
                     'curso_academico_id' => $cursoAcademico->id,
                     'unidad_formativa_id' => $unidadFormativa->id,
-                    'codigo' => $unidadFormativa->codigo, // Suponiendo que las unidades formativas tienen un campo 'codigo'
-                    'nombre' => $unidadFormativa->nombre, // Nombre de la unidad formativa
-                    'inicio' => null, // Este valor lo podrás modificar más tarde
-                    'fin' => null,    // Este valor lo podrás modificar más tarde
-                    'calificacion' => null, // Este valor lo podrás modificar más tarde
+                    'codigo' => $unidadFormativa->codigo, 
+                    'nombre' => $unidadFormativa->nombre, 
+                    'inicio' => null, 
+                    'fin' => null,    
+                    'calificacion' => null, 
                 ]);
             }
         }
@@ -254,7 +264,7 @@ class AcademiaController extends Controller
     {
         // Buscar el CursoAcademico por su ID con la relación de cursos, modulos y unidades
         $cursoAcademico = CursoAcademico::with([
-            'curso.modulos.unidades', // si tienes relaciones anidadas
+            'curso.modulos.unidades', 
             'detallesCurso',
             'curso.FamiliaProfesional'
         ])->findOrFail($id);
@@ -271,7 +281,7 @@ class AcademiaController extends Controller
                     'fin' => $unidad->fin,        
                     'Examen0' => $unidad->examen0, 
                     'ExamenF' => $unidad->examenF, 
-                    'modulo' => $modulo->nombre,  // Módulo relacionado con la unidad
+                    'modulo' => $modulo->nombre,  
                 ];
             }
         }
@@ -391,7 +401,7 @@ class AcademiaController extends Controller
     {
         $cursoAcademico = CursoAcademico::findOrFail($id);
 
-        // Validación de los campos del formulario
+        
         $request->validate([
             'municipio' => 'nullable|string|max:100',
             'provincia' => 'nullable|string|max:100',
@@ -399,7 +409,7 @@ class AcademiaController extends Controller
             'fin' => 'nullable|date',
         ]);
 
-        // Actualización de los campos en el modelo
+        
         $cursoAcademico->update([
             'municipio' => strip_tags($request->municipio),
             'provincia' => strip_tags($request->provincia),
@@ -445,15 +455,15 @@ class AcademiaController extends Controller
     
     public function getAlumnos($id)
     {
-        // Obtén el curso académico por ID
+        
         $cursoAcademico = CursoAcademico::find($id);
         
-        // Verifica si existe el curso académico
+        
         if (!$cursoAcademico) {
             return response()->json(['message' => 'Curso no encontrado'], 404);
         }
     
-        // Obtén los alumnos relacionados con ese curso
+        
         $alumnos = $cursoAcademico->alumnos;
     
         return response()->json($alumnos);
@@ -470,7 +480,7 @@ class AcademiaController extends Controller
         $es_profesor = $request->has('es_profesor') ? 1 : 0;
 
      
-        // Validación de los datos del formulario
+        
         $request->validate([
             'dni' => 'required|string|max:15',
             'nombre' => 'required|string|max:255',
@@ -483,7 +493,7 @@ class AcademiaController extends Controller
        
         $cursoAcademicoId = $request->curso_academico_id;
   
-        // Creación del nuevo alumno en la base de datos
+        
         AlumnoCurso::create([
             'dni' => $dni,
             'nombre' => $nombre,
@@ -497,20 +507,20 @@ class AcademiaController extends Controller
         $cursoAcademico = CursoAcademico::with(['curso', 'curso.FamiliaProfesional', 'alumnos'])
             ->findOrFail($cursoAcademicoId);
         
-        // Retorna la vista con los detalles del curso
+        
         return view('academia.detalle_curso', compact('cursoAcademico'));
     }
 
     public function actualizarAlumno(Request $request, $id)
     {
     
-        // Limpiar los datos con strip_tags() para eliminar las etiquetas HTML
+        
         $dni = strip_tags($request->dni);
         $nombre = strip_tags($request->nombre);
         $email = strip_tags($request->email);
         $telefono = strip_tags($request->telefono);
         $es_profesor = $request->es_profesor;
-        // Validación de los datos (sin permitir HTML)
+        
         $request->validate([
             'dni' => 'required|string|max:255',
             'nombre' => 'required|string|max:255',
@@ -524,7 +534,7 @@ class AcademiaController extends Controller
             return redirect()->back()->withErrors(['error' => 'Los campos no pueden contener solo etiquetas HTML.'])->withInput();
         }
 
-        // Intentar actualizar el alumno con los datos limpios
+        
         try {
             $alumno = AlumnoCurso::findOrFail($id);
             $alumno->update([
@@ -535,46 +545,39 @@ class AcademiaController extends Controller
                 'es_profesor' => $request->es_profesor,
             ]);
         } catch (\Exception $e) {
-            // Si hay un error al actualizar, mostrar un mensaje adecuado
             return redirect()->back()->withErrors(['error' => 'Hubo un problema al intentar actualizar el alumno.'])->withInput();
         }
 
-        // Si todo salió bien, redirigir a la vista del curso actualizado
+        
         $cursoAcademico = CursoAcademico::with(['curso', 'curso.FamiliaProfesional', 'alumnos'])
             ->findOrFail($request->curso_academico_id);
 
         return view('academia.detalle_curso', compact('cursoAcademico'));
     }
 
-    public function mostrarDetallesCurso($id)
-    {
-        $cursoAcademico = CursoAcademico::with(['detallesCurso', 'curso.modulos.unidades'])
-            ->findOrFail($id)
-            ->refresh(); // Recarga el modelo y sus relaciones
+    // public function mostrarDetallesCurso($id)
+    // {
+    //     $cursoAcademico = CursoAcademico::with(['detallesCurso', 'curso.modulos.unidades'])
+    //         ->findOrFail($id)
+    //         ->refresh(); // Recarga el modelo y sus relaciones
         
-        return view('tu_vista', compact('cursoAcademico'));
-    }
+    //     return view('tu_vista', compact('cursoAcademico'));
+    // }
 
     public function eliminarAlumno($id)
     {
-        // Buscar el alumno por su ID
+        
         $alumno = AlumnoCurso::find($id);
 
         if (!$alumno) {
             return response()->json(['error' => 'Alumno no encontrado'], 404);
         }
-
-        // Obtener el ID del curso antes de eliminar el alumno
-        $cursoAcademicoId = $alumno->curso_academico_id;
-
-        // Eliminar el alumno
+        $cursoAcademicoId = $alumno->curso_academico_id;     
+        
         $alumno->delete();
         
-        // Cargar el curso académico junto con sus relaciones necesarias
         $cursoAcademico = CursoAcademico::with(['curso', 'curso.FamiliaProfesional', 'alumnos'])
             ->findOrFail($cursoAcademicoId);
-        
-        // Retornar la vista con los detalles del curso actualizado
         return view('academia.detalle_curso', compact('cursoAcademico'));
     }
 
@@ -589,7 +592,7 @@ class AcademiaController extends Controller
             }
         ])->findOrFail($cursoAcademicoId);
     
-        // Verificar que los datos están disponibles
+        
         if (!$cursoAcademico) {
             return abort(404, "Curso académico no encontrado");
         }
@@ -605,7 +608,6 @@ class AcademiaController extends Controller
             ->first();
 
         if ($detalle) {
-            // Actualiza la calificación
             $detalle->Examen0 = $request->nota_examen0;
             $detalle->ExamenF = $request->nota_examenF;
             $detalle->save();
@@ -623,6 +625,93 @@ class AcademiaController extends Controller
         })->with('alumno');
     }
 
+    // Método para mostrar cursos archivados
+    public function cursosArchivados()
+    {
+        $cursosArchivados = CursoAcademico::where('academia_id', Auth::id())
+            ->where('archivado', true)
+            ->with(['curso', 'alumnos' => function($query) {
+                $query->where('es_profesor', 1);
+            }])
+            ->orderBy('archivado_en', 'desc')
+            ->get();
+
+        return view('academia.cursos_archivados', compact('cursosArchivados'));
+    }
+
+    // Método para archivar un curso
+    public function archive($id)
+    {
+        $cursoAcademico = CursoAcademico::findOrFail($id);
+        
+        // Verificar que el curso pertenece a esta academia
+        if ($cursoAcademico->academia_id != Auth::id()) {
+            return redirect()->back()->with('error', 'No tienes permiso para archivar este curso.');
+        }
+        
+        $cursoAcademico->archivado = true;
+        $cursoAcademico->archivado_en = now();
+        $cursoAcademico->save();
+
+        return redirect()->back()->with('success', 'Curso archivado correctamente.');
+    }
+
+    // Método para restaurar un curso
+    public function restore($id)
+    {
+        $cursoAcademico = CursoAcademico::findOrFail($id);
+        
+        // Verificar que el curso pertenece a esta academia
+        if ($cursoAcademico->academia_id != Auth::id()) {
+            return redirect()->back()->with('error', 'No tienes permiso para restaurar este curso.');
+        }
+        
+        $cursoAcademico->archivado = false;
+        $cursoAcademico->archivado_en = null;
+        $cursoAcademico->save();
+
+        return redirect()->back()->with('success', 'Curso restaurado correctamente.');
+    }
+
+    // Método para eliminar definitivamente (modificar el existente)
+    public function destroy($id)
+    {
+        $cursoAcademico = CursoAcademico::findOrFail($id);
+        
+        // Verificar que el curso pertenece a esta academia
+        if ($cursoAcademico->academia_id != Auth::id()) {
+            return redirect()->back()->with('error', 'No tienes permiso para eliminar este curso.');
+        }
+        
+        $cursoAcademico->delete();
+
+        return redirect()->back()->with('success', 'Curso eliminado definitivamente.');
+    }
 
 
+    public function verificarSuscripcion(Request $request)
+    {
+        // Verificar si el sistema de suscripciones está activo
+        $sistemaActivo = config('app.sistema_suscripciones_activo');
+        
+        if (!$sistemaActivo) {
+            // Si el sistema no está activo, permitir contacto
+            return response()->json(['success' => true]);
+        }
+        
+        $academia = Auth::user();
+        
+        // Verificar si tiene suscripción activa
+        $suscripcion = $academia->suscripcion;
+        
+        if (!$suscripcion || $suscripcion->estado !== 'activa' || $suscripcion->fecha_fin < now()) {
+            // Redirigir a planes
+            return response()->json([
+                'redirect' => route('academia.planes')
+            ]);
+        }
+        
+        // Si tiene suscripción activa, permitir contacto
+        return response()->json(['success' => true]);
+    }
 }

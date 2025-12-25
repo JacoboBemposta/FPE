@@ -63,8 +63,6 @@ class CursoController extends Controller
 
     public function edit(Curso $curso)
     {
-   
-        // Aquí puedes cargar los módulos asociados al curso si es necesario
         $familiasProfesionales = FamiliaProfesional::all();
         return view('admin.cursos.edit', compact('curso', 'familiasProfesionales'));
     }

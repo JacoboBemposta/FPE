@@ -35,6 +35,7 @@
         vertical-align: middle;
         padding: 14px 20px;
     }
+    
     .action-buttons {
         display: flex;
         gap: 10px;
@@ -54,6 +55,52 @@
         color: white;
         border: none;
     }
+    
+    /* Estilos para alertas de suscripción */
+    .suscripcion-alert {
+        border-left: 5px solid;
+        border-radius: 8px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+    }
+    .suscripcion-alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffc107;
+        color: #856404;
+    }
+    .suscripcion-alert-success {
+        background-color: #d4edda;
+        border-color: #28a745;
+        color: #155724;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 0.75rem;
+        background-color: #f8f9fa;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #dee2e6;
+    }
+    .empty-state .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    .empty-state .btn-primary:hover {
+        background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
 </style>
 
 <div class="container mt-4">
@@ -62,17 +109,20 @@
         <h1><i class="fas fa-book-open me-2"></i>Cursos que puedo impartir</h1>
     </div>
 
-    <!-- Filtros y acciones -->
+
+
+    <!-- Botones principales -->
     <div class="d-flex justify-content-between mb-4">
         <a href="{{ route('profesor.cursos') }}" class="btn btn-primary btn-custom">
-            <i class="fas fa-search me-2"></i>Asignar mis Cursos
+            <i class="fas fa-search me-2"></i>Buscar Cursos para Impartir
         </a>
         <a href="{{ route('profesor.ver_academias') }}" class="btn btn-info btn-custom">
             <i class="fas fa-school me-2"></i>Buscar Academias
         </a>
     </div>
 
-    <!-- Tabla -->
+    <!-- Tabla de cursos -->
+    @if($misCursos && count($misCursos) > 0)
     <div class="table-responsive">
         <table class="table table-hover table-modern">
             <thead>
@@ -117,8 +167,18 @@
             </tbody>
         </table>
     </div>
+    @else
+    <div class="empty-state">
+        <i class="fas fa-folder-open"></i>
+        <h3 class="text-muted">No tienes cursos asignados</h3>
+        <p class="text-muted">Comienza buscando cursos que puedas impartir.</p>
+        <a href="{{ route('profesor.cursos') }}" class="btn btn-primary mt-3">
+            <i class="fas fa-search me-2"></i>Buscar Cursos
+        </a>
+    </div>
+    @endif
 
-    <!-- Modal -->
+    <!-- Modal para editar -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
       <div class="modal-dialog">
          <div class="modal-content">

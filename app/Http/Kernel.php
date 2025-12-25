@@ -29,7 +29,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            // \App\Http\Middleware\CheckUserRole::class, // ← COMENTA TEMPORALMENTE
+            \App\Http\Middleware\CheckUserRole::class,
         ],
 
         'api' => [
@@ -52,12 +52,18 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-    'rol' => \App\Http\Middleware\CheckRole::class, // ← Mantén por si acaso
-    'checkuserrole' => \App\Http\Middleware\CheckUserRole::class,
-        // TUS MIDDLEWARES PERSONALIZADOS
-    'admin' => \App\Http\Middleware\AdminMiddleware::class,
-    'academia' => \App\Http\Middleware\AcademiaMiddleware::class, 
-    'profesor' => \App\Http\Middleware\ProfesorMiddleware::class,
-    'alumno' => \App\Http\Middleware\AlumnoMiddleware::class,
+        'rol' => \App\Http\Middleware\CheckRole::class, // ← Mantén por si acaso
+        'checkuserrole' => \App\Http\Middleware\CheckUserRole::class,
+  
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        'academia' => \App\Http\Middleware\AcademiaMiddleware::class, 
+        'profesor' => \App\Http\Middleware\ProfesorMiddleware::class,
+        'alumno' => \App\Http\Middleware\AlumnoMiddleware::class,
+    ];
+    protected $routeMiddleware = [
+        // ...
+        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        // 'check.role' => \App\Http\Middleware\CheckRole::class,
+        // ...
     ];
 }

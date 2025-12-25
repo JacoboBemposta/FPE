@@ -13,53 +13,52 @@ use App\Http\Controllers\ActaController;
 use App\Http\Controllers\CalificacionController;
 use App\Http\Controllers\ProfesorController;
 use App\Http\Controllers\EmailStatsController;
+use App\Http\Controllers\SuscripcionController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\ProfesorCursoController;
 use App\Http\Controllers\CursoModuloController;
 use App\Http\Controllers\Auth\GoogleLoginController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 
 
-    Route::get('/', function () {
-        $user = Auth::user();
-        
-        // Si no hay usuario autenticado, mostrar welcome normal
-        if (!$user) {
-            return view('welcome');
-        }
 
-        // Si el usuario no tiene rol, mostrar welcome con modal
-        if (is_null($user->rol)) {
-            session(['show_role_modal' => true]);
-            return view('welcome', [
-                'user' => $user,
-                'userRole' => $user->rol,
-                'userName' => $user->name,
-                'showRoleModal' => true,
-            ]);
-        }
+// Rutas de autenticación
+Auth::routes();
 
-        // Si el usuario es admin, redirigir a admin.panel
-        if ($user->rol === 'admin') {
-            return redirect()->route('admin.panel');
-        }
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
 
-        // Para los demás roles, mostrar welcome personalizado
-        return view('welcome', [
-            'user' => $user,
-            'userRole' => $user->rol,
-            'userName' => $user->name,
-            'showRoleModal' => false,
-        ]);
-    });
+// Ruta específica para actualizar rol (primera vez)
+Route::post('/user/update-role', [UserController::class, 'updateRole'])
+    ->name('user.updateRole')
+    ->middleware('auth');
 
-    Auth::routes();
+// Ruta específica para actualizar perfil completo
+Route::put('/user/profile', [UserController::class, 'updateProfile'])
+    ->name('user.updateProfile')
+    ->middleware('auth');
+
+Route::get('/home', function () {
+    return redirect('/');
+})->name('home');
 
 
-    Route::get('/home', function () {
-        return redirect('/');
-    })->name('home');  
+Route::post('/user/force-logout', function(Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    
+    return response()->json(['success' => true]);
+})->name('user.forceLogout');
 
+Route::get('/suscripcion/planes', [SuscripcionController::class, 'planes'])
+    ->name('suscripcion.planes')
+    ->middleware('auth');
 
 // Rutas para cada panel según el rol
 Route::get('/academia/dashboard', function () {
@@ -74,14 +73,58 @@ Route::get('/alumno/dashboard', function () {
     return view('alumno.dashboard');  // Ruta para el panel de alumno
 })->name('alumno.dashboard');
 
+Auth::routes(['verify' => true]);
 
 
 
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified']);
+
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Rutas que requieren email verificado
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    });
+});
 
 
 
-// Grupo protegido por middleware y con prefijo
-Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':admin'])->prefix('admin')->name('admin.')->group(function () {
+// Rutas para el footer
+Route::get('/sobre-nosotros', function () {
+    return view('about');
+})->name('about');
+
+Route::get('/privacidad', function () {
+    return view('privacy');
+})->name('privacy');
+
+Route::get('/terminos', function () {
+    return view('terms');
+})->name('terms');
+
+Route::get('/academias', function () {
+    return view('academias');
+})->name('academias');
+
+Route::get('/docentes', function () {
+    return view('docentes');
+})->name('docentes');
+
+Route::get('/alumnos', function () {
+    return view('alumnos');
+})->name('alumnos');
+
+
+Route::get('/ayuda', function () {
+    return view('ayuda');
+})->name('ayuda');
+
+Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
     
     // Ruta al panel (index principal del admin)
     Route::get('/', [AdminController::class, 'index'])->name('panel'); 
@@ -123,8 +166,12 @@ Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':admin'])->p
     Route::get('/email-stats', [EmailStatsController::class, 'index'])->name('email.stats');
     Route::get('/email-stats/{contexto}', [EmailStatsController::class, 'detalleContexto'])->name('email.stats.contexto'); // ← AÑADE ESTA
     Route::get('/email-search', [EmailStatsController::class, 'buscar'])->name('email.search'); 
-});
 
+
+
+    Route::post('/toggle-suscripciones', [App\Http\Controllers\Admin\SuscripcionConfigController::class, 'toggleSuscripciones']);
+    Route::get('/estado-suscripciones', [App\Http\Controllers\Admin\SuscripcionConfigController::class, 'getEstado']);
+});
 
 
 Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':academia'])
@@ -148,31 +195,40 @@ Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':academia'])
         // Para unidades formativas
         Route::post('/guardar-nota', [AcademiaController::class, 'guardarNota'])->name('guardarNota');
 
-   
-    //Route::post('/calificaciones/guardar-modulo', [AcademiaController::class, 'guardarNotaModulo'])->name('guardarNotaModulo');
     Route::post('/guardar-nota', [AcademiaController::class, 'guardarNotaModulo'])->name('guardarNotaModulo');
     Route::post('/eliminar-calificacion', [AcademiaController::class, 'eliminarCalificacion'])->name('eliminarCalificacion');
     Route::post('/detalle/guardar', [AcademiaController::class,'crearActualizarDetalle'])->name('crearActualizarDetalle');
     Route::get('/obtener-email-docente/{docenteId}', [AcademiaController::class, 'obtenerEmailDocente'])->name('obtener-email-docente');
-    Route::post('/enviar-mensaje-docente', [AcademiaController::class, 'enviarMensajeDocente'])->name('enviar_mensaje_docente');    
+    Route::post('/enviar-mensaje-docente', [AcademiaController::class, 'enviarMensajeDocente'])->name('enviar_mensaje_docente');
+    
+    Route::put('/curso_academico/{id}/archive', [AcademiaController::class, 'archive'])->name('curso_academico.archive');
+    Route::put('/curso_academico/{id}/restore', [AcademiaController::class, 'restore'])->name('curso_academico.restore');
+    Route::get('/cursos_archivados', [AcademiaController::class, 'cursosArchivados'])->name('cursos_archivados');
+
+
+    // Nueva ruta para verificar el estado del sistema
+    Route::get('/verificar-sistema-suscripciones', function() {
+        $sistemaActivo = \App\Helpers\SistemaHelper::sistemaSuscripcionesActivo();
+        
+        return response()->json([
+            'sistema_activo' => $sistemaActivo
+        ]);
+    });
+    
+    // Ruta para verificar la suscripción del usuario actual
+    Route::get('/verificar-mi-suscripcion', function() {
+        return response()->json([
+            'tiene_suscripcion_valida' => false
+        ]);
+    });
 });
-
-
-
-
-//Route::post('/calificaciones', [CalificacionController::class, 'store'])->name('calificaciones.store');
-//Route::get('/calificaciones/{curso_academico_id}', [CalificacionController::class, 'showCalificaciones'])->name('calificaciones');
-Route::put('/calificaciones/{calificacion}', [CalificacionController::class, 'update'])->name('calificaciones.update');
-
-//Route::post('/calificaciones/guardar', [CalificacionController::class, 'storeCalificacion'])->name('calificaciones.store');
-//Route::post('/calificaciones', [CalificacionController::class, 'storeCalificacion'])->name('calificaciones.store');
-Route::post('/generar-actas/{grado}', [ActaController::class, 'generarActas'])->name('generar.actas');
 
 
 Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':profesor'])
     ->prefix('profesor')
     ->name('profesor.') 
     ->group(function () {
+        Route::get('/', [ProfesorController::class, 'index'])->name('index');
         Route::get('/mis-cursos', [ProfesorController::class, 'misCursos'])->name('miscursos');
         Route::get('/cursos', [ProfesorController::class, 'cursos'])->name('cursos');
         Route::post('/asignar-curso/{curso}', [ProfesorController::class, 'asignarCurso'])->name('asignar_curso');
@@ -182,49 +238,45 @@ Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':profesor'])
         Route::get('curso/{id}', [ProfesorController::class, 'detalleCurso'])->name('detalleCurso');
         Route::post('/enviar-candidatura', [ProfesorController::class, 'enviarCandidatura'])->name('enviar_candidatura');
   
-        // CORRECCIÓN: Quita '/profesor/' porque ya está en el prefijo
-        Route::get('/obtener-email/{academiaId}', [ProfesorController::class, 'obtenerEmailAcademia'])->name('obtener-email');
-    });
+        Route::get('/obtener-email/{academiaId}', [ProfesorController::class, 'obtenerEmailAcademia'])
+            ->name('obtener-email');
 
+        Route::get('/verificar-mi-suscripcion', function() {
+            $user = Auth::user();
+            
+            // Verificar suscripción
+            $tieneSuscripcionValida = false;
+            
+            if ($user->suscripcion && $user->suscripcion->estaActiva()) {
+                $tieneSuscripcionValida = true;
+            }
+            
+            return response()->json([
+                'tiene_suscripcion_valida' => $tieneSuscripcionValida
+            ]);
+        })->name('profesor.verificar_suscripcion');
+});
 
-    // Rutas de Google OAuth
-    Route::get('/auth/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('login.google');
-    Route::get('/auth/google/callback', [GoogleLoginController::class, 'handleGoogleCallback']);
-
-
-    Route::post('/calificaciones', [CalificacionController::class, 'storeCalificacion'])->name('calificaciones.store');
-
-
-    Route::post('/user/update-role', [App\Http\Controllers\UserController::class, 'updateRole'])
-        ->name('user.updateRole')
-        ->middleware('auth');
-
-
-
-    Route::get('/debug-middleware', function() {
-        return [
-            'kernel_exists' => file_exists(app_path('Http/Kernel.php')),
-            'middlewares' => [
-                'TrustProxies' => file_exists(app_path('Http/Middleware/TrustProxies.php')),
-                'CheckUserRole' => file_exists(app_path('Http/Middleware/CheckUserRole.php')),
-
-            ]
-        ];
-    });
-
-    // Rutas para alumnos
-    Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':alumno'])->group(function () {
+  
+Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':alumno'])->group(function () {
         Route::get('/alumno', [AlumnoController::class, 'index'])->name('alumno.index');
         Route::get('/alumno/academias', [AlumnoController::class, 'listarAcademias'])->name('alumno.academias');
         Route::get('/alumno/academia/{id}', [AlumnoController::class, 'verAcademia'])->name('alumno.academia.ver');
         Route::post('/alumno/contactar-academia', [AlumnoController::class, 'enviarEmailAcademia'])->name('alumno.academia.enviar_email');
         Route::get('/alumno/obtener-email/{id}', [AlumnoController::class, 'obtenerEmailAcademia'])->name('alumno.obtener.email');
-    });
+});
+
+    // Rutas de Google OAuth
+Route::get('/auth/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('login.google');
+Route::get('/auth/google/callback', [GoogleLoginController::class, 'handleGoogleCallback']);
+
+
+Route::post('/calificaciones', [CalificacionController::class, 'storeCalificacion'])->name('calificaciones.store');
+Route::put('/calificaciones/{calificacion}', [CalificacionController::class, 'update'])->name('calificaciones.update');
+Route::post('/generar-actas/{grado}', [ActaController::class, 'generarActas'])->name('generar.actas');
 
 
 
 
 
-
-
-
+Route::post('/stripe/webhook', [SuscripcionController::class, 'handleWebhook']);

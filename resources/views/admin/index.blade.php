@@ -69,16 +69,30 @@
         <h5><i class="fas fa-envelope"></i> Estadísticas de Emails</h5>
     </div>
     <div class="card-body">
-        <p>Consulta las estadísticas de todos los emails enviados en la plataforma:</p>
-        <ul>
-            <li>Emails de academias a docentes</li>
-            <li>Emails de docentes a academias</li>
-            <li>Estados de envío</li>
-            <li>Destinatarios más frecuentes</li>
-        </ul>
+        <p>Consulta las estadísticas de la plataforma:</p>
         <a href="{{ route('admin.email.stats') }}" class="btn btn-primary">
             <i class="fas fa-chart-bar"></i> Ver Estadísticas
         </a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Sistema de Suscripciones</h5>
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" 
+                   id="sistemaSuscripciones" 
+                   {{ $sistema_suscripciones_activo ? 'checked' : '' }}
+                   onchange="toggleSistemaSuscripciones(this)">
+            <label class="form-check-label" for="sistemaSuscripciones">
+                Activar sistema de suscripciones
+            </label>
+        </div>
+        <small class="text-muted">
+            Cuando activo, los usuarios necesitan suscripción para contactar.
+            <span id="estadoActual" class="badge ms-2 {{ $sistema_suscripciones_activo ? 'bg-success' : 'bg-secondary' }}">
+                {{ $sistema_suscripciones_activo ? 'ACTIVO' : 'INACTIVO' }}
+            </span>
+        </small>
     </div>
 </div>
     <h1>Administración de Cursos</h1>
@@ -797,7 +811,91 @@ function toggleModulos(cursoId) {
         });
     }
 
+function toggleSistemaSuscripciones(checkbox) {
+    // Obtener el elemento de estado
+    const estadoSpan = document.getElementById('estadoActual');
+    
+    // Mostrar estado temporal
+    estadoSpan.textContent = 'CAMBIO...';
+    estadoSpan.className = 'badge bg-warning ms-2';
+    
+    // Deshabilitar temporalmente
+    checkbox.disabled = true;
+    
+    fetch('/admin/toggle-suscripciones', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            activo: checkbox.checked
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar estado visual
+            if (checkbox.checked) {
+                estadoSpan.textContent = 'ACTIVO';
+                estadoSpan.className = 'badge bg-success ms-2';
+            } else {
+                estadoSpan.textContent = 'INACTIVO';
+                estadoSpan.className = 'badge bg-secondary ms-2';
+            }
+            
+            // Mostrar notificación de éxito
+            mostrarNotificacion('Sistema ' + (checkbox.checked ? 'activado' : 'desactivado') + ' correctamente', 'success');
+            
+            // Recargar después de 2 segundos para asegurar que todas las vistas se actualicen
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        } else {
+            throw new Error(data.message || 'Error al actualizar');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Revertir el cambio
+        checkbox.checked = !checkbox.checked;
+        
+        // Restaurar estado anterior
+        if (checkbox.checked) {
+            estadoSpan.textContent = 'ACTIVO';
+            estadoSpan.className = 'badge bg-success ms-2';
+        } else {
+            estadoSpan.textContent = 'INACTIVO';
+            estadoSpan.className = 'badge bg-secondary ms-2';
+        }
+        
+        mostrarNotificacion('Error: ' + error.message, 'error');
+    })
+    .finally(() => {
+        checkbox.disabled = false;
+    });
+}
 
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    // Crear elemento de notificación
+    const notificacion = document.createElement('div');
+    notificacion.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+    notificacion.style.top = '20px';
+    notificacion.style.right = '20px';
+    notificacion.style.zIndex = '9999';
+    notificacion.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(notificacion);
+    
+    // Auto-eliminar después de 3 segundos
+    setTimeout(() => {
+        if (notificacion.parentNode) {
+            notificacion.remove();
+        }
+    }, 3000);
+}
 
 
 </script>

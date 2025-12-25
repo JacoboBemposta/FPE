@@ -14,14 +14,14 @@ class ModuloController extends Controller
 {
     public function index()
     {
-        // Obtiene todos los módulos con sus unidades asociadas
+       
         $modulos = Modulo::with('unidades')->get();
         return view('admin.modulos.index', compact('modulos'));
     }
 
     public function show($id)
     {
-        // Obtiene un módulo específico y sus unidades asociadas
+        
         $modulo = Modulo::with('unidades')->findOrFail($id);
         return view('admin.modulos.show', compact('modulo'));
     }
@@ -34,7 +34,7 @@ class ModuloController extends Controller
 
     public function store(Request $request, Curso $curso)
     {
-        // Validación de los datos
+        
         $request->validate([
             'curso_id' => 'required|exists:cursos,id',
             'modulo_existente_id' => 'nullable|exists:modulos,id',
@@ -43,9 +43,9 @@ class ModuloController extends Controller
             'horas' => 'nullable|numeric'
         ]);
 
-        // Manejo de módulo existente o nuevo
+       
         if ($request->modulo_existente_id && $request->modulo_existente_id !== 'new') {
-            // Vincular módulo existente
+           
             $modulo = Modulo::findOrFail($request->modulo_existente_id);
             
             // Verificar si la relación ya existe
@@ -56,7 +56,7 @@ class ModuloController extends Controller
             
             return redirect()->back()->with('info', 'Este módulo ya estaba vinculado al curso');
         } else {
-            // Crear nuevo módulo
+            
             $modulo = Modulo::create([
                 'codigo' => $request->codigo,
                 'nombre' => $request->nombre,
@@ -79,13 +79,13 @@ class ModuloController extends Controller
     {
         $validated = $request->validate([
             'curso_id' => 'required|exists:cursos,id',
-            'modulo_existente_id' => 'nullable|in:new,' . implode(',', $modulosDisponibles->pluck('id')->toArray()), // Permite 'new' o módulos existentes
+            'modulo_existente_id' => 'nullable|in:new,' . implode(',', $curso->modulos->pluck('id')->toArray()), // Permite 'new' o módulos existentes
             'codigo' => 'required_if:modulo_existente_id,new|string|max:50',
             'nombre' => 'required_if:modulo_existente_id,new|string|max:255',
             'horas' => 'nullable|numeric'
         ]);
     
-        // Si se seleccionó crear un nuevo módulo, crearlo
+        
         if ($request->modulo_existente_id === 'new') {
             $modulo = Modulo::create([
                 'curso_id' => $curso->id,
@@ -94,7 +94,7 @@ class ModuloController extends Controller
                 'horas' => $request->horas,
             ]);
         } else {
-            // Si se seleccionó un módulo existente, buscarlo
+           
             $modulo = Modulo::find($request->modulo_existente_id);
         }
     

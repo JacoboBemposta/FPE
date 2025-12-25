@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Log;
 
 class FamiliaProfesionalController extends Controller
 {
-    public function index()
-    {
-        // Mostrar todas las familias profesionales
-        $familias_profesionales = FamiliaProfesional::all();
-        return view('admin.familias.index', compact('familiasProfesionales'));
-    }
+    // public function index()
+    // {
+    //     // Mostrar todas las familias profesionales
+    //     $familias_profesionales = FamiliaProfesional::all();
+    //     return view('admin.familias.index', compact('familias_profesionales'));
+    // }
 
     protected function sanitizeInput(array $data): array
     {

@@ -9,24 +9,31 @@ class CheckRole
 {
     public function handle($request, Closure $next, ...$roles)
     {
-        // Verificar autenticación
         if (!Auth::check()) {
             return redirect('/login');
         }
         
         $user = Auth::user();
         
-        // Verificar si el usuario tiene rol
+        // Si no tiene rol, solo permitir acceso a rutas básicas
         if (!$user->rol) {
-            session(['show_role_modal' => true]);
-            return redirect('/')->with('error', 'Debes seleccionar un rol primero');
+            $allowedRoutes = ['/', 'home', 'user.updateRole', 'logout'];
+            
+            if (!$request->is('/') && 
+                !$request->routeIs('home') && 
+                !$request->routeIs('user.updateRole') &&
+                !$request->routeIs('logout')) {
+                return redirect('/');
+            }
+            
+            return $next($request);
         }
         
-        // Verificar si el rol del usuario está en los permitidos
-        if (!in_array($user->rol, $roles)) {
+        // Verificar rol si se especificó
+        if (!empty($roles) && !in_array($user->rol, $roles)) {
             abort(403, 'No tienes permisos para acceder a esta sección');
         }
-    
+        
         return $next($request);
     }
 }

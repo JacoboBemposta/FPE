@@ -24,6 +24,36 @@ class EmailStatsController extends Controller
                 ->count(),
         ];
 
+        // Estadísticas de usuarios
+        $userStats = [
+            'total_usuarios' => DB::table('users')->count(),
+            'total_academias' => DB::table('users')->where('rol', 'academia')->count(),
+            'total_profesores' => DB::table('users')->where('rol', 'profesor')->count(),
+            'total_alumnos' => DB::table('users')->where('rol', 'alumno')->count(),
+            'total_admins' => DB::table('users')->where('rol', 'admin')->count(),
+            'usuarios_activos' => DB::table('users')->where('activo', true)->count(),
+            'usuarios_inactivos' => DB::table('users')->where('activo', false)->count(),
+        ];
+
+        // Distribución de usuarios por rol (para gráfico)
+        $usuariosPorRol = DB::table('users')
+            ->select('rol', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('rol')
+            ->groupBy('rol')
+            ->orderBy('total', 'desc')
+            ->get();
+
+        // Evolución de usuarios registrados (últimos 6 meses)
+        $evolucionUsuarios = DB::table('users')
+            ->select(
+                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as mes'),
+                DB::raw('COUNT(*) as total')
+            )
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->groupBy('mes')
+            ->orderBy('mes')
+            ->get();
+
         // Estadísticas por contexto
         $porContexto = DB::table('emails_enviados')
             ->select('contexto', DB::raw('COUNT(*) as total'))
@@ -57,7 +87,7 @@ class EmailStatsController extends Controller
             ->limit(50)
             ->get();
 
-        // AÑADE ESTA SECCIÓN PARA LA EVOLUCIÓN MENSUAL
+        // Evolución mensual de emails
         $evolucion = DB::table('emails_enviados')
             ->select(
                 DB::raw('DATE_FORMAT(created_at, "%Y-%m") as mes'),
@@ -68,14 +98,16 @@ class EmailStatsController extends Controller
             ->orderBy('mes')
             ->get();
 
-        // Añade $evolucion al compact
         return view('admin.emails.email-stats', compact(
             'stats',
+            'userStats',
+            'usuariosPorRol',
+            'evolucionUsuarios',
             'porContexto',
             'porEstado',
             'topDestinatarios',
             'ultimosEmails',
-            'evolucion' // ← AÑADE ESTA
+            'evolucion'
         ));
     }
 
@@ -101,9 +133,7 @@ class EmailStatsController extends Controller
         };
 
         return view('admin.emails.detalle-contexto', compact('emails', 'titulo', 'contexto'));
-    }    
-
-
+    }
 
     public function buscar(Request $request)
     {
@@ -139,5 +169,5 @@ class EmailStatsController extends Controller
         ->paginate(25);
 
         return view('admin.emails.busqueda', compact('resultados'));
-    }    
+    }
 }
