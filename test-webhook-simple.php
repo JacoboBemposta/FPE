@@ -1,4 +1,4 @@
-<?php
+<!-- <?php
 // test-webhook-simple.php
 echo "=== Probando conexión con Laravel ===\n\n";
 
@@ -24,4 +24,4 @@ echo "   Response: " . substr($response, 0, 100) . "...\n";
 curl_close($ch);
 
 echo "\n=== Si el código HTTP es 419, CSRF aún está activo ===\n";
-echo "=== Si es 400, CSRF está desactivado pero la firma es inválida (ESPERADO) ===\n";
+echo "=== Si es 400, CSRF está desactivado pero la firma es inválida (ESPERADO) ===\n"; -->

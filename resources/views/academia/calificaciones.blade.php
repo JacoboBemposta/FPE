@@ -169,7 +169,7 @@
                                                        value=""
                                                        data-tipo="unidad"
                                                        data-curso-academico-id="{{ $cursoAcademico->id }}"
-                                                       data-alumno-id="{{ $alumno->id }}"
+                                                       data-alumno-curso-id="{{ $alumno->id }}"
                                                        data-unidad-id="{{ $unidad->id }}"
                                                    @endif
                                                    onchange="guardarCalificacion(this)">
@@ -195,7 +195,7 @@
                                                    value=""
                                                    data-tipo="modulo"
                                                    data-curso-academico-id="{{ $cursoAcademico->id }}"
-                                                   data-alumno-id="{{ $alumno->id }}"
+                                                   data-alumno-curso-id="{{ $alumno->id }}"
                                                    data-modulo-id="{{ $modulo->id }}"
                                                @endif
                                                onchange="guardarCalificacion(this)">
@@ -210,17 +210,13 @@
 
         <!-- Botones para generar actas -->
         <div class="text-center mt-4">
-            <button type="submit" formaction="{{ route('generar.actas', 'gradoA') }}" 
-                    class="btn btn-success btn-acta">
-                <i class="fas fa-file-pdf mr-2"></i> Actas Grado A
-            </button>
             <button type="submit" formaction="{{ route('generar.actas', 'gradoB') }}" 
                     class="btn btn-warning btn-acta">
-                <i class="fas fa-file-pdf mr-2"></i> Actas Grado B
+                <i class="fas fa-file-pdf mr-2"></i> Acta Grado B
             </button>
             <button type="submit" formaction="{{ route('generar.actas', 'gradoC') }}" 
                     class="btn btn-danger btn-acta">
-                <i class="fas fa-file-pdf mr-2"></i> Actas Grado C
+                <i class="fas fa-file-pdf mr-2"></i> Acta Grado C
             </button>
         </div>
     </form>
@@ -253,7 +249,7 @@ async function guardarCalificacion(input) {
 
     const tipo = input.getAttribute('data-tipo');
     const data = {
-        alumno_id: input.getAttribute('data-alumno-id'),
+        alumno_curso_id: input.getAttribute('data-alumno-curso-id'),
         curso_academico_id: input.getAttribute('data-curso-academico-id'),
         nota: nota
     };
@@ -267,30 +263,47 @@ async function guardarCalificacion(input) {
     }
 
     const calificacionId = input.getAttribute('data-calificacion-id');
-    const url = calificacionId ? `/calificaciones/${calificacionId}` : '/calificaciones';
-    const method = calificacionId ? 'PUT' : 'POST';
+    let url, method, data_send;
+
+    if (calificacionId) {
+        // CAMBIA: Añade el prefijo academia/
+        url = `/academia/calificaciones/${calificacionId}`;
+        method = 'PUT';
+        data_send = { nota: nota };
+    } else {
+        // CAMBIA: Añade el prefijo academia/
+        url = '/academia/calificaciones';
+        method = 'POST';
+        data_send = data;
+    }
+
+ 
 
     try {
         const response = await fetch(url, {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'Accept': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data_send)
         });
 
         const result = await response.json();
 
+
         if (!response.ok) {
-            throw new Error(result.message || 'Error al guardar la calificación');
+            let errorMsg = result.message || 'Error al guardar la calificación';
+            if (result.errors) {
+                errorMsg += '\n' + Object.values(result.errors).flat().join('\n');
+            }
+            throw new Error(errorMsg);
         }
 
         if (!calificacionId && result.data && result.data.id) {
             input.setAttribute('data-calificacion-id', result.data.id);
-            input.removeAttribute(`data-${tipo}-id`);
+
         }
 
         // Feedback visual
@@ -298,20 +311,16 @@ async function guardarCalificacion(input) {
         setTimeout(() => input.classList.remove('border-success'), 1000);
         
     } catch (error) {
-        console.error('Error:', error);
-        alert(error.message);
+        console.error('Error completo:', error);
+        alert('Error: ' + error.message);
         input.value = '';
+        input.focus();
     }
 }
-
 // Validación de formulario para actas
 function validarFormulario(grado) {
     const modulosSeleccionados = document.querySelectorAll('input[name="modulos[]"]:checked').length;
     
-    if (grado === 'gradoA' && modulosSeleccionados !== 1) {
-        alert('Para el Grado A, debes seleccionar exactamente un módulo.');
-        return false;
-    }
 
     if (grado === 'gradoB' && modulosSeleccionados !== 1) {
         alert('Para el Grado B, debes seleccionar exactamente un módulo.');
@@ -348,12 +357,12 @@ document.addEventListener('DOMContentLoaded', function() {
         checkbox.addEventListener('change', function() {
             const moduloId = this.value;
             const isChecked = this.checked;
-            
-            // Aquí puedes añadir lógica adicional si necesitas
-            console.log(`Módulo ${moduloId} ${isChecked ? 'seleccionado' : 'deseleccionado'}`);
+                        
+
         });
     });
 });
+
 </script>
 
 @endsection

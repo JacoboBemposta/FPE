@@ -1,4 +1,4 @@
-<?php
+<!-- <?php
 // test-webhook.php
 require __DIR__ . '/vendor/autoload.php';
 
@@ -54,4 +54,4 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 echo "HTTP Code: $httpCode\n";
 echo "Response: $response\n";
 
-curl_close($ch);
+curl_close($ch); -->

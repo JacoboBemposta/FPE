@@ -1003,7 +1003,7 @@
                     
                     if (data.success && data.redirect_url) {
                         // Redirigir inmediatamente
-                        window.location.href = data.redirect_url;
+                        window.location.href = '/';
                     } else {
                         throw new Error(data.message || 'Error al actualizar el rol');
                     }
@@ -1208,7 +1208,7 @@
                             setTimeout(() => {
                                 if (data.role_changed && data.redirect_url) {
                                     console.log('Redirigiendo a:', data.redirect_url);
-                                    window.location.href = data.redirect_url;
+                                    window.location.href = '/';
                                 } else {
                                     console.log('Recargando página...');
                                     window.location.reload();

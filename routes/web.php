@@ -162,15 +162,21 @@ Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':academia'])
         Route::delete('/eliminar-alumno/{id}', [AcademiaController::class, 'eliminarAlumno'])->name('eliminarAlumno');
         Route::post('/actualizar-detalle', [AcademiaController::class, 'actualizarDetalle'])->name('actualizarDetalle');
         Route::post('/crear-detalle', [AcademiaController::class, 'crearDetalle'])->name('crearDetalle');
-        Route::get('/calificaciones/{cursoAcademicoId}', [AcademiaController::class, 'showCalificaciones'])->name('calificaciones');
         Route::get('ver-docentes', [AcademiaController::class, 'verDocentes'])->name('ver_docentes');
         Route::put('/curso/{id}', [AcademiaController::class, 'actualizarCurso'])->name('curso_academico.update');
         Route::delete('/curso/{id}', [AcademiaController::class, 'destroyCursoAcademico'])->name('curso_academico.destroy');
         
-        // Calificaciones
+
+
         Route::post('/guardar-nota', [AcademiaController::class, 'guardarNotaModulo'])->name('guardarNotaModulo');
         Route::post('/eliminar-calificacion', [AcademiaController::class, 'eliminarCalificacion'])->name('eliminarCalificacion');
         Route::post('/detalle/guardar', [AcademiaController::class,'crearActualizarDetalle'])->name('crearActualizarDetalle');
+            // Calificaciones
+        Route::post('/calificaciones', [CalificacionController::class, 'store'])->name('calificaciones.store');
+        Route::put('/calificaciones/{calificacion}', [CalificacionController::class, 'update'])->name('calificaciones.update');
+        Route::get('/calificaciones/{cursoAcademicoId}', [AcademiaController::class, 'showCalificaciones'])->name('calificaciones');
+        Route::post('/generar-actas/{grado}', [ActaController::class, 'generarActas'])->name('generar.actas');
+
         
         // Comunicación
         Route::get('/obtener-email-docente/{docenteId}', [AcademiaController::class, 'obtenerEmailDocente'])->name('obtener-email-docente');
@@ -265,10 +271,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':alumno'])
 Route::get('/auth/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('login.google');
 Route::get('/auth/google/callback', [GoogleLoginController::class, 'handleGoogleCallback']);
 
-// Calificaciones y Actas
-Route::post('/calificaciones', [CalificacionController::class, 'storeCalificacion'])->name('calificaciones.store');
-Route::put('/calificaciones/{calificacion}', [CalificacionController::class, 'update'])->name('calificaciones.update');
-Route::post('/generar-actas/{grado}', [ActaController::class, 'generarActas'])->name('generar.actas');
+
 
 
 Route::middleware('auth')->group(function () {
@@ -289,4 +292,5 @@ Route::get('/suscripcion/test', [SuscripcionController::class, 'testSuccess'])
     ->name('suscripcion.test');
 
 
-    
+   
+        Route::post('/generar-actas/{grado}', [ActaController::class, 'generarActas'])->name('generar.actas');
