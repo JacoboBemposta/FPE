@@ -475,14 +475,11 @@
                     
             // Verificar primero si el sistema está activo
             if (window.sistemaSuscripcionesActivo) {
-                // Sistema ACTIVO: redirigir a la vista de planes
-                console.log('Sistema de suscripciones ACTIVO - redirigiendo a planes');
+
                 window.location.href = '{{ route("suscripcion.planes") }}';
                 return; // Salir de la función
             }
-            
-            // Sistema INACTIVO: abrir modal de contacto
-            console.log('Sistema de suscripciones INACTIVO - abriendo modal de contacto');
+
             
             // Obtener datos del botón
             const academiaId = button.getAttribute('data-academia-id');
@@ -567,14 +564,9 @@
         
         if (clearBtn) {
             clearBtn.addEventListener('click', function() {
-                console.log('Limpiando filtros...');
-                
-                // OPCIÓN 1: Redirigir a la ruta sin parámetros (RECOMENDADA)
+  
                 window.location.href = "{{ route('profesor.ver_academias') }}";
                 
-                // OPCIÓN 2: Resetear el formulario y enviarlo
-                // document.getElementById('searchForm').reset();
-                // document.getElementById('searchForm').submit();
             });
         }
     });

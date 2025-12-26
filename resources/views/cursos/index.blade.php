@@ -286,18 +286,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Inicializando acordeón de cursos...');
     
-    // Debug: Verificar que Bootstrap esté cargado
-    if (typeof bootstrap !== 'undefined') {
-        console.log('Bootstrap cargado correctamente');
-    } else {
-        console.error('Bootstrap no está cargado');
-    }
-    
-    // Eliminar cualquier listener duplicado que pueda interferir
-    // Dejar que Bootstrap maneje el acordeón por sí solo
-    
+        
     // Añadir clase cuando se expande y quitarla cuando se colapsa
     const accordionButtons = document.querySelectorAll('.family-header-modern .btn-link');
     
@@ -305,10 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             console.log('Familia clickeada:', this.getAttribute('data-bs-target'));
             
-            // Bootstrap manejará automáticamente el colapso/expansión
-            // No necesitamos hacer nada más
-            
-            // Opcional: Añadir feedback visual adicional
+
             const targetId = this.getAttribute('data-bs-target');
             const targetCollapse = document.querySelector(targetId);
             

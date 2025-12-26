@@ -383,6 +383,7 @@
 <script>
 
 // Toggle curso detalles
+// Toggle curso detalles
 function toggleCursoDetalles() {
     const detallesDiv = document.getElementById('cursoDetalles');
     const boton = document.getElementById('btnDetallesCurso');
@@ -399,7 +400,7 @@ function toggleCursoDetalles() {
             boton.innerHTML = '<i class="fas fa-chevron-up me-2"></i>Ocultar Detalles';
         }
         
-        debug('Toggle curso detalles: ' + (detallesDiv.classList.contains('hidden') ? 'oculto' : 'visible'));
+
     }
 }
 
@@ -408,7 +409,7 @@ function toggleModulo(moduloId) {
     const moduloDiv = document.getElementById('modulo-' + moduloId);
     if (moduloDiv) {
         moduloDiv.classList.toggle('hidden');
-        debug('Toggle módulo ' + moduloId + ': ' + (moduloDiv.classList.contains('hidden') ? 'oculto' : 'visible'));
+        
     }
 }
 
@@ -430,7 +431,7 @@ async function saveFecha(inputElement) {
             payload.modulo_id = inputElement.dataset.modulo;
         }
 
-        debug('Enviando datos: ' + JSON.stringify(payload));
+      
 
         const response = await fetch("{{ route('academia.crearActualizarDetalle') }}", {
             method: "POST",
@@ -452,7 +453,7 @@ async function saveFecha(inputElement) {
             inputElement.classList.add('actualizado');
             setTimeout(() => inputElement.classList.remove('actualizado'), 2000);
             
-            debug('Fecha guardada exitosamente: ' + inputElement.value);
+
         } else {
             throw new Error(data.message || 'Error al guardar');
         }
@@ -464,18 +465,9 @@ async function saveFecha(inputElement) {
     }
 }
 
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    debug('Página cargada - Curso ID: {{ $cursoAcademico->id }}');
-    debug('Módulos encontrados: ' + {{ $modulos->count() ?? 0 }});
-    
-    // Mostrar todos los módulos al principio (opcional, comenta si prefieres ocultos)
-    // setTimeout(() => {
-    //     document.querySelectorAll('.modulo-content').forEach(el => {
-    //         el.classList.remove('hidden');
-    //     });
-    // }, 500);
-});
+
+
+
 </script>
 
 @endsection

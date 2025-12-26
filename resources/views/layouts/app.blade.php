@@ -989,7 +989,7 @@
                         credentials: 'same-origin' // Importante para mantener la sesión
                     });
                     
-                    console.log('Response status:', response.status); // Para debug
+                   
                     
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({ 
@@ -999,7 +999,7 @@
                     }
                     
                     const data = await response.json();
-                    console.log('Response data:', data); // Para debug
+              
                     
                     if (data.success && data.redirect_url) {
                         // Redirigir inmediatamente
@@ -1044,8 +1044,7 @@
             const editProfileForm = document.getElementById('editProfileForm');
             
             if (editProfileForm) {
-                console.log('Formulario de edición de perfil encontrado');
-                
+                                
                 // Inicializar estilos de los radio buttons
                 function initializeRoleRadios() {
                     const roleRadios = document.querySelectorAll('#editProfileForm input[name="rol"]');
@@ -1094,7 +1093,6 @@
                 const editProfileModal = document.getElementById('editProfileModal');
                 if (editProfileModal) {
                     editProfileModal.addEventListener('shown.bs.modal', function() {
-                        console.log('Modal de edición de perfil abierto');
                         initializeRoleRadios();
                     });
                 }
@@ -1102,7 +1100,6 @@
                 // Manejar envío del formulario
                 editProfileForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
-                    console.log('Enviando formulario de edición de perfil');
                     
                     const nameField = document.getElementById('editName');
                     const selectedRole = document.querySelector('#editProfileForm input[name="rol"]:checked');
@@ -1182,10 +1179,10 @@
                             credentials: 'same-origin'
                         });
                         
-                        console.log('Respuesta recibida, status:', response.status);
+   
                         
                         const data = await response.json();
-                        console.log('Datos de respuesta:', data);
+ 
                         
                         if (response.ok && data.success) {
                             // Cerrar modal
@@ -1207,10 +1204,10 @@
                             // Redirigir o recargar después de un breve delay
                             setTimeout(() => {
                                 if (data.role_changed && data.redirect_url) {
-                                    console.log('Redirigiendo a:', data.redirect_url);
+          
                                     window.location.href = '/';
                                 } else {
-                                    console.log('Recargando página...');
+               
                                     window.location.reload();
                                 }
                             }, 2000);

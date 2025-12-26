@@ -347,12 +347,11 @@ function loadCursos(familiaId) {
     const container = document.getElementById(`cursos-container-${familiaId}`);
     const url = container.getAttribute('data-url');
     
-    console.log('🔍 Cargando cursos para familia:', familiaId);
-    console.log('📡 URL:', url);
+
 
     // Si ya se cargaron los cursos, no hacer nada
     if (container.getAttribute('data-loaded') === 'true') {
-        console.log('✅ Los cursos ya estaban cargados');
+ 
         return;
     }
 
@@ -374,14 +373,14 @@ function loadCursos(familiaId) {
         }
     })
     .then(response => {
-        console.log('📨 Respuesta recibida:', response.status);
+ 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
     .then(cursos => {
-        console.log('📊 Cursos cargados:', cursos);
+
         
         if (cursos.length === 0) {
             container.innerHTML = `
@@ -465,12 +464,11 @@ function loadCursos(familiaId) {
     const container = document.getElementById(`cursos-container-${familiaId}`);
     const url = `/admin/familias/${familiaId}/cursos`;
     
-    console.log('🔍 Cargando cursos para familia:', familiaId);
-    console.log('📡 URL:', url);
+
 
     // Si ya se cargaron los cursos, no hacer nada
     if (container.getAttribute('data-loaded') === 'true') {
-        console.log('✅ Los cursos ya estaban cargados');
+
         return;
     }
 
@@ -492,7 +490,7 @@ function loadCursos(familiaId) {
         }
     })
     .then(response => {
-        console.log('📨 Respuesta recibida:', response.status, response.statusText);
+ 
         if (!response.ok) {
             return response.json().then(errorData => {
                 throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
@@ -503,7 +501,7 @@ function loadCursos(familiaId) {
         return response.json();
     })
     .then(cursos => {
-        console.log('📊 Cursos cargados:', cursos);
+  
         
         // Verificar si es un error
         if (cursos.error) {
@@ -623,8 +621,7 @@ function toggleModulos(cursoId) {
         const container = document.getElementById(`modulos-container-${cursoId}`);
         const url = `/admin/cursos/${cursoId}/modulos`;
         
-        console.log('🔍 Cargando módulos para curso:', cursoId);
-        console.log('📡 URL:', url);
+
 
         // Mostrar spinner
         container.innerHTML = `
@@ -644,7 +641,7 @@ function toggleModulos(cursoId) {
             }
         })
         .then(response => {
-            console.log('📨 Respuesta módulos:', response.status, response.statusText);
+    
             if (!response.ok) {
                 return response.json().then(errorData => {
                     throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
@@ -655,7 +652,7 @@ function toggleModulos(cursoId) {
             return response.json();
         })
         .then(modulos => {
-            console.log('📊 Módulos cargados:', modulos);
+     
             
             // Verificar si es un error
             if (modulos.error) {
@@ -726,8 +723,6 @@ function toggleModulos(cursoId) {
         const container = document.getElementById(`unidades-container-${moduloId}`);
         const url = `/admin/modulos/${moduloId}/unidades`;
         
-        console.log('🔍 Cargando unidades para módulo:', moduloId);
-        console.log('📡 URL:', url);
 
         // Mostrar spinner
         container.innerHTML = `
@@ -747,7 +742,7 @@ function toggleModulos(cursoId) {
             }
         })
         .then(response => {
-            console.log('📨 Respuesta unidades:', response.status, response.statusText);
+
             if (!response.ok) {
                 return response.json().then(errorData => {
                     throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
@@ -758,7 +753,7 @@ function toggleModulos(cursoId) {
             return response.json();
         })
         .then(unidades => {
-            console.log('📊 Unidades cargadas:', unidades);
+          
             
             // Verificar si es un error
             if (unidades.error) {
