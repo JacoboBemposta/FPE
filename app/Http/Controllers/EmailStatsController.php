@@ -1,4 +1,4 @@
-<?php
+<!-- <?php
 
 namespace App\Http\Controllers;
 
@@ -170,4 +170,4 @@ class EmailStatsController extends Controller
 
         return view('admin.emails.busqueda', compact('resultados'));
     }
-}
+} -->

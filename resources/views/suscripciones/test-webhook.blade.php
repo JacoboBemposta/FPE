@@ -1,4 +1,4 @@
-
+{{-- 
 @extends('layouts.app')
 
 @section('content')
@@ -68,4 +68,4 @@ document.getElementById('testWebhookForm').addEventListener('submit', function(e
     });
 });
 </script>
-@endsection
+@endsection --}}

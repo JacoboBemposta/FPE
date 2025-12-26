@@ -2,228 +2,111 @@
 
 @section('content')
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
+    <h1>Planes de Suscripción</h1>
+    
+    <div class="row">
+        <!-- Plan Docente -->
+        <div class="col-md-6">
             <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-crown me-2"></i>Planes de Suscripción
-                    </h4>
+                <div class="card-header">
+                    <h3>Plan Docente</h3>
                 </div>
-                
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Para poder contactar 
-                        @if($tipo_usuario == 'docente')
-                            <strong>academias</strong>,
-                        @elseif($tipo_usuario == 'academia')
-                            <strong>docentes</strong>,
-                        @endif
-                        necesitas activar una suscripción.
-                    </div>
-
-                    <div class="row justify-content-center">
-                        @if($tipo_usuario == 'profesor')
-                            <!-- Plan para Docente - 5€ -->
-                            <div class="col-md-8">
-                                <div class="card border-primary shadow">
-                                    <div class="card-header bg-primary text-white text-center">
-                                        <h4 class="mb-0">
-                                            <i class="fas fa-chalkboard-teacher me-2"></i>
-                                            Plan Docente
-                                        </h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <h1 class="display-4 text-primary">5€</h1>
-                                            <p class="text-muted">por mes</p>
-                                        </div>
-                                        
-                                        <h5 class="text-center mb-3">¿Qué incluye?</h5>
-                                        <ul class="list-group list-group-flush mb-4">
-                                            <li class="list-group-item d-flex align-items-center">
-                                                <i class="fas fa-check text-success me-3"></i>
-                                                <span>Contactar con academias sin límite</span>
-                                            </li>
-                                            <li class="list-group-item d-flex align-items-center">
-                                                <i class="fas fa-check text-success me-3"></i>
-                                                <span>Perfil visible para academias</span>
-                                            </li>
-                                            <li class="list-group-item d-flex align-items-center">
-                                                <i class="fas fa-check text-success me-3"></i>
-                                                <span>Soporte por email</span>
-                                            </li>
-                                        </ul>
-                                        
-                                        <div class="text-center">
-                                            <button class="btn btn-primary btn-lg btn-suscribir" 
-                                                    data-tipo="docente" 
-                                                    data-precio="5">
-                                                <i class="fas fa-credit-card me-2"></i>
-                                                Suscribirse por 5€/mes
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                        @elseif($tipo_usuario == 'academia')
-                            <!-- Plan para Academia - 10€ -->
-                            <div class="col-md-8">
-                                <div class="card border-warning shadow">
-                                    <div class="card-header bg-warning text-white text-center">
-                                        <h4 class="mb-0">
-                                            <i class="fas fa-university me-2"></i>
-                                            Plan Academia
-                                        </h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <h1 class="display-4 text-warning">10€</h1>
-                                            <p class="text-muted">por mes</p>
-                                        </div>
-                                        
-                                        <h5 class="text-center mb-3">¿Qué incluye?</h5>
-                                        <ul class="list-group list-group-flush mb-4">
-                                            <li class="list-group-item d-flex align-items-center">
-                                                <i class="fas fa-check text-success me-3"></i>
-                                                <span>Contactar docentes sin límites</span>
-                                            </li>
-                                            <li class="list-group-item d-flex align-items-center">
-                                                <i class="fas fa-check text-success me-3"></i>
-                                                <span>Búsqueda avanzada de docentes</span>
-                                            </li>
-                                            <li class="list-group-item d-flex align-items-center">
-                                                <i class="fas fa-check text-success me-3"></i>
-                                                <span>Soporte prioritario</span>
-                                            </li>
-                                        </ul>
-                                        
-                                        <div class="text-center">
-                                            <button class="btn btn-warning btn-lg btn-suscribir" 
-                                                    data-tipo="academia" 
-                                                    data-precio="10">
-                                                <i class="fas fa-credit-card me-2"></i>
-                                                Suscribirse por 10€/mes
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                        @else
-                            <!-- Si no se reconoce el tipo de usuario -->
-                            <div class="col-md-8">
-                                <div class="alert alert-danger">
-                                    <h5><i class="fas fa-exclamation-triangle me-2"></i>Tipo de usuario no reconocido</h5>
-                                    <p class="mb-0">Por favor, contacta con soporte para seleccionar el plan adecuado.</p>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-
-<div class="text-center mt-4">
-    @if($tipo_usuario == 'profesor')
-        <a href="{{ url()->previous() }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Volver atrás
-        </a>
-    @elseif($tipo_usuario == 'academia')
-        <a href="{{ url()->previous() }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Volver atrás
-        </a>
-    @else
-        <a href="/" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Volver al inicio
-        </a>
-    @endif
-</div>
+                    <h4>5€/mes</h4>
+                    <ul>
+                        <li>Acceso completo a cursos</li>
+                        <li>Gestión de alumnos</li>
+                        <li>Soporte prioritario</li>
+                    </ul>
+                    
+                    @if($tipo_usuario === 'profesor')
+                        <button onclick="suscribirse('docente', 5)" 
+                                class="btn btn-primary btn-lg btn-block">
+                            Suscribirse - 5€/mes
+                        </button>
+                    @else
+                        <button disabled class="btn btn-secondary btn-lg btn-block">
+                            No disponible para tu rol
+                        </button>
+                    @endif
+                </div>
+            </div>
+        </div>
+        
+        <!-- Plan Academia -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Plan Academia</h3>
+                </div>
+                <div class="card-body">
+                    <h4>10€/mes</h4>
+                    <ul>
+                        <li>Todas las funciones del plan docente</li>
+                        <li>Gestión de múltiples cursos</li>
+                        <li>Panel de administración</li>
+                    </ul>
+                    
+                    @if($tipo_usuario === 'academia')
+                        <button onclick="suscribirse('academia', 10)" 
+                                class="btn btn-primary btn-lg btn-block">
+                            Suscribirse - 10€/mes
+                        </button>
+                    @else
+                        <button disabled class="btn btn-secondary btn-lg btn-block">
+                            No disponible para tu rol
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Manejar el clic en el botón de suscripción
-    document.querySelectorAll('.btn-suscribir').forEach(button => {
-        button.addEventListener('click', function() {
-            const tipo = this.getAttribute('data-tipo');
-            const precio = this.getAttribute('data-precio');
-            
-            // Mostrar confirmación
-            Swal.fire({
-                title: `¿Suscribirse al plan ${tipo}?`,
-                html: `Estás a punto de suscribirte al plan <strong>${tipo}</strong> por <strong>${precio}€/mes</strong>.<br><br>
-                      Esta suscripción te permitirá contactar con ${tipo === 'docente' ? 'academias' : 'docentes'}.`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Confirmar suscripción',
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: tipo === 'docente' ? '#0d6efd' : '#ffc107'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Aquí implementarás la lógica de pago
-                    iniciarProcesoSuscripcion(tipo, precio);
-                }
-            });
-        });
-    });
+function suscribirse(tipo, precio) {
+    console.log('Intentando suscribirse a:', tipo, precio); // Para debug
     
-    function iniciarProcesoSuscripcion(tipo, precio) {
-        // Mostrar cargando
-        Swal.fire({
-            title: 'Procesando...',
-            text: 'Redirigiendo al proceso de pago',
-            icon: 'info',
-            showConfirmButton: false,
-            allowOutsideClick: false
-        });
-        
-        // Enviar petición al servidor para crear la suscripción
-        fetch('/suscripciones/procesar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({
-                tipo: tipo,
-                precio: precio
-            })
+    // Mostrar loading
+    const boton = event.target;
+    const originalText = boton.innerHTML;
+    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    boton.disabled = true;
+    
+    // Enviar solicitud AJAX
+    fetch('{{ route("suscripcion.procesar") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            tipo: tipo,
+            precio: precio
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Redirigir al proceso de pago (Stripe, PayPal, etc.)
-                if (data.redirect_url) {
-                    window.location.href = data.redirect_url;
-                } else {
-                    // Si no hay URL de redirección, mostrar éxito
-                    Swal.fire({
-                        title: '¡Suscripción activada!',
-                        text: 'Tu suscripción ha sido activada correctamente.',
-                        icon: 'success'
-                    }).then(() => {
-                        // Redirigir al inicio
-                        window.location.href = '/';
-                    });
-                }
-            } else {
-                throw new Error(data.message || 'Error al procesar la suscripción');
-            }
-        })
-        .catch(error => {
-            Swal.fire({
-                title: 'Error',
-                text: error.message,
-                icon: 'error'
-            });
-        });
-    }
-});
+    })
+    .then(response => {
+        console.log('Respuesta recibida:', response);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Datos recibidos:', data);
+        if (data.success && data.redirect_url) {
+            // Redirigir a Stripe Checkout
+            window.location.href = data.redirect_url;
+        } else {
+            alert(data.message || 'Error al procesar la suscripción');
+            boton.innerHTML = originalText;
+            boton.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión. Verifica la consola para más detalles.');
+        boton.innerHTML = originalText;
+        boton.disabled = false;
+    });
+}
 </script>
-@endpush
 @endsection

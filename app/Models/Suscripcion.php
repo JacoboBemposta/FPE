@@ -1,6 +1,4 @@
 <?php
-// app/Models/Suscripcion.php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,19 +9,20 @@ class Suscripcion extends Model
 {
     use HasFactory;
 
+    protected $table = 'suscripciones';
+
     protected $fillable = [
         'user_id',
         'stripe_id',
         'stripe_subscription_id',
         'plan',
-        'tipo',
         'precio',
-        'intervalo',
+        'tipo',
         'fecha_inicio',
         'fecha_fin',
         'cancelado_en',
-        'estado',
-        'metadata',
+        'activa', // ← Usamos 'activa' en lugar de 'estado'
+        // 'intervalo' → NO LO INCLUIMOS
     ];
 
     protected $casts = [
@@ -31,7 +30,8 @@ class Suscripcion extends Model
         'fecha_fin' => 'datetime',
         'cancelado_en' => 'datetime',
         'precio' => 'decimal:2',
-        'metadata' => 'array',
+        'activa' => 'boolean',
+        // 'metadata' → NO LO INCLUIMOS
     ];
 
     /**
@@ -43,11 +43,19 @@ class Suscripcion extends Model
     }
 
     /**
+     * Relación con los pagos
+     */
+    public function pagos()
+    {
+        return $this->hasMany(Pago::class);
+    }
+
+    /**
      * Verificar si la suscripción está activa
      */
     public function estaActiva(): bool
     {
-        return $this->estado === 'activa' && 
+        return $this->activa == 1 && 
                $this->fecha_fin && 
                $this->fecha_fin->isFuture();
     }
@@ -62,5 +70,21 @@ class Suscripcion extends Model
         }
         
         return $this->fecha_fin->diffInDays(now()) <= 7;
+    }
+
+    /**
+     * Obtener el total pagado
+     */
+    public function getTotalPagadoAttribute()
+    {
+        return $this->pagos()->where('estado', 'completado')->sum('monto_total');
+    }
+
+    /**
+     * Accessor para estado (compatibilidad)
+     */
+    public function getEstadoAttribute()
+    {
+        return $this->activa ? 'activa' : 'inactiva';
     }
 }

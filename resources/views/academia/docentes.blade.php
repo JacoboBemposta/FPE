@@ -115,92 +115,107 @@
                 </table>
             </div>
 
-            <!-- Paginación -->
-            @if($docentesConCursos->hasPages())
-            <div class="d-flex justify-content-between align-items-center mt-4">
-                <div class="text-muted">
-                    Página <strong>{{ $docentesConCursos->currentPage() }}</strong> de <strong>{{ $docentesConCursos->lastPage() }}</strong>
-                </div>
-                
-                <nav aria-label="Paginación de docentes">
-                    <ul class="pagination justify-content-center mb-0">
-                        <!-- Enlace anterior -->
-                        <li class="page-item {{ $docentesConCursos->onFirstPage() ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ $docentesConCursos->previousPageUrl() }}" aria-label="Anterior">
-                                <i class="fas fa-chevron-left"></i>
-                            </a>
-                        </li>
+<!-- Paginación MEJORADA -->
+@if($docentesConCursos->hasPages())
+@php
+    // Obtener todos los parámetros de búsqueda
+    $queryParams = request()->except('page');
+    
+    // Función para generar URLs con parámetros
+    function paginationUrl($paginator, $page, $params) {
+        if ($page === null) return '#';
+        $url = $paginator->url($page);
+        if (!empty($params)) {
+            $separator = (strpos($url, '?') === false) ? '?' : '&';
+            $url .= $separator . http_build_query($params);
+        }
+        return $url;
+    }
+@endphp
 
-                        <!-- Números de página -->
-                        @php
-                            $current = $docentesConCursos->currentPage();
-                            $last = $docentesConCursos->lastPage();
-                            $start = max(1, $current - 2);
-                            $end = min($last, $current + 2);
-                        @endphp
+<div class="d-flex justify-content-between align-items-center mt-4">
+    <div class="text-muted">
+        Página <strong>{{ $docentesConCursos->currentPage() }}</strong> de <strong>{{ $docentesConCursos->lastPage() }}</strong>
+    </div>
+    
+    <nav aria-label="Paginación de docentes">
+        <ul class="pagination justify-content-center mb-0">
+            <!-- Enlace anterior -->
+            <li class="page-item {{ $docentesConCursos->onFirstPage() ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ paginationUrl($docentesConCursos, $docentesConCursos->currentPage() - 1, $queryParams) }}" aria-label="Anterior">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
 
-                        @if($start > 1)
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $docentesConCursos->url(1) }}">1</a>
-                            </li>
-                            @if($start > 2)
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
-                            @endif
-                        @endif
+            <!-- Números de página -->
+            @php
+                $current = $docentesConCursos->currentPage();
+                $last = $docentesConCursos->lastPage();
+                $start = max(1, $current - 2);
+                $end = min($last, $current + 2);
+            @endphp
 
-                        @for($i = $start; $i <= $end; $i++)
-                            <li class="page-item {{ $i == $current ? 'active' : '' }}">
-                                <a class="page-link" href="{{ $docentesConCursos->url($i) }}">{{ $i }}</a>
-                            </li>
-                        @endfor
-
-                        @if($end < $last)
-                            @if($end < $last - 1)
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
-                            @endif
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $docentesConCursos->url($last) }}">{{ $last }}</a>
-                            </li>
-                        @endif
-
-                        <!-- Enlace siguiente -->
-                        <li class="page-item {{ !$docentesConCursos->hasMorePages() ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ $docentesConCursos->nextPageUrl() }}" aria-label="Siguiente">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-
-                <!-- Selector de página rápida -->
-                <div class="d-flex align-items-center">
-                    <span class="text-muted me-2">Ir a:</span>
-                    <form method="GET" action="{{ route('academia.ver_docentes') }}" class="d-flex">
-                        <input type="hidden" name="codigo" value="{{ request('codigo') }}">
-                        <input type="hidden" name="nombre" value="{{ request('nombre') }}">
-                        <input type="hidden" name="docente_nombre" value="{{ request('docente_nombre') }}">
-                        <input type="hidden" name="provincia" value="{{ request('provincia') }}">
-                        <input type="hidden" name="estado_suscripcion" value="{{ request('estado_suscripcion', 'todos') }}">
-                        <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
-                        
-                        <input type="number" 
-                               name="page" 
-                               class="form-control form-control-sm" 
-                               style="width: 80px;" 
-                               min="1" 
-                               max="{{ $docentesConCursos->lastPage() }}"
-                               value="{{ $docentesConCursos->currentPage() }}">
-                        <button type="submit" class="btn btn-sm btn-primary ms-2">
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
+            @if($start > 1)
+                <li class="page-item">
+                    <a class="page-link" href="{{ paginationUrl($docentesConCursos, 1, $queryParams) }}">1</a>
+                </li>
+                @if($start > 2)
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                @endif
             @endif
+
+            @for($i = $start; $i <= $end; $i++)
+                <li class="page-item {{ $i == $current ? 'active' : '' }}">
+                    <a class="page-link" href="{{ paginationUrl($docentesConCursos, $i, $queryParams) }}">{{ $i }}</a>
+                </li>
+            @endfor
+
+            @if($end < $last)
+                @if($end < $last - 1)
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                @endif
+                <li class="page-item">
+                    <a class="page-link" href="{{ paginationUrl($docentesConCursos, $last, $queryParams) }}">{{ $last }}</a>
+                </li>
+            @endif
+
+            <!-- Enlace siguiente -->
+            <li class="page-item {{ !$docentesConCursos->hasMorePages() ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ paginationUrl($docentesConCursos, $docentesConCursos->currentPage() + 1, $queryParams) }}" aria-label="Siguiente">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Selector de página rápida (ya funciona correctamente) -->
+    <div class="d-flex align-items-center">
+        <span class="text-muted me-2">Ir a:</span>
+        <form method="GET" action="{{ route('academia.ver_docentes') }}" class="d-flex">
+            @foreach(request()->except(['page', '_token']) as $key => $value)
+                @if($value)
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endif
+            @endforeach
+            
+            <input type="number" 
+                   name="page" 
+                   class="form-control form-control-sm" 
+                   style="width: 80px;" 
+                   min="1" 
+                   max="{{ $docentesConCursos->lastPage() }}"
+                   value="{{ $docentesConCursos->currentPage() }}">
+            <button type="submit" class="btn btn-sm btn-primary ms-2">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+</div>
+@endif
             
             <div class="d-flex justify-content-end mt-4">
                 <a href="{{ route('academia.miscursos') }}" class="btn btn-success px-4">
@@ -386,6 +401,22 @@ if (contactForm) {
         }
     });
 }
+    // ========== LIMPIAR FILTROS ==========
+    const clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            console.log('Botón Limpiar clickeado - Vista docentes');
+            
+            // Redirigir a la ruta sin parámetros
+            window.location.href = "{{ route('academia.ver_docentes') }}";
+            
+            // Alternativa: Resetear formulario y enviar
+            // document.getElementById('searchForm').reset();
+            // document.getElementById('searchForm').submit();
+        });
+    } else {
+        console.error('ERROR: No se encontró el botón con id="clearBtn" en vista docentes');
+    }
 </script>
 
 <!-- Estilos CSS personalizados -->

@@ -372,7 +372,7 @@
                     </h2>
                     <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            <p class="mb-0">Los docentes se registran en la plataforma y los administradores les asignan manualmente 
+                            <p class="mb-0">Los docentes se registran en la plataforma y se asignan manualmente 
                             los certificados de profesionalidad que están autorizados a impartir. Las academias pueden ver estos 
                             certificados en el perfil de cada docente y contactar con ellos directamente.</p>
                         </div>

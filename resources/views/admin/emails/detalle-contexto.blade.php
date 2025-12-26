@@ -1,4 +1,4 @@
-{{-- resources/views/admin/emails/detalle-contexto.blade.php --}}
+{{-- resources/views/admin/emails/detalle-contexto.blade.php
 @extends('layouts.app')
 
 @section('content')
@@ -133,4 +133,4 @@ function verDetalle(id) {
 }
 </script>
 @endpush
-@endsection
+@endsection --}}

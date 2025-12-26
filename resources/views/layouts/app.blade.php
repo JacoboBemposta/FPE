@@ -536,7 +536,7 @@
                             <!-- BOTÓN SOLO PARA ADMIN -->
                             @if(Auth::user()->rol === 'admin')
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('admin.email.stats') }}">
+                                    <a class="nav-link" href="{{ route('admin.stats') }}">
                                         <i class="fas fa-chart-bar me-1"></i>
                                         <span>Estadísticas</span>
                                     </a>

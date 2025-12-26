@@ -11,10 +11,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\SuscripcionTrait;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SuscripcionTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -56,6 +57,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'activo' => 'boolean',
             'premium' => 'boolean',
+            'inicio_suscripcion' => 'datetime', 
+            'fin_suscripcion' => 'datetime',
         ];
     }
 
@@ -207,18 +210,6 @@ public function cursosGestionados()
 }
 
 
-
-
-    public function tieneSuscripcionActiva()
-    {
-        // Verifica si la fecha fin_suscripcion es mayor a hoy
-        if ($this->fin_suscripcion) {
-            return now()->lessThan($this->fin_suscripcion);
-        }
-        
-        return false;
-    }
-
     // Método para obtener la fecha de fin de suscripción formateada
     public function getFinSuscripcionFormatted()
     {
@@ -228,5 +219,43 @@ public function cursosGestionados()
         
         return null;
     }
+
+
+    public function suscripciones()
+    {
+        return $this->hasMany(Suscripcion::class);
+    }
+
+
+
+
+/**
+ * Verificar si tiene suscripción activa
+ */
+public function tieneSuscripcionActiva()
+{
+    // Primero verificar si tiene campo premium (si ya lo tienes)
+    if ($this->premium && $this->fin_suscripcion && $this->fin_suscripcion->isFuture()) {
+        return true;
+    }
+    
+    // Luego verificar en tabla suscripciones - CAMBIA ESTO:
+    return $this->suscripciones()
+        ->where('activa', 1)  // ← Cambiar de 'estado' a 'activa'
+        ->where('fecha_fin', '>', now())
+        ->exists();
+}
+
+/**
+ * Obtener suscripción activa
+ */
+public function suscripcionActiva()
+{
+    return $this->suscripciones()
+        ->where('activa', 1)  // ← Cambiar de 'estado' a 'activa'
+        ->where('fecha_fin', '>', now())
+        ->latest()
+        ->first();
+}
 }
 

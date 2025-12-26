@@ -1,4 +1,4 @@
-{{-- @extends('layouts.app')
+@extends('layouts.app')
 
 @section('content')
 <div class="container-fluid">
@@ -347,21 +347,29 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($ingresosPorTipo as $tipo)
-                                <tr>
-                                    <td>
-                                        <span class="badge badge-{{ $tipo->tipo == 'academia' ? 'success' : 'primary' }}">
-                                            {{ $tipo->tipo == 'academia' ? 'Academias' : 'Docentes' }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {{ $tipo->total_suscripciones }}
-                                    </td>
-                                    <td>
-                                        {{ number_format($tipo->total_ingresos, 2) }}€
-                                    </td>
-                                </tr>
-                                @endforeach
+                                @if($ingresosPorTipo && $ingresosPorTipo->count() > 0)
+                                    @foreach($ingresosPorTipo as $tipo)
+                                    <tr>
+                                        <td>
+                                            <span class="badge badge-{{ $tipo->tipo == 'academia' ? 'success' : 'primary' }}">
+                                                {{ $tipo->tipo == 'academia' ? 'Academias' : 'Docentes' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {{ $tipo->total_suscripciones ?? 0 }}
+                                        </td>
+                                        <td>
+                                            {{ number_format($tipo->total_ingresos ?? 0, 2) }}€
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">
+                                            <i class="fas fa-info-circle mr-1"></i> No hay datos de suscripciones disponibles
+                                        </td>
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -387,26 +395,37 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @php $totalSuscripciones = $subscriptionStats['total_suscripciones'] ?? 1; @endphp
-                                @foreach($suscripcionesPorPlan as $plan)
-                                @php $porcentaje = ($plan->total / $totalSuscripciones) * 100; @endphp
-                                <tr>
-                                    <td>{{ $plan->plan }}</td>
-                                    <td>{{ $plan->total }}</td>
-                                    <td>
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-info" 
-                                                 role="progressbar" 
-                                                 style="width: {{ $porcentaje }}%"
-                                                 aria-valuenow="{{ $plan->total }}" 
-                                                 aria-valuemin="0" 
-                                                 aria-valuemax="{{ $totalSuscripciones }}">
-                                                {{ number_format($porcentaje, 1) }}%
+                                @php
+                                    $totalSuscripciones = $subscriptionStats['total_suscripciones'] ?? 0;
+                                @endphp
+                                
+                                @if($suscripcionesPorPlan && $suscripcionesPorPlan->count() > 0)
+                                    @foreach($suscripcionesPorPlan as $plan)
+                                    @php $porcentaje = $totalSuscripciones > 0 ? ($plan->total / $totalSuscripciones) * 100 : 0; @endphp
+                                    <tr>
+                                        <td>{{ $plan->plan }}</td>
+                                        <td>{{ $plan->total }}</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-info" 
+                                                     role="progressbar" 
+                                                     style="width: {{ $porcentaje }}%"
+                                                     aria-valuenow="{{ $plan->total }}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="{{ $totalSuscripciones }}">
+                                                    {{ number_format($porcentaje, 1) }}%
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">
+                                            <i class="fas fa-info-circle mr-1"></i> No hay datos de planes disponibles
+                                        </td>
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -436,18 +455,26 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($topSuscriptores as $index => $suscriptor)
-                                <tr>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $suscriptor->name }}</td>
-                                    <td>
-                                        <span class="badge badge-{{ $suscriptor->rol == 'academia' ? 'success' : 'primary' }}">
-                                            {{ $suscriptor->rol == 'academia' ? 'Academia' : 'Docente' }}
-                                        </span>
-                                    </td>
-                                    <td>{{ number_format($suscriptor->total_pagado, 2) }}€</td>
-                                </tr>
-                                @endforeach
+                                @if($topSuscriptores && $topSuscriptores->count() > 0)
+                                    @foreach($topSuscriptores as $index => $suscriptor)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $suscriptor->name }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ $suscriptor->rol == 'academia' ? 'success' : 'primary' }}">
+                                                {{ $suscriptor->rol == 'academia' ? 'Academia' : 'Docente' }}
+                                            </span>
+                                        </td>
+                                        <td>{{ number_format($suscriptor->total_pagado, 2) }}€</td>
+                                    </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            <i class="fas fa-info-circle mr-1"></i> No hay datos de suscriptores disponibles
+                                        </td>
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -473,27 +500,35 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @php $maxIngresos = $ingresosMensuales->max('total') ?? 1; @endphp
-                                @foreach($ingresosMensuales as $item)
-                                @php
-                                    $width = $maxIngresos > 0 ? ($item->total / $maxIngresos) * 100 : 0;
-                                @endphp
-                                <tr>
-                                    <td>{{ \Carbon\Carbon::parse($item->year . '-' . $item->month . '-01')->format('M Y') }}</td>
-                                    <td>{{ number_format($item->total, 2) }}€</td>
-                                    <td>
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-success" 
-                                                 role="progressbar" 
-                                                 style="width: {{ $width }}%"
-                                                 aria-valuenow="{{ $item->total }}" 
-                                                 aria-valuemin="0" 
-                                                 aria-valuemax="{{ $maxIngresos }}">
+                                @if($ingresosMensuales && $ingresosMensuales->count() > 0)
+                                    @php $maxIngresos = $ingresosMensuales->max('total') ?? 1; @endphp
+                                    @foreach($ingresosMensuales as $item)
+                                    @php
+                                        $width = $maxIngresos > 0 ? ($item->total / $maxIngresos) * 100 : 0;
+                                    @endphp
+                                    <tr>
+                                        <td>{{ \Carbon\Carbon::parse($item->year . '-' . $item->month . '-01')->format('M Y') }}</td>
+                                        <td>{{ number_format($item->total, 2) }}€</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-success" 
+                                                     role="progressbar" 
+                                                     style="width: {{ $width }}%"
+                                                     aria-valuenow="{{ $item->total }}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="{{ $maxIngresos }}">
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">
+                                            <i class="fas fa-info-circle mr-1"></i> No hay datos de ingresos disponibles
+                                        </td>
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -502,7 +537,7 @@
         </div>
     </div>
 
-    {{-- Título para sección de emails --}}
+    {{-- SECCIÓN DE ESTADÍSTICAS DE EMAILS --}}
     <div class="row mb-4">
         <div class="col-12 mb-3">
             <h4 class="h5 mb-0 text-gray-800">
@@ -510,10 +545,8 @@
             </h4>
             <hr class="mt-2">
         </div>
-    </div>
 
-    {{-- Tarjetas de estadísticas de emails (código existente) --}}
-    <div class="row mb-4">
+        {{-- Tarjetas de estadísticas de emails --}}
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
@@ -583,7 +616,6 @@
         </div>
     </div>
 
-    {{-- Resto del código existente (secciones de emails) --}}
     {{-- Distribución por contexto --}}
     <div class="row mb-4">
         <div class="col-lg-6 mb-4">
@@ -636,7 +668,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <a href="{{ route('admin.email.stats.contexto', $item->contexto) }}" 
+                                        <a href="{{ route('admin.stats.contexto', $item->contexto) }}" 
                                            class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-eye"></i> Ver
                                         </a>
@@ -699,7 +731,6 @@
 
     {{-- Top destinatarios y evolución --}}
     <div class="row mb-4">
-        {{-- Top 10 destinatarios --}}
         <div class="col-lg-6 mb-4">
             <div class="card shadow">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
@@ -736,7 +767,6 @@
             </div>
         </div>
 
-        {{-- Evolución últimos 6 meses --}}
         <div class="col-lg-6 mb-4">
             <div class="card shadow">
                 <div class="card-header py-3">
@@ -794,7 +824,7 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.email.search') }}" method="GET" class="form-inline">
+                    <form action="{{ route('admin.stats.buscar-emails') }}" method="GET" class="form-inline">
                         <div class="input-group w-100">
                             <select name="tipo" class="form-control mr-2" style="width: 150px;">
                                 <option value="email">Por Email</option>
@@ -823,7 +853,7 @@
                     <h6 class="m-0 font-weight-bold text-primary">
                         <i class="fas fa-history mr-2"></i>Últimos 50 Emails Enviados
                     </h6>
-                    <a href="{{ route('admin.email.stats') }}" class="btn btn-sm btn-primary">
+                    <a href="{{ route('admin.stats') }}" class="btn btn-sm btn-primary">
                         <i class="fas fa-sync-alt"></i> Actualizar
                     </a>
                 </div>
@@ -914,10 +944,9 @@
 </div>
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 function verDetalle(id) {
-    fetch(`/admin/email-stats/detalle/${id}`)
+    fetch(`/admin/stats/email/${id}`)
         .then(response => response.json())
         .then(data => {
             let html = `
@@ -960,18 +989,6 @@ function verDetalle(id) {
             document.getElementById('detalleContent').innerHTML = '<div class="alert alert-danger">Error al cargar los detalles</div>';
         });
 }
-
-// Gráfico de ingresos de suscripciones
-document.addEventListener('DOMContentLoaded', function() {
-    // Si tienes datos para un gráfico más avanzado, puedes añadirlo aquí
-    // Por ahora solo mostramos las tablas
-    
-    // Ejemplo básico de gráfico si decides implementarlo
-    const ctx = document.getElementById('graficoIngresos');
-    if (ctx) {
-        // Tu código para inicializar Chart.js aquí
-    }
-});
 </script>
 @endpush
 
@@ -990,4 +1007,4 @@ document.addEventListener('DOMContentLoaded', function() {
     line-height: 20px;
 }
 </style>
-@endsection --}}
+@endsection

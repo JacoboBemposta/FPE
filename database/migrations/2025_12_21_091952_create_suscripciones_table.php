@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('stripe_id')->unique()->nullable();
             $table->string('stripe_subscription_id')->unique()->nullable();
             $table->string('plan')->nullable(); // basico, premium
+            $table->decimal('precio', 10, 2)->nullable();
             $table->string('tipo'); // docente, academia
             $table->timestamp('fecha_inicio')->nullable();
             $table->timestamp('fecha_fin')->nullable();

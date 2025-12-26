@@ -82,12 +82,10 @@ class RegisterController extends Controller
             'premium' => false,
             'email_verified_at' => null, // Asegurar que no está verificado
         ]);
-Log::info('Implementa MustVerifyEmail? ' . ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail ? 'Sí' : 'No'));
+
         // Disparar evento de registro (envía email de verificación)
         event(new Registered($user));
-        
-$user->sendEmailVerificationNotification();
-Log::info('Notificación de verificación enviada manualmente');
+        $user->sendEmailVerificationNotification();
 
         return redirect()->route('verification.notice');
     }
@@ -108,18 +106,8 @@ Log::info('Notificación de verificación enviada manualmente');
             'email_verified_at' => null,
         ]);
 
-        Log::info('Usuario creado:', [
-        'id' => $user->id,
-        'email' => $user->email,
-        'email_verified_at' => $user->email_verified_at
-    ]);
 
         event(new Registered($user));
-
-        Log::info('Evento Registered disparado para el usuario:', [
-        'id' => $user->id,
-        'email' => $user->email
-    ]);
     
         return $user;
     }

@@ -70,7 +70,7 @@
     </div>
     <div class="card-body">
         <p>Consulta las estadísticas de la plataforma:</p>
-        <a href="{{ route('admin.email.stats') }}" class="btn btn-primary">
+        <a href="{{ route('admin.stats') }}" class="btn btn-primary">
             <i class="fas fa-chart-bar"></i> Ver Estadísticas
         </a>
     </div>

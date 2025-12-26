@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Traits\EnviaEmails;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\CursoAcademico;
@@ -136,7 +137,7 @@ public function index()
 
         $query = DB::table('users')
             ->join('curso_academicos', 'users.id', '=', 'curso_academicos.academia_id')
-            ->join('cursos', 'curso_academicos.curso_id', '=', 'cursos.id')
+            ->leftJoin('cursos', 'curso_academicos.curso_id', '=', 'cursos.id')
             ->leftJoin('alumnos_curso', function($join) {
                 $join->on('curso_academicos.id', '=', 'alumnos_curso.curso_academico_id')
                     ->where('alumnos_curso.es_profesor', 1);
@@ -209,6 +210,7 @@ public function index()
 
         // Sistema de suscripciones activo
         $sistema_suscripciones_activo = SistemaHelper::sistemaSuscripcionesActivo();
+
         $user = Auth::user();
         
         // IMPORTANTE: Usar compact() o array asociativo correctamente
@@ -218,107 +220,108 @@ public function index()
             'user' => $user
         ]);
     }
-public function obtenerEmailAcademia($academiaId)
-    {
-        try {
-            // Verificar que el usuario es profesor
-            if (Auth::user()->rol !== 'profesor') {
-                return response()->json(['error' => 'No autorizado'], 403);
+
+    public function obtenerEmailAcademia($academiaId)
+        {
+            try {
+                // Verificar que el usuario es profesor
+                if (Auth::user()->rol !== 'profesor') {
+                    return response()->json(['error' => 'No autorizado'], 403);
+                }
+
+                // Obtener el email de la academia
+                $academia = DB::table('users')
+                    ->where('id', $academiaId)
+                    ->where('rol', 'academia')
+                    ->select('email')
+                    ->first();
+
+                if (!$academia) {
+                    return response()->json(['error' => 'Academia no encontrada'], 404);
+                }
+
+                return response()->json(['email' => $academia->email]);
+
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Error interno'], 500);
+            }
+        }
+
+
+        public function destroy($id)
+        {
+            $curso = CursoAcademico::find($id);
+
+            if (!$curso) {
+                return back()->withErrors(['error' => 'Curso no encontrado.']);
             }
 
-            // Obtener el email de la academia
-            $academia = DB::table('users')
-                ->where('id', $academiaId)
-                ->where('rol', 'academia')
-                ->select('email')
-                ->first();
-
-            if (!$academia) {
-                return response()->json(['error' => 'Academia no encontrada'], 404);
+            // Validar que el curso le pertenece al usuario (opcional pero recomendado)
+            if ($curso->academia_id !== Auth::id()) {
+                return back()->withErrors(['error' => 'No tienes permiso para eliminar este curso.']);
             }
 
-            return response()->json(['email' => $academia->email]);
+            $curso->delete();
 
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error interno'], 500);
+            return back()->with('success', 'Curso eliminado correctamente.');
+        }
+
+        public function actualizarCurso(Request $request, $id)
+        {
+        
+            $cursoAcademico = CursoAcademico::findOrFail($id);
+
+            // Validación de los campos del formulario
+            $request->validate([
+                'municipio' => 'nullable|string|max:100',
+                'provincia' => 'nullable|string|max:100',
+                'inicio' => 'nullable|date',
+                'fin' => 'nullable|date',
+            ]);
+
+            // Actualización de los campos en el modelo
+            $cursoAcademico->update([
+                'municipio' => strip_tags($request->municipio),
+                'provincia' => strip_tags($request->provincia),
+                'inicio' => $request->inicio,
+                'fin' => $request->fin,
+            ]);
+            
+
+
+            $user = Auth::user();
+            $misCursos = CursoAcademico::where('academia_id', $user->id)->get();
+    
+    
+            
+            return view('profesor.index', compact('misCursos'));
+        } 
+
+        public function enviarCandidatura(Request $request)
+        {
+            
+            
+            $request->validate([
+                'email' => 'required|email',
+                'subject' => 'required|string|max:255',
+                'message' => 'required|string',
+                'curso_acad_id' => 'required|integer|exists:curso_academicos,id',
+                'attachment' => 'nullable|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png',
+            ]);
+
+
+            $exito = $this->enviarEmailRegistrado([
+                'destinatario_email' => $request->email,
+                'asunto' => $request->subject,
+                'mensaje' => $request->message,
+                'contexto' => 'profesor_a_academia',
+                'curso_id' => $request->curso_acad_id,
+            ]);
+
+            if ($exito) {
+                return redirect()->back()->with('success', 'Candidatura enviada correctamente.');
+            } else {
+                return redirect()->back()->with('error', 'Error al enviar la candidatura.');
+            }
         }
     }
-
-
-    public function destroy($id)
-    {
-        $curso = CursoAcademico::find($id);
-
-        if (!$curso) {
-            return back()->withErrors(['error' => 'Curso no encontrado.']);
-        }
-
-        // Validar que el curso le pertenece al usuario (opcional pero recomendado)
-        if ($curso->academia_id !== Auth::id()) {
-            return back()->withErrors(['error' => 'No tienes permiso para eliminar este curso.']);
-        }
-
-        $curso->delete();
-
-        return back()->with('success', 'Curso eliminado correctamente.');
-    }
-
-    public function actualizarCurso(Request $request, $id)
-    {
-       
-        $cursoAcademico = CursoAcademico::findOrFail($id);
-
-        // Validación de los campos del formulario
-        $request->validate([
-            'municipio' => 'nullable|string|max:100',
-            'provincia' => 'nullable|string|max:100',
-            'inicio' => 'nullable|date',
-            'fin' => 'nullable|date',
-        ]);
-
-        // Actualización de los campos en el modelo
-        $cursoAcademico->update([
-            'municipio' => strip_tags($request->municipio),
-            'provincia' => strip_tags($request->provincia),
-            'inicio' => $request->inicio,
-            'fin' => $request->fin,
-        ]);
-        
-
-
-        $user = Auth::user();
-        $misCursos = CursoAcademico::where('academia_id', $user->id)->get();
-  
-   
-        
-        return view('profesor.index', compact('misCursos'));
-    } 
-
-    public function enviarCandidatura(Request $request)
-    {
-        
-        
-        $request->validate([
-            'email' => 'required|email',
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string',
-            'curso_acad_id' => 'required|integer|exists:curso_academicos,id',
-            'attachment' => 'nullable|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png',
-        ]);
-
-
-        $exito = $this->enviarEmailRegistrado([
-            'destinatario_email' => $request->email,
-            'asunto' => $request->subject,
-            'mensaje' => $request->message,
-            'contexto' => 'profesor_a_academia',
-            'curso_id' => $request->curso_acad_id,
-        ]);
-
-        if ($exito) {
-            return redirect()->back()->with('success', 'Candidatura enviada correctamente.');
-        } else {
-            return redirect()->back()->with('error', 'Error al enviar la candidatura.');
-        }
-    }
-}

@@ -1,4 +1,4 @@
-{{-- resources/views/admin/emails/busqueda.blade.php --}}
+{{-- resources/views/admin/emails/busqueda.blade.php
 @extends('layouts.app')
 
 @section('content')
@@ -94,4 +94,4 @@
     </div>
     @endif
 </div>
-@endsection
+@endsection --}}
