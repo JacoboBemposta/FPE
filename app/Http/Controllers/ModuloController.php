@@ -107,6 +107,7 @@ class ModuloController extends Controller
 
     public function destroy($id)
     {
+        
         try {
             $modulo = Modulo::findOrFail($id);
             $modulo->delete();

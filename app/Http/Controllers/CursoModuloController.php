@@ -8,17 +8,19 @@ use Illuminate\Http\Request;
 
 class CursoModuloController extends Controller
 {
-    public function destroy($cursoId, $moduloId)
-    {
-        $curso = Curso::findOrFail($cursoId);
-        $modulo = Modulo::findOrFail($moduloId);
-        
-        // Eliminar la relación en la tabla intermedia
-        $curso->modulos()->detach($moduloId);
-        
-        return redirect()->back()->with('success', 'Modulo eliminado correctamente');
-    }
+// CursoModuloController.php
+public function destroy($cursoId, $moduloId)
+{
 
+    
+    $curso = Curso::findOrFail($cursoId);
+    $modulo = Modulo::findOrFail($moduloId);
+    
+    // Eliminar la relación en la tabla intermedia
+    $curso->modulos()->detach($moduloId);
+    
+    return redirect()->back()->with('success', 'Modulo eliminado correctamente');
+}
     public function store(Request $request, Curso $curso)
     {
         

@@ -627,52 +627,48 @@ function toggleModulos(cursoId) {
 }
 
 // Función para cargar módulos de un curso
-    function loadModulos(cursoId) {
-        const container = document.getElementById(`modulos-container-${cursoId}`);
-        const url = `/admin/cursos/${cursoId}/modulos`;
-        
-
-
-        // Mostrar spinner
-        container.innerHTML = `
-            <div class="text-center py-2">
-                <div class="spinner-border spinner-border-sm text-primary" role="status">
-                    <span class="visually-hidden">Cargando módulos...</span>
-                </div>
-                <span class="text-muted ms-2">Cargando módulos...</span>
-            </div>
-        `;
-
-        fetch(url, {
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        })
-        .then(response => {
+function loadModulos(cursoId) {
     
-            if (!response.ok) {
-                return response.json().then(errorData => {
-                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-                }).catch(() => {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                });
-            }
-            return response.json();
-        })
-        .then(modulos => {
-     
-            
-            // Verificar si es un error
-            if (modulos.error) {
-                throw new Error(modulos.message || modulos.error);
-            }
-            
-            if (modulos.length === 0) {
-                container.innerHTML = '<p class="text-muted">Este curso no tiene módulos.</p>';
-            } else {
-                container.innerHTML = modulos.map(modulo => `
+    
+    const container = document.getElementById(`modulos-container-${cursoId}`);
+    const url = `/admin/cursos/${cursoId}/modulos`;
+    
+
+    fetch(url, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => {
+
+        
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('❌ Error response text:', text);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(modulos => {
+   
+        
+        if (!Array.isArray(modulos)) {
+            console.error('❌ modulos no es array:', modulos);
+            throw new Error('La respuesta no es un array');
+        }
+        
+        if (modulos.length === 0) {
+            container.innerHTML = '<p class="text-muted">Este curso no tiene módulos.</p>';
+        } else {
+            // Generar el HTML con logs para cada formulario
+            container.innerHTML = modulos.map(modulo => {
+                const deleteUrl = `/admin/cursos/${cursoId}/modulos/${modulo.id}`;
+
+                
+                return `
     <div class="modulo-item border rounded p-3 mb-2 modulo-container">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <div>
@@ -689,9 +685,10 @@ function toggleModulos(cursoId) {
                         data-bs-target="#agregarUnidadModal${modulo.id}">
                     <i class="fas fa-plus"></i> Unidad
                 </button>
-                <form action="/admin/cursos/${modulo.curso_id}/modulos/${modulo.id}" 
+                <form action="${deleteUrl}" 
                       method="POST" 
-                      class="d-inline">
+                      class="d-inline"
+                      onsubmit="console.log('📌 Enviando formulario para módulo ${modulo.id}, curso: ${cursoId}')">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="_method" value="DELETE">
                     <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar módulo?')">
@@ -701,34 +698,31 @@ function toggleModulos(cursoId) {
             </div>
         </div>
         
-        <!-- Contenedor para unidades -->
-        <div id="unidades-container-${modulo.id}" 
-             class="unidades-container mt-2">
+        <div id="unidades-container-${modulo.id}" class="unidades-container mt-2">
             <button class="btn btn-outline-secondary btn-sm" onclick="loadUnidades(${modulo.id})">
                 <i class="fas fa-sync"></i> Cargar Unidades
             </button>
         </div>
-    </div>
-`).join('');
-            }
-            container.setAttribute('data-loaded', 'true');
-        })
-        .catch(error => {
-            console.error('❌ Error cargando módulos:', error);
-            container.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle"></i> Error al cargar los módulos.
-                    <br><small>${error.message}</small>
-                    <div class="mt-2">
-                        <button class="btn btn-sm btn-warning" onclick="loadModulos(${cursoId})">
-                            <i class="fas fa-redo"></i> Reintentar
-                        </button>
-                    </div>
+    </div>`;
+            }).join('');
+        }
+        container.setAttribute('data-loaded', 'true');
+    })
+    .catch(error => {
+        console.error('❌ Error cargando módulos:', error);
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> Error al cargar los módulos.
+                <br><small>${error.message}</small>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-warning" onclick="loadModulos(${cursoId})">
+                        <i class="fas fa-redo"></i> Reintentar
+                    </button>
                 </div>
-            `;
-        });
-    }
-
+            </div>
+        `;
+    });
+}
 // Función para cargar unidades de un módulo (sin cambios)
     function loadUnidades(moduloId) {
         const container = document.getElementById(`unidades-container-${moduloId}`);

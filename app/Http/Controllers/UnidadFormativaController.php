@@ -25,43 +25,49 @@ class UnidadFormativaController extends Controller
 
 public function store(Request $request)
 {
-    // 1. Validar los datos
+    // Validar los campos básicos (sin unique en código)
     $validated = $request->validate([
         'modulo_id' => 'required|exists:modulos,id',
-        'codigo' => 'required|string|max:20|unique:unidades_formativas',
+        'codigo' => 'required|string|max:20',
         'nombre' => 'required|string|max:255',
         'horas' => 'required|integer|min:1',
     ]);
 
     try {
-        // 2. Buscar el módulo
         $modulo = Modulo::findOrFail($request->modulo_id);
-        
-        // 3. Crear la unidad formativa
-        $unidadFormativa = UnidadFormativa::create([
-            'codigo' => strip_tags($request->codigo),
-            'nombre' => strip_tags($request->nombre),
-            'horas' => strip_tags($request->horas),
-        ]);
 
-        // 4. Vincular usando Eloquent (esto crea el registro en modulo_unidad)
-        $modulo->unidades()->attach($unidadFormativa->id);
+        // Buscar unidad por código
+        $unidadExistente = UnidadFormativa::where('codigo', $request->codigo)->first();
 
-        // 5. Verificar la vinculación
-        $verificarVinculo = $modulo->unidades()
-            ->where('unidad_formativa_id', $unidadFormativa->id)
-            ->exists();
+        if ($unidadExistente) {
+            // Verificar si ya está asociada al módulo
+            $yaAsociada = $modulo->unidades()->where('unidad_formativa_id', $unidadExistente->id)->exists();
 
-        if (!$verificarVinculo) {
-            throw new \Exception('No se pudo vincular la unidad al módulo');
+            if ($yaAsociada) {
+                return redirect()->back()->with('error', 'Esta unidad ya está asociada a este módulo.');
+            }
+
+            // Asociar la unidad existente al módulo
+            $modulo->unidades()->attach($unidadExistente->id);
+
+            return redirect()->back()->with('success', 'Unidad existente asociada al módulo correctamente.');
         }
 
-        return redirect()->route('admin.panel')->with('success', 'Unidad formativa creada y vinculada al módulo con éxito.');
+        // Si no existe, crear la unidad (con el código único)
+        // Aquí debemos asegurarnos de que el código sea único, pero como ya verificamos que no existe, podemos crearla.
+        $unidadFormativa = UnidadFormativa::create([
+            'codigo' => $request->codigo,
+            'nombre' => $request->nombre,
+            'horas' => $request->horas,
+        ]);
+
+        // Asociar la nueva unidad al módulo
+        $modulo->unidades()->attach($unidadFormativa->id);
+
+        return redirect()->back()->with('success', 'Unidad creada y asociada al módulo correctamente.');
 
     } catch (\Exception $e) {
-        return redirect()->back()
-            ->withInput()
-            ->with('error', 'Error: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
     }
 }
     public function edit($modulo_id, $id)
