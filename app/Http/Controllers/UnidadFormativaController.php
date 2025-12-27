@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Models\UnidadFormativa;
 use App\Models\Modulo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UnidadFormativaController extends Controller
 {
@@ -22,33 +23,47 @@ class UnidadFormativaController extends Controller
         return view('admin.unidades.create', compact('modulo'));
     }
 
-    public function store(Request $request)
-    {
-        
-        $request->validate([
-            'modulo_id' => 'required|exists:modulos,id',
-            'codigo' => 'required|string|max:20|unique:unidades_formativas',
-            'nombre' => 'required|string|max:255',
-            'horas' => 'required|integer|min:1',
-        ]);
-    
-        $modulo_id=strip_tags($request->modulo_id);
-        $codigo=strip_tags($request->codigo);
-        $nombre=strip_tags($request->nombre);
-        $horas=strip_tags($request->horas);
-        // Crear la unidad formativa
-        UnidadFormativa::create([
-            'modulo_id' => $modulo_id,
-            'codigo' => $codigo,
-            'nombre' => $nombre,
-            'horas' => $horas,
-        ]);
-        
-        // Redirigir con un mensaje de éxito
-        return redirect()->route('admin.panel')->with('success', 'Unidad formativa creada con éxito.');
+public function store(Request $request)
+{
+    // 1. Validar los datos
+    $validated = $request->validate([
+        'modulo_id' => 'required|exists:modulos,id',
+        'codigo' => 'required|string|max:20|unique:unidades_formativas',
+        'nombre' => 'required|string|max:255',
+        'horas' => 'required|integer|min:1',
+    ]);
 
+    try {
+        // 2. Buscar el módulo
+        $modulo = Modulo::findOrFail($request->modulo_id);
+        
+        // 3. Crear la unidad formativa
+        $unidadFormativa = UnidadFormativa::create([
+            'codigo' => strip_tags($request->codigo),
+            'nombre' => strip_tags($request->nombre),
+            'horas' => strip_tags($request->horas),
+        ]);
+
+        // 4. Vincular usando Eloquent (esto crea el registro en modulo_unidad)
+        $modulo->unidades()->attach($unidadFormativa->id);
+
+        // 5. Verificar la vinculación
+        $verificarVinculo = $modulo->unidades()
+            ->where('unidad_formativa_id', $unidadFormativa->id)
+            ->exists();
+
+        if (!$verificarVinculo) {
+            throw new \Exception('No se pudo vincular la unidad al módulo');
+        }
+
+        return redirect()->route('admin.panel')->with('success', 'Unidad formativa creada y vinculada al módulo con éxito.');
+
+    } catch (\Exception $e) {
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Error: ' . $e->getMessage());
     }
-    
+}
     public function edit($modulo_id, $id)
     {
         $modulo = Modulo::findOrFail($modulo_id);

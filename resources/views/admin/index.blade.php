@@ -58,6 +58,7 @@
 .unidad-profesional {
     font-size: 0.9rem;
 }
+
 </style>
 @section('content')
 
@@ -208,6 +209,10 @@
                         <input type="text" name="nombre" class="form-control" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Cualificacion</label>
+                        <input type="text" name="cualificacion" class="form-control">
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Horas totales</label>
                         <input type="number" name="horas" class="form-control">
                     </div>
@@ -253,6 +258,10 @@
                             <div class="mb-3">
                                 <label class="form-label">Nombre</label>
                                 <input type="text" name="nombre" class="form-control" value="{{ $curso->nombre }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Cualificación</label>
+                                <input type="text" name="cualificacion" class="form-control" value="{{ $curso->cualificacion }}" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Horas totales</label>
@@ -528,6 +537,7 @@ function loadCursos(familiaId) {
                 </div>
                 <div class="btn-group" onclick="event.stopPropagation()">
                     <button class="btn btn-sm btn-outline-warning" 
+                            style="display: inline-flex; align-items: center; height: 31px;"
                             data-bs-toggle="modal" 
                             data-bs-target="#editarCursoModal${curso.id}">
                         <i class="fas fa-edit"></i> Editar
@@ -674,6 +684,7 @@ function toggleModulos(cursoId) {
             </div>
             <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-outline-primary" 
+                        style="display: inline-flex; align-items: center; height: 25px;"
                         data-bs-toggle="modal" 
                         data-bs-target="#agregarUnidadModal${modulo.id}">
                     <i class="fas fa-plus"></i> Unidad

@@ -38,6 +38,7 @@ class CursoController extends Controller
         $validated = $request->validate([
             'codigo' => 'required',
             'nombre' => 'required',
+            'cualificacion' => 'required',
             'horas' => 'nullable|integer',
             'familia_profesional_id' => 'required|exists:familias_profesionales,id'
         ]);
@@ -46,6 +47,7 @@ class CursoController extends Controller
         $cursoData = [
             'codigo' => htmlspecialchars(strip_tags($request->input('codigo'))),
             'nombre' => htmlspecialchars(strip_tags($request->input('nombre'))),
+            'cualificacion' => htmlspecialchars(strip_tags($request->input('cualificacion'))),
             'horas' => htmlspecialchars(strip_tags($request->input('horas'))),
             'familia_profesional_id' => $validated['familia_profesional_id'] // ✅ Correcto
         ];
@@ -83,6 +85,7 @@ class CursoController extends Controller
         $validated = $request->validate([
             'codigo' => 'required|string|max:20|unique:cursos,codigo,'.$curso->id,
             'nombre' => 'required|string|max:100',
+            'cualificacion' => 'required|string|max:100',
             'horas' => 'nullable|integer|min:0',
             'familia_profesional_id' => 'required|exists:familias_profesionales,id'
         ]);

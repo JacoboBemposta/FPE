@@ -65,7 +65,7 @@
 
 <script>
 function suscribirse(tipo, precio) {
-    console.log('Intentando suscribirse a:', tipo, precio); // Para debug
+
     
     // Mostrar loading
     const boton = event.target;
@@ -87,11 +87,11 @@ function suscribirse(tipo, precio) {
         })
     })
     .then(response => {
-        console.log('Respuesta recibida:', response);
+
         return response.json();
     })
     .then(data => {
-        console.log('Datos recibidos:', data);
+
         if (data.success && data.redirect_url) {
             // Redirigir a Stripe Checkout
             window.location.href = data.redirect_url;
