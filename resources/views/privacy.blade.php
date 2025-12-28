@@ -39,6 +39,7 @@
         </div>
     </div>
 
+
     <!-- Recopilación de datos -->
     <div class="row justify-content-center mb-5">
         <div class="col-lg-10">
@@ -84,12 +85,13 @@
                                 <td class="p-3">
                                     <ul class="mb-0">
                                         <li>Datos de contacto</li>
-
+                                        <li>Información fiscal y de facturación</li>
                                     </ul>
                                 </td>
                                 <td class="p-3">
                                     <ul class="mb-0">
-                                        <li>Gestión de cursos</li>
+                                        <li>Gestión de cursos y matrículas</li>
+                                        <li>Emisión de certificados y facturación</li>
                                     </ul>
                                 </td>
                             </tr>
@@ -97,12 +99,14 @@
                                 <td class="p-3 fw-bold">Docentes</td>
                                 <td class="p-3">
                                     <ul class="mb-0">
-                                        <li>Especialidades</li>
+                                        <li>Especialidades y experiencia</li>
+                                        <li>Datos de contacto</li>
                                     </ul>
                                 </td>
                                 <td class="p-3">
                                     <ul class="mb-0">
                                         <li>Comunicación con academias</li>
+                                        <li>Gestión de asignaciones y cursos</li>
                                     </ul>
                                 </td>
                             </tr>
@@ -110,6 +114,7 @@
                                 <td class="p-3 fw-bold">Alumnos (cursos académicos)</td>
                                 <td class="p-3">
                                     <ul class="mb-0">
+                                        <li>Datos cifrados y protegidos</li>
                                         <li>DNI/NIE</li>
                                         <li>Nombre completo</li>
                                         <li>Teléfono de contacto</li>
@@ -117,9 +122,9 @@
                                 </td>
                                 <td class="p-3">
                                     <ul class="mb-0">
-                                        <li>Verificación de identidad (requisito para academias)</li>
-                                        <li>Gestión de matrículas</li>
-                                        <li>Expedición de certificados</li>
+                                        <li>La academia es responsable de obtener el consentimiento de los alumnos o sus representantes legales</li>
+                                        <li>Gestión de matrículas en cursos académicos</li>
+                                        <li>Expedición de certificados y documentación académica</li>
                                     </ul>
                                 </td>
                             </tr>
@@ -133,8 +138,9 @@
                         <div>
                             <h5 class="mb-1">Nota importante sobre alumnos</h5>
                             <p class="mb-0">
-                                Los datos de DNI y teléfono son opcionales, <strong>solo se solicitan a alumnos matriculados en cursos académicos oficiales</strong>, 
-                                para realizar un seguimiento por parte de las academias.
+                                Los datos de DNI y teléfono de los alumnos son recabados únicamente por las academias que los matriculan en cursos académicos oficiales. 
+                                RedFPE actúa como encargado técnico del tratamiento, garantizando la seguridad y confidencialidad de la información. 
+                                Las academias declaran que disponen del consentimiento de los alumnos o, en su caso, de los representantes legales para el tratamiento de estos datos.
                             </p>
                         </div>
                     </div>

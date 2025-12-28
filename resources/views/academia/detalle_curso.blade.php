@@ -228,42 +228,55 @@
         <i class="fas fa-graduation-cap me-2"></i>Calificaciones
     </a>
 
-    <!-- Modal para Agregar Alumno (CSS Only) -->
+    <!-- Modal para Agregar Alumno o Docente (CSS Only) -->
     <div id="addAlumnoModal" class="modal">
         <div class="modal-content">
             <a href="#" class="close">&times;</a>
-            <h5 class="mb-3"><i class="fas fa-user-plus me-2"></i>Agregar Alumno</h5>
+            <h5 class="mb-3"><i class="fas fa-user-plus me-2"></i>Agregar Alumno / Docente</h5>
             <form method="POST" action="{{ route('academia.guardarAlumno') }}">
                 @csrf
                 <input type="hidden" name="curso_academico_id" value="{{ $cursoAcademico->id }}">
+
                 <div class="mb-3">
-                    <label for="dni" class="form-label">DNI</label>
-                    <input type="text" class="form-control" id="dni" name="dni" required maxlength="15">
+                    <label for="dni" class="form-label">DNI / NIE</label>
+                    <input type="text" class="form-control" id="dni" name="dni" maxlength="15">
                 </div>
+
                 <div class="mb-3">
-                    <label for="nombre" class="form-label">Nombre</label>
+                    <label for="nombre" class="form-label">Nombre completo</label>
                     <input type="text" class="form-control" id="nombre" name="nombre" required maxlength="255">
                 </div>
+
                 <div class="mb-3">
                     <label for="email" class="form-label">Correo Electrónico</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    <input type="email" class="form-control" id="email" name="email">
                 </div>
+
                 <div class="mb-3">
                     <label for="telefono" class="form-label">Teléfono</label>
                     <input type="text" class="form-control" id="telefono" name="telefono" maxlength="20">
                 </div>
+
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="es_profesor" name="es_profesor" value="1">
-                    <label class="form-check-label" for="es_profesor">¿Es profesor?</label>
+                    <label class="form-check-label" for="es_profesor">
+                        <b>¿Es el docente?</b>
+                    </label>
                 </div>
+
+                <div class="form-text mb-3">
+                    Los datos de los alumnos y el docente se recogen bajo consentimiento de ellos o de sus representantes legales y serán cifrados y protegidos por RedFPE.
+                </div>
+
                 <div class="d-grid">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>Guardar Alumno
+                        <i class="fas fa-save me-2"></i>Guardar
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
 
     <!-- Lista de alumnos inscritos -->
     <div class="card">

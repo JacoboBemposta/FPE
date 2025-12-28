@@ -246,18 +246,32 @@
                         <td class="col-modulo">{{ Str::limit($modulo->nombre, 60) }}</td>
                         <td class="col-horas">{{ $modulo->horas ?? '--' }}</td>
                         <td class="col-calificacion">
-                            @if($modulo->unidades->count() === 0 && isset($calificacionesPorModulo[$modulo->id]))
-                                {{ number_format($calificacionesPorModulo[$modulo->id], 1) }}
-                            @else
-                                --
-                            @endif
+                            @php
+                                $moduloNota = 0;
+                                $unidadCount = $modulo->unidades->count();
+                                if($unidadCount > 0){
+                                    $suma = 0;
+                                    foreach($modulo->unidades as $unidad){
+                                        if(isset($calificacionesPorUnidad[$modulo->id][$unidad->id])){
+                                            $suma += $calificacionesPorUnidad[$modulo->id][$unidad->id];
+                                        } else {
+                                            $unidadCount--; // restamos si no hay calificación
+                                        }
+                                    }
+                                    $moduloNota = $unidadCount > 0 ? $suma / $unidadCount : null;
+                                } else {
+                                    $moduloNota = $calificacionesPorModulo[$modulo->id] ?? null;
+                                }
+                            @endphp
+                            {{ $moduloNota !== null ? number_format($moduloNota, 1) : '--' }}
                         </td>
                         <td class="col-resultado">
-                            @if($modulo->unidades->count() === 0 && isset($calificacionesPorModulo[$modulo->id]))
-                                {{ $calificacionesPorModulo[$modulo->id] >= 5 ? 'APTO' : 'NO APTO' }}
+                            @if($moduloNota !== null)
+                                {{ $moduloNota >= 5 ? 'APTO' : 'NO APTO' }}
                             @endif
                         </td>
                     </tr>
+
                     
                     <!-- Filas de unidades formativas -->
                     @if($modulo->unidades->count() > 0)
