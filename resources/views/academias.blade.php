@@ -36,9 +36,6 @@
         </div>
         <div class="col-lg-6">
             <div class="position-relative">
-                <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                     alt="Academia moderna" 
-                     class="img-fluid rounded-3 shadow-lg">
                 <div class="position-absolute top-0 start-0 bg-white p-3 rounded-end shadow" style="transform: translateY(20px);">
                     <div class="d-flex align-items-center">
                         <div class="bg-primary rounded-circle p-2 me-2">
@@ -455,7 +452,7 @@
                             <i class="fas fa-envelope fa-3x mb-3" style="color: #4361ee;"></i>
                             <h5 class="fw-bold mb-2">Contacto</h5>
                             <p class="text-muted small mb-3">Para academias y centros educativos</p>
-                            <a href="mailto:academias@redfpe.com" class="btn btn-outline-primary">
+                            <a href="mailto:contacto@redfpe.com" class="btn btn-outline-primary">
                                 <i class="fas fa-envelope me-2"></i>Enviar Email
                             </a>
                         </div>

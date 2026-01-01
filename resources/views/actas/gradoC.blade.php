@@ -252,7 +252,7 @@
                                 if($unidadCount > 0){
                                     $suma = 0;
                                     foreach($modulo->unidades as $unidad){
-                                        if(isset($calificacionesPorUnidad[$modulo->id][$unidad->id])){
+                                        if(isset($calificacionesPorUnidad[$modulo->id][$unidad->id]) ){
                                             $suma += $calificacionesPorUnidad[$modulo->id][$unidad->id];
                                         } else {
                                             $unidadCount--; // restamos si no hay calificación
@@ -281,14 +281,14 @@
                                 <td class="col-modulo">{{ Str::limit($unidad->nombre, 60) }}</td>
                                 <td class="col-horas">{{ $unidad->horas ?? '--' }}</td>
                                 <td class="col-calificacion">
-                                    @if(isset($calificacionesPorUnidad[$modulo->id][$unidad->id]))
+                                    @if(isset($calificacionesPorUnidad[$modulo->id][$unidad->id]) )
                                         {{ number_format($calificacionesPorUnidad[$modulo->id][$unidad->id], 1) }}
                                     @else
                                         --
                                     @endif
                                 </td>
                                 <td class="col-resultado">
-                                    @if(isset($calificacionesPorUnidad[$modulo->id][$unidad->id]))
+                                    @if(isset($calificacionesPorUnidad[$modulo->id][$unidad->id]) )
                                         {{ $calificacionesPorUnidad[$modulo->id][$unidad->id] >= 5 ? 'APTO' : 'NO APTO' }}
                                     @endif
                                 </td>
@@ -351,6 +351,5 @@
             <div style="font-size: 6px; margin-top: 1px;">{{ date('d/m/Y') }}</div>
         </div>
     </div>
-
 </body>
 </html>

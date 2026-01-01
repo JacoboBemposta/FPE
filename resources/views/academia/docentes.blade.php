@@ -290,8 +290,6 @@
 window.sistemaSuscripcionesActivo = @json($sistema_suscripciones_activo);
 window.userRol = @json($user->rol);
 
-
-
 // Función para abrir el modal de contacto (solo se llama cuando sistema está inactivo)
 function abrirModalContactoDocente(docenteId, docenteNombre, cursoCodigo, cursoNombre, provincia) {
     // Llenar los datos en el modal
@@ -360,13 +358,11 @@ document.addEventListener('click', function(e) {
         // Verificar primero si el sistema está activo
         if (window.sistemaSuscripcionesActivo) {
             // Sistema ACTIVO: redirigir a la vista de planes
-     
             window.location.href = '{{ route("suscripcion.planes") }}';
             return; // Salir de la función
         }
         
         // Sistema INACTIVO: abrir modal de contacto
- 
         
         // Obtener datos del botón
         const docenteId = button.getAttribute('data-docente-id');
@@ -400,22 +396,21 @@ if (contactForm) {
         }
     });
 }
-    // ========== LIMPIAR FILTROS ==========
-    const clearBtn = document.getElementById('clearBtn');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-  
-            
-            // Redirigir a la ruta sin parámetros
-            window.location.href = "{{ route('academia.ver_docentes') }}";
-            
-            // Alternativa: Resetear formulario y enviar
-            // document.getElementById('searchForm').reset();
-            // document.getElementById('searchForm').submit();
-        });
-    } else {
-        console.error('ERROR: No se encontró el botón con id="clearBtn" en vista docentes');
-    }
+
+// ========== LIMPIAR FILTROS ==========
+const clearBtn = document.getElementById('clearBtn');
+if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+        // Redirigir a la ruta sin parámetros
+        window.location.href = "{{ route('academia.ver_docentes') }}";
+        
+        // Alternativa: Resetear formulario y enviar
+        // document.getElementById('searchForm').reset();
+        // document.getElementById('searchForm').submit();
+    });
+} else {
+    console.error('ERROR: No se encontró el botón con id="clearBtn" en vista docentes');
+}
 </script>
 
 <!-- Estilos CSS personalizados -->

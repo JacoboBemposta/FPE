@@ -36,9 +36,6 @@
         </div>
         <div class="col-lg-6">
             <div class="position-relative">
-                <img src="https://images.unsplash.com/photo-1602991491777-a38a5bf5b511?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                     alt="Docente enseñando" 
-                     class="img-fluid rounded-3 shadow-lg">
                 <div class="position-absolute top-0 start-0 bg-white p-3 rounded-end shadow" style="transform: translateY(20px);">
                     <div class="d-flex align-items-center">
                         <div class="bg-primary rounded-circle p-2 me-2">

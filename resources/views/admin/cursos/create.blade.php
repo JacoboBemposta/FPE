@@ -4,7 +4,7 @@
 <div class="container">
     <h2>Añadir Curso</h2>
 
-    <a href="{{ route('admin.cursos.create', ['familia_id' => $familia->id]) }}" class="btn btn-secondary">Añadir Curso</a>
+    <a href="{{ route('admin.cursos.create', ['familia_id' => $familia->id']) --}} }}" class="btn btn-secondary">Añadir Curso</a>
         @csrf
 
         <div class="mb-3">

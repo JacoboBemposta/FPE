@@ -320,7 +320,7 @@
                     <p class="mb-2"><strong>Para ejercer estos derechos:</strong></p>
                     <ol class="mb-0" style="opacity: 0.9;">
                         <li>Accede a la configuración de tu cuenta en RedFPE</li>
-                        <li>O contacta con nuestro Delegado de Protección de Datos en <strong>privacidad@redfpe.com</strong></li>
+                        <li>O contacta con nuestro Delegado de Protección de Datos en <strong>contacto@redfpe.com</strong></li>
                     </ol>
                 </div>
             </div>
@@ -347,7 +347,7 @@
                                     <i class="fas fa-envelope mt-1 me-3" style="color: #4361ee;"></i>
                                     <div>
                                         <h6 class="fw-bold mb-1">Delegado de Protección de Datos</h6>
-                                        <p class="mb-0">privacidad@redfpe.com</p>
+                                        <p class="mb-0">contacto@redfpe.com</p>
                                     </div>
                                 </div>
                             </div>

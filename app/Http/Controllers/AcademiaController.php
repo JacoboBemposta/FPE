@@ -78,37 +78,41 @@ class AcademiaController extends Controller
             ->join('curso_academicos', 'users.id', '=', 'curso_academicos.academia_id')
             ->join('cursos', 'curso_academicos.curso_id', '=', 'cursos.id')
             ->where('users.rol', 'profesor')
-        
-            // filtros opcionales
-            ->when($request->filled('docente_nombre'), fn($q) =>
-                $q->where('users.name', 'like', '%' . strtolower(trim($request->docente_nombre)) . '%')
-            )
-            ->when($request->filled('codigo'), fn($q) =>
-                $q->where('cursos.codigo', 'like', '%' . strtolower(trim($request->codigo)) . '%')
-            )
-            ->when($request->filled('nombre'), fn($q) =>
-                $q->where('cursos.nombre', 'like', '%' . strtolower(trim($request->nombre)) . '%')
-            )
-            ->when($request->filled('municipio'), fn($q) =>
-                $q->where('curso_academicos.municipio', 'like', '%' . strtolower(trim($request->municipio)) . '%')
-            )
-            ->when($request->filled('provincia'), fn($q) =>
-                $q->where('curso_academicos.provincia', 'like', '%' . strtolower(trim($request->provincia)) . '%')
-            )
-            ->select([
-                'users.id as docente_id',
-                'users.name as docente_nombre',
-                'users.email as docente_email',
-                'curso_academicos.id as curso_acad_id',
-                'curso_academicos.municipio',
-                'curso_academicos.provincia',
-                'curso_academicos.inicio',
-                'curso_academicos.fin',
-                'cursos.nombre as curso_nombre',
-                'cursos.codigo as curso_codigo',
-            ])
-            ->orderBy('users.inicio_suscripcion', 'desc')
-            ->orderBy('users.name');
+
+        // filtros opcionales
+        ->when($request->filled('docente_nombre'), function($q) use ($request) {
+            $search = trim($request->docente_nombre);
+            $q->whereRaw("MATCH(users.name) AGAINST(? IN BOOLEAN MODE)", ["*{$search}*"]);
+        })
+        ->when($request->filled('nombre'), function($q) use ($request) {
+            $search = trim($request->nombre);
+            $q->whereRaw("MATCH(cursos.nombre) AGAINST(? IN BOOLEAN MODE)", ["*{$search}*"]);
+        })
+        ->when($request->filled('codigo'), function($q) use ($request) {
+            $search = trim($request->codigo);
+            $q->whereRaw("MATCH(cursos.codigo) AGAINST(? IN BOOLEAN MODE)", ["*{$search}*"]);
+        })
+        ->when($request->filled('municipio'), fn($q) =>
+            $q->where('curso_academicos.municipio', 'like', '%' . strtolower(trim($request->municipio)) . '%')
+        )
+        ->when($request->filled('provincia'), fn($q) =>
+            $q->where('curso_academicos.provincia', 'like', '%' . strtolower(trim($request->provincia)) . '%')
+        )
+        ->select([
+            'users.id as docente_id',
+            'users.name as docente_nombre',
+            'users.email as docente_email',
+            'curso_academicos.id as curso_acad_id',
+            'curso_academicos.municipio',
+            'curso_academicos.provincia',
+            'curso_academicos.inicio',
+            'curso_academicos.fin',
+            'cursos.nombre as curso_nombre',
+            'cursos.codigo as curso_codigo',
+        ])
+        ->orderBy('users.inicio_suscripcion', 'desc')
+        ->orderBy('users.name');
+
         
         $docentesConCursos = $query->paginate($perPage);
 
@@ -154,6 +158,7 @@ class AcademiaController extends Controller
     
     public function enviarMensajeDocente(Request $request)
     {
+        
         $request->validate([
             'email' => 'required|email',
             'subject' => 'required|string|max:255',

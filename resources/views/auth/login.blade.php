@@ -8,7 +8,7 @@
                 <!-- Header con gradiente -->
                 <div class="card-header bg-gradient-primary text-white text-center py-4">
                     <h2 class="mb-0 fw-bold"><i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión</h2>
-                    <p class="mb-0 mt-2 opacity-75">Accede a tu cuenta de Formación Plus</p>
+                    <p class="mb-0 mt-2 opacity-75">Accede a tu cuenta de RedFPE</p>
                 </div>
 
                 <div class="card-body p-5">

@@ -246,8 +246,8 @@
                             </div>
                             <h5 class="fw-bold mb-2">Correo Electrónico</h5>
                             <p class="text-muted small mb-2">Respuesta en 24 horas</p>
-                            <a href="mailto:soporte@redfpe.com" class="text-decoration-none">
-                                soporte@redfpe.com
+                            <a href="mailto:contacto@redfpe.com" class="text-decoration-none">
+                                contacto@redfpe.com
                             </a>
                         </div>
                     </div>
@@ -426,7 +426,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 html: `
                     <div class="text-start">
                         <p>Nuestro chat en vivo está disponible de <strong>Lunes a Viernes, 9:00-18:00</strong>.</p>
-                        <p>Fuera de este horario, puedes enviarnos un correo a <strong>soporte@redfpe.com</strong>.</p>
+                        <p>Fuera de este horario, puedes enviarnos un correo a <strong>contacto@redfpe.com</strong>.</p>
                         <div class="alert alert-info mt-3">
                             <i class="fas fa-info-circle me-2"></i>
                             Para una atención más rápida, proporciona tu número de usuario si lo tienes.

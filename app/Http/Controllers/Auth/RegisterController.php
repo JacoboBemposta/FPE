@@ -46,7 +46,7 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'rol' => ['required', 'string', 'in:admin,academia,profesor,alumno'],
+            'rol' => ['required', 'string', 'in:academia,profesor,alumno'],
         ]);
     }
 
@@ -58,6 +58,7 @@ class RegisterController extends Controller
     
    public function register(Request $request)
     {
+        
         // Validar los datos
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],

@@ -489,9 +489,9 @@
                         <div class="d-inline-block p-4 rounded" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);">
                             <h5 class="fw-bold mb-3" style="color: #3a0ca3;">¿Tienes preguntas sobre estos términos?</h5>
                             <p class="text-muted mb-3">
-                                Contacta con nuestro equipo legal en <strong>legal@redfpe.com</strong>
+                                Contacta con nuestro equipo legal en <strong>contacto@redfpe.com</strong>
                             </p>
-                            <a href="mailto:legal@redfpe.com" class="btn btn-primary">
+                            <a href="mailto:contacto@redfpe.com" class="btn btn-primary">
                                 <i class="fas fa-envelope me-2"></i>Contactar al departamento legal
                             </a>
                         </div>

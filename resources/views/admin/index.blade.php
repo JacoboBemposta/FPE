@@ -135,7 +135,7 @@
                 <div class="accordion-body">
                     <div id="cursos-container-{{ $familia->id }}" 
                          class="cursos-container"
-                         data-url="{{ route('admin.familias.cursos', ['familia' => $familia->id]) }}">
+                         data-url="{{ route('admin.familias.cursos', ['familia' => $familia->id]) }}"> 
                         <div class="text-center">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Cargando cursos...</span>

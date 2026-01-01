@@ -644,7 +644,7 @@
         color: #7f1d1d;
     }
     
-    /* Estilos para botones modernos (consistentes con vistas anteriores) */
+
     .btn-modern-action {
         background-color: #4361ee;
         border: none;
@@ -679,12 +679,12 @@
         color: white;
     }
     
-    /* Mejora para inputs de búsqueda */
+    /* Mejora para inputs de búsqueda -->
     #nombreCursoInput, #codigoInput {
         text-transform: lowercase;
     }
     
-    /* Estilos para paginación */
+    /* Estilos para paginación -->
     .page-item.active .page-link {
         background-color: #4361ee;
         border-color: #4361ee;
@@ -713,12 +713,12 @@
         background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%) !important;
     }
     
-    /* Badge para filtros activos */
+    /* Badge para filtros activos -->
     .badge.bg-primary {
         background-color: #4361ee !important;
     }
     
-    /* Responsive */
+    /* Responsive -->
     @media (max-width: 768px) {
         .form-floating {
             margin-bottom: 1rem;

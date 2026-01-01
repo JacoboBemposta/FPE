@@ -79,7 +79,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                 Alumnos</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['total_alumnos']) }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['total_alumnos'])  }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
@@ -97,7 +97,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Activos</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['usuarios_activos']) }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['usuarios_activos'])  }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-check-circle fa-2x text-gray-300"></i>
@@ -114,7 +114,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                                 Inactivos</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['usuarios_inactivos']) }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['usuarios_inactivos'])  }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-times-circle fa-2x text-gray-300"></i>

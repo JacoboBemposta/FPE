@@ -28,7 +28,7 @@
                     <td>{{ $modulo->curso->nombre ?? '—' }}</td>
                     <td>{{ $modulo->curso->familiaProfesional->nombre ?? '—' }}</td>
                     <td class="text-end">
-                        <a href="{{ route('modulos.unidades.edit', [$modulo->id, $unidad->id]) }}" class="btn btn-sm btn-warning">Editar</a>
+                        <a href="{{ route('modulos.unidades.edit', [$modulo->id, $unidad->id']) --}} }}" class="btn btn-sm btn-warning">Editar</a>
                         <form action="{{ route('admin.unidad.destroy', $unidad->id) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')

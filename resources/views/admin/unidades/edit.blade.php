@@ -4,7 +4,7 @@
 <div class="container">
     <h2>Editar Unidad Formativa: <strong>{{ $unidad->nombre }}</strong></h2>
 
-    <form action="{{ route('modulos.unidades.update', [$modulo->id, $unidad->id]) }}" method="POST">
+    <form action="{{ route('modulos.unidades.update', [$modulo->id, $unidad->id']) --}} }}" method="POST">
         @csrf
         @method('PUT')
 

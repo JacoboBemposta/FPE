@@ -13,7 +13,7 @@ class UserController extends Controller
     public function updateRole(Request $request)
     {
         $request->validate([
-            'rol' => 'required|in:academia,profesor,alumno,admin',
+            'rol' => 'required|in:academia,profesor,alumno',
         ]);
         
         $user = Auth::user();
@@ -49,7 +49,7 @@ class UserController extends Controller
         
         $request->validate([
             'name' => 'required|string|max:255',
-            'rol' => 'required|in:academia,profesor,alumno,admin',
+            'rol' => 'required|in:academia,profesor,alumno',
         ]);
         
         $oldRole = $user->rol;
