@@ -118,7 +118,7 @@
                                     Suscríbete para acceder a todas las funciones premium
                                 </p>
                             </div>
-                            <a href="{{ route('suscripcion.index') }}" class="btn btn-primary btn-lg">
+                            <a href="{{ route('suscripciones.index') }}" class="btn btn-primary btn-lg">
                                 <i class="fas fa-credit-card me-2"></i>
                                 Suscribirse Ahora
                             </a>
