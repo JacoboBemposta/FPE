@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="Certificados de profesionalidad. Formación para el empleo">
+    <title>{{ config('app.name', 'RedFPE') }} - Plataforma de Empleo Educativo</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('logo.png') }}">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    @vite(['resources/js/app.js'])
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    
+        <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #4cc9f0;
+            --success-color: #4ade80;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --gradient-primary: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            --gradient-accent: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+            --border-radius: 12px;
+            --border-radius-lg: 20px;
+        }
+        
+        * {
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        h1, h2, h3, h4, h5, h6, .navbar-brand {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: var(--dark-color);
+        }
+        
+        #app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1;
+        }
+        
+        /* Navbar Estilizada */
+        .navbar {
+            background: var(--gradient-primary) !important;
+            padding: 1rem 0;
+            box-shadow: var(--shadow-md);
+            border-bottom: none;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .navbar-brand img {
+            height: 32px;
+            width: 32px;
+            filter: brightness(0) invert(1);
+            transition: transform 0.3s ease;
+        }
+        
+        .navbar-brand:hover img {
+            transform: rotate(15deg);
+        }
+        
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            padding: 8px 16px !important;
+            margin: 0 4px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white !important;
+            transform: translateY(-2px);
+        }
+        
+        .navbar-nav .nav-item.active .nav-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: white !important;
+        }
+        
+        .nav-item .btn {
+            border-radius: 50px !important;
+            padding: 8px 24px !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .nav-item .btn-primary {
+            background: var(--accent-color);
+            border: none;
+        }
+        
+        .nav-item .btn-primary:hover {
+            background: #3ab8d8;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .nav-item .btn-danger {
+            background: #ef4444;
+            border: none;
+        }
+        
+        .nav-item .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .dropdown-menu {
+            border-radius: var(--border-radius);
+            border: none;
+            box-shadow: var(--shadow-lg);
+            margin-top: 10px;
+            padding: 8px;
+            z-index: 1100 !important;
+        }
+        
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 10px 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        /* FIX IMPORTANTE: Asegurar que el dropdown esté por encima de otros elementos */
+        .nav-item.dropdown {
+            position: relative;
+        }
+        
+        /* Alertas Mejoradas */
+        .alert {
+            border-radius: var(--border-radius);
+            border: none;
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            color: white;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        .btn-close {
+            filter: brightness(0) invert(1);
+        }
+        
+        /* Modal de Selección de Rol Mejorado */
+        #roleSelectionModal .modal-content {
+            border-radius: var(--border-radius-lg);
+            border: none;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        #roleSelectionModal .modal-header {
+            background: var(--gradient-primary);
+            padding: 2rem;
+            border-bottom: none;
+        }
+        
+        #roleSelectionModal .modal-title {
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        #roleSelectionModal .modal-body {
+            padding: 2.5rem;
+            background: white;
+        }
+        
+        #roleSelectionModal .modal-footer {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 1.5rem 2.5rem;
+        }
+        
+        .role-option {
+            border: 2px solid transparent;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            height: 100%;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            position: relative;
+            background: white;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .role-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .role-option:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .role-option:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .form-check-input:checked + .card-body {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.05) 0%, rgba(67, 97, 238, 0.1) 100%);
+            border-color: var(--primary-color);
+        }
+        
+        .form-check-input:checked + .card-body::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .role-option .form-check-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .role-option .card-body {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+        
+        .role-option i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .role-option h6 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+        
+        .role-option small {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        #roleSelectionModal .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            padding: 12px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        
+        #roleSelectionModal .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+        }
+        
+        /* Estilos para el modal de edición de perfil */
+        #editProfileModal .modal-content {
+            border-radius: var(--border-radius-lg);
+            border: none;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        #editProfileModal .form-check {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        #editProfileModal .form-check:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        #editProfileModal .form-check-input:checked + .form-check-label {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        #editProfileModal .form-check-label {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        #editProfileModal .form-check-label i {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+        
+        #editProfileModal .form-check-input {
+            display: none;
+        }
+        
+        #editProfileModal .form-check-input:checked + .form-check-label {
+            border-color: var(--primary-color);
+        }
+        
+        /* Estilos para mensajes flash */
+        .container.mt-3 {
+            margin-top: 1.5rem !important;
+            max-width: 1200px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+                padding: 6px 12px;
+            }
+            
+            .navbar-nav {
+                padding: 1rem 0;
+            }
+            
+            .nav-item .btn {
+                margin: 5px 0;
+                width: 100%;
+            }
+            
+            #roleSelectionModal .modal-body {
+                padding: 1.5rem;
+            }
+            
+            .role-option .card-body {
+                padding: 1.5rem 1rem;
+            }
+        }
+        
+        /* Animación para el modal */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #roleSelectionModal .modal-content {
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+        
+        /* Efectos de hover generales */
+        .btn, .card, .nav-link {
+            transition: all 0.3s ease;
+        }
+
+    /* Estilos para el footer */
+    .footer-section {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .footer-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4361ee, #3a0ca3, #4cc9f0);
+        background-size: 200% 100%;
+        animation: gradientAnimation 3s ease infinite;
+    }
+    
+    @keyframes gradientAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .footer-section a:hover {
+        opacity: 1 !important;
+        color: #4cc9f0 !important;
+        transform: translateX(5px);
+    }
+    
+    .social-links a:hover {
+        opacity: 1 !important;
+        color: #4cc9f0 !important;
+        transform: translateY(-3px);
+    }
+    
+    .footer-bottom-links a:hover {
+        color: #4cc9f0 !important;
+    }
+    
+    /* Estilos responsivos */
+    @media (max-width: 768px) {
+    /* Estilos para el footer */
+    .footer-section {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .footer-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4361ee, #3a0ca3, #4cc9f0);
+        background-size: 200% 100%;
+        animation: gradientAnimation 3s ease infinite;
+    }
+    
+    @keyframes gradientAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .footer-section a:hover {
+        opacity: 1 !important;
+        color: #4cc9f0 !important;
+        transform: translateX(5px);
+    }
+    
+    .social-links a:hover {
+        opacity: 1 !important;
+        color: #4cc9f0 !important;
+        transform: translateY(-3px);
+    }
+    
+    .footer-bottom-links a:hover {
+        color: #4cc9f0 !important;
+    }
+    
+    /* Estilos responsivos CORREGIDOS */
+    @media (max-width: 768px) {
+        /* Solo centrar el logo y descripción en móviles */
+        .footer-section .col-lg-4.col-md-6 {
+            text-align: center;
+        }
+        
+        .footer-section .col-lg-4.col-md-6 .d-flex {
+            justify-content: center;
+        }
+        
+        /* Las otras columnas mantienen alineación izquierda */
+        .footer-section .col-lg-2.col-md-6,
+        .footer-section .col-lg-3.col-md-6 {
+            text-align: left !important;
+        }
+        
+        /* Forzar alineación izquierda específicamente en contacto */
+        .col-lg-3.col-md-6.text-start.text-md-start,
+        .col-lg-3.col-md-6.text-start.text-md-start ul,
+        .col-lg-3.col-md-6.text-start.text-md-start li,
+        .col-lg-3.col-md-6.text-start.text-md-start .social-links {
+            text-align: center !important;
+            justify-content: flex-start !important;
+        }
+        
+        /* Remover la regla que centraba todos los li */
+        .footer-section li {
+            justify-content: flex-start !important;
+        }
+        
+        /* Mantener el footer bottom links centrado */
+        .footer-bottom-links {
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        /* Asegurar que los enlaces de las otras columnas también estén alineados a la izquierda */
+        .footer-section .col-lg-2.col-md-6 .d-flex,
+        .footer-section .col-lg-3.col-md-6 .d-flex:not(.justify-content-center) {
+            justify-content: flex-start !important;
+        }
+    }
+    }        
+
+
+.btn-navbar-bg {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: none !important;
+    color: white !important;
+    border-radius: 50px !important;
+    padding: 8px 24px !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-navbar-bg:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: white !important;
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Estilos específicos para los íconos dentro del botón */
+.btn-navbar-bg i {
+    color: white !important;
+}    
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navbar Moderna -->
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url('/') }}">
+                    <img src="{{ asset('logo.png') }}" alt="RedFPE Logo" style="height: 80px; width: auto; object-fit: contain;">
+                    RedFPE
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon" style="filter: brightness(0) invert(1);"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        @guest
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('login') }}">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Iniciar sesión
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('register') }}">
+                                    <i class="fas fa-user-plus me-1"></i> Registrarse
+                                </a>
+                            </li>
+                        @else
+                            <!-- BOTÓN SOLO PARA ADMIN -->
+                            @if(Auth::user()->rol === 'admin')
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('admin.stats') }}">
+                                        <i class="fas fa-chart-bar me-1"></i>
+                                        <span>Estadísticas</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item ms-2">
+                                    <a class="btn btn-navbar-bg px-4" href="{{ route('admin.panel') }}">
+                                        <i class="fas fa-cogs me-2"></i>Panel Admin
+                                    </a>
+                                </li>
+                            @endif
+
+                            <!-- BOTÓN SOLO PARA ACADEMIA -->
+                            @if(Auth::user()->rol === 'academia')
+                                <li class="nav-item ms-2">
+                                    <a class="btn btn-navbar-bg px-4" href="{{ route('academia.miscursos') }}">
+                                        <i class="fas fa-university me-2"></i>Panel Academia
+                                    </a>
+                                </li>
+                            @endif
+
+                            <!-- BOTÓN SOLO PARA PROFESOR -->
+                            @if(Auth::user()->rol === 'profesor')
+                                <li class="nav-item ms-2">
+                                    <a class="btn btn-navbar-bg px-4" href="{{ route('profesor.miscursos') }}">
+                                        <i class="fas fa-chalkboard-teacher me-2"></i>Panel Docente
+                                    </a>
+                                </li>
+                            @endif
+                            
+                            <!-- Menú de usuario -->
+                            <li class="nav-item dropdown ms-3">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="bg-white rounded-circle p-2 me-2" style="width: 36px; height: 36px;">
+                                        <i class="fas fa-user text-primary"></i>
+                                    </div>
+                                    <span>{{ Auth::user()?->name ?? 'Usuario' }}</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                            <i class="fas fa-user-edit me-2"></i>Editar Perfil
+                                        </a>
+                                    </li>
+                                    
+                                    <!-- Nueva opción para eliminar cuenta -->
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                                            <i class="fas fa-trash-alt me-2"></i>Eliminar cuenta
+                                        </a>
+                                    </li>
+                                    
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="{{ route('logout') }}" 
+                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
+                                        </a>
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                            @csrf
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endguest
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenedor para mensajes flash -->
+        <div class="container">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i class="fas fa-check-circle me-3 fa-lg"></i>
+                    <div class="flex-grow-1">{{ session('success') }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i class="fas fa-exclamation-circle me-3 fa-lg"></i>
+                    <div class="flex-grow-1">{{ session('error') }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+        </div>
+
+        <!-- Contenido Principal -->
+        <main>
+            @yield('content')
+        </main>
+
+<!-- Footer Actualizado -->
+<footer class="footer-section py-5 mt-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Columna 1: Logo y descripción -->
+            <div class="col-lg-4 col-md-6">
+                <div class="footer-logo mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{{ asset('logo.png') }}" alt="RedFPE Logo" style="height: 100px; filter: brightness(0) invert(1);" class="me-2">
+                        <h4 class="text-white mb-0">RedFPE</h4>
+                    </div>
+                    <p class="text-light mb-4" style="opacity: 0.8;">
+                        Plataforma educativa que conecta academias, docentes y alumnos en un ecosistema completo y eficiente.
+                    </p>
+                    <div class="privacy-badge p-3 rounded" style="background: rgba(255, 255, 255, 0.1); border-left: 3px solid #4cc9f0;">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-shield-alt text-info me-3 fa-lg"></i>
+                            <div>
+                                <small class="text-light fw-bold d-block">Sin cookies de seguimiento</small>
+                                <small class="text-light" style="opacity: 0.7; font-size: 0.8rem;">Respetamos tu privacidad. Solo usamos cookies esenciales.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Columna 2: Enlaces rápidos -->
+            <div class="col-lg-2 col-md-6">
+                <h5 class="text-white mb-4 text-start text-md-start" style="position: relative; padding-bottom: 10px;">
+                    Enlaces
+                    <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
+                </h5>
+                <ul class="list-unstyled text-start text-md-start">
+                    <li class="mb-2">
+                        <a href="{{ url('/') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                            <i class="fas fa-home me-2" style="width: 20px;"></i>
+                            <span>Inicio</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ route('about') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                            <i class="fas fa-info-circle me-2" style="width: 20px;"></i>
+                            <span>Sobre Nosotros</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ route('privacy') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                            <i class="fas fa-user-shield me-2" style="width: 20px;"></i>
+                            <span>Privacidad</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ route('terms') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                            <i class="fas fa-file-contract me-2" style="width: 20px;"></i>
+                            <span>Términos</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Columna 3: Para usuarios -->
+            <div class="col-lg-2 col-md-6">
+                <h5 class="text-white mb-4 text-start text-md-start" style="position: relative; padding-bottom: 10px;">
+                    Para Usuarios
+                    <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
+                </h5>
+                <ul class="list-unstyled text-start text-md-start">
+                    <li class="mb-2">
+                        <a href="{{ route('academias') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                            <i class="fas fa-university me-2" style="width: 20px;"></i>
+                            <span>Academias</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ route('docentes') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                            <i class="fas fa-chalkboard-teacher me-2" style="width: 20px;"></i>
+                            <span>Docentes</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ route('alumnos') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                            <i class="fas fa-user-graduate me-2" style="width: 20px;"></i>
+                            <span>Alumnos</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href={{ route('ayuda') }} class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                            <i class="fas fa-question-circle me-2" style="width: 20px;"></i>
+                            <span>Ayuda</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Columna 4: Contacto -->
+            <div class="col-lg-2 col-md-6 text-start text-md-start">
+                <h5 class="text-white mb-4 text-start" style="position: relative; padding-bottom: 10px;">
+                    Contacto
+                    <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
+                </h5>
+                
+                <ul class="list-unstyled mb-0" style="opacity: 0.8;">
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fas fa-envelope mt-1 me-3" style="color: #4cc9f0; width: 20px;"></i>
+                        <span class="text-start d-block">info@redfpe.com</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fas fa-phone mt-1 me-3" style="color: #4cc9f0; width: 20px;"></i>
+                        <span class="text-start d-block">+34 635 15 62 63</span>
+                    </li>
+                    <!-- <li class="mb-5 d-flex align-items-start">
+                        <i class="fas fa-map-marker-alt mt-1 me-3 " style="color: #4cc9f0; width: 20px;"></i>
+                        <span class="text-start d-block">Avenida de Vigo 63<br>Pontevedra, España</span>
+                    </li> -->
+                </ul>
+            </div>
+                <div class="col-lg-2 col-md-6 text-start text-md-start">
+                    <h5 class="text-white mb-4 text-start" style="position: relative; padding-bottom: 10px;">
+                        Comunidades colaboradoras
+                        <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
+                    </h5>
+                    <div class="social-links mt-5">
+                    <!-- <a href="#" class="text-light me-3" style="opacity: 0.7; transition: all 0.3s ease; text-decoration: none;">
+                        <i class="fab fa-facebook fa-lg"></i>
+                    </a> -->
+                    <a href="#" class="text-light me-3" style="opacity: 0.7; transition: all 0.3s ease; text-decoration: none;">
+                        <i class="fab fa-linkedin fa-lg"></i>
+                    </a>
+                    <a href="#" class="text-light me-3" style="opacity: 0.7; transition: all 0.3s ease; text-decoration: none;">
+                        <i class="fab fa-telegram fa-lg"></i>
+                    </a>
+                    <!-- <a href="#" class="text-light" style="opacity: 0.7; transition: all 0.3s ease;">
+                        <i class="fab fa-youtube fa-lg"></i>
+                    </a> -->
+                </div>
+            </div>
+        </div>
+        
+        <hr class="my-5" style="border-color: rgba(255, 255, 255, 0.1);">
+        
+        <!-- Fila inferior -->
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="text-light mb-0" style="opacity: 0.7;">
+                    &copy; {{ date('Y') }} RedFPE. Todos los derechos reservados.
+                </p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="footer-bottom-links">
+                    <a href="{{ route('privacy') }}" class="text-light text-decoration-none me-3" style="opacity: 0.7; font-size: 0.9rem;">Política de Privacidad</a>
+                    <a href="{{ route('terms') }}" class="text-light text-decoration-none me-3" style="opacity: 0.7; font-size: 0.9rem;">Términos de Uso</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL 1: PARA SELECCIÓN DE ROL (PRIMERA VEZ) -->
+    <!-- ============================================== -->
+    @auth
+    @if(is_null(Auth::user()->rol) && !Session::has('role_selected'))
+    <div class="modal fade" id="roleSelectionModal" tabindex="-1" aria-labelledby="roleSelectionModalLabel" 
+         aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="roleSelectionModalLabel">
+                        <i class="fas fa-user-tie me-2"></i>Selecciona tu tipo de cuenta
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-4 text-center fs-5">Elige el rol que mejor se adapte a tu actividad en la plataforma:</p>
+                    
+                    <form id="roleSelectionForm">
+                        @csrf
+                        <div class="row g-4">
+                            <!-- Academia -->
+                            <div class="col-md-4">
+                                <div class="form-check card role-option h-100">
+                                    <input class="form-check-input" type="radio" name="rol" id="rolAcademia" value="academia" required>
+                                    <label class="form-check-label card-body" for="rolAcademia">
+                                        <i class="fas fa-university"></i>
+                                        <h6 class="fw-bold mt-3">Academia</h6>
+                                        <small class="text-muted">Gestiono cursos, docentes y estudiantes</small>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Profesor -->
+                            <div class="col-md-4">
+                                <div class="form-check card role-option h-100">
+                                    <input class="form-check-input" type="radio" name="rol" id="rolProfesor" value="profesor" required>
+                                    <label class="form-check-label card-body" for="rolProfesor">
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                        <h6 class="fw-bold mt-3">Docente</h6>
+                                        <small class="text-muted">Imparto formación y evalúo estudiantes</small>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Alumno -->
+                            <div class="col-md-4">
+                                <div class="form-check card role-option h-100">
+                                    <input class="form-check-input" type="radio" name="rol" id="rolAlumno" value="alumno" required>
+                                    <label class="form-check-label card-body" for="rolAlumno">
+                                        <i class="fas fa-user-graduate"></i>
+                                        <h6 class="fw-bold mt-3">Alumno</h6>
+                                        <small class="text-muted">Participo en cursos y recibo formación</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary px-5" id="confirmRoleBtn">
+                        <i class="fas fa-rocket me-2"></i>Confirmar y Continuar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+    @endauth
+
+    <!-- ============================================== -->
+    <!-- MODAL 2: PARA EDITAR PERFIL -->
+    <!-- ============================================== -->
+    @auth
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background: var(--gradient-primary); color: white;">
+                    <h5 class="modal-title" id="editProfileModalLabel">
+                        <i class="fas fa-user-edit me-2"></i>Editar Perfil
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editProfileForm" action="{{ route('user.updateProfile') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="editName" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="editName" name="name" 
+                                   value="{{ Auth::user()->name }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Rol</label>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <div class="form-check form-check-inline w-100">
+                                        <input class="form-check-input" type="radio" name="rol" id="editRolAcademia" 
+                                               value="academia" {{ Auth::user()->rol === 'academia' ? 'checked' : '' }}>
+                                        <label class="form-check-label w-100 text-center" for="editRolAcademia">
+                                            <i class="fas fa-university d-block mb-1"></i>
+                                            <small>Academia</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-check form-check-inline w-100">
+                                        <input class="form-check-input" type="radio" name="rol" id="editRolProfesor" 
+                                               value="profesor" {{ Auth::user()->rol === 'profesor' ? 'checked' : '' }}>
+                                        <label class="form-check-label w-100 text-center" for="editRolProfesor">
+                                            <i class="fas fa-chalkboard-teacher d-block mb-1"></i>
+                                            <small>Docente</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-check form-check-inline w-100">
+                                        <input class="form-check-input" type="radio" name="rol" id="editRolAlumno" 
+                                               value="alumno" {{ Auth::user()->rol === 'alumno' ? 'checked' : '' }}>
+                                        <label class="form-check-label w-100 text-center" for="editRolAlumno">
+                                            <i class="fas fa-user-graduate d-block mb-1"></i>
+                                            <small>Alumno</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editEmail" 
+                                   value="{{ Auth::user()->email }}" readonly>
+                            <small class="text-muted">El email no se puede modificar</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endauth
+
+    <!-- Modal para eliminar cuenta permanentemente -->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteAccountModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Eliminar cuenta permanentemente
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <form id="deleteAccountForm" action="{{ route('user.destroy') }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    
+                    <div class="modal-body">
+                        <div class="alert alert-danger">
+                            <h5 class="alert-heading">
+                                <i class="fas fa-skull-crossbones me-2"></i>ADVERTENCIA: ACCIÓN IRREVERSIBLE
+                            </h5>
+                            <p class="mb-0">
+                                Estás a punto de eliminar permanentemente tu cuenta y todos los datos asociados. 
+                                Esta acción <strong>NO SE PUEDE DESHACER</strong>.
+                            </p>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-danger mb-3">
+                                    <div class="card-header bg-danger text-white">
+                                        <i class="fas fa-times-circle me-1"></i> ¿Qué se eliminará?
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="mb-0">
+                                            <li>Todos tus datos personales</li>
+                                            <li>Historial de cursos</li>
+                                            <li>Registros de actividad</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card border-warning mb-3">
+                                    <div class="card-header bg-warning text-white">
+                                        <i class="fas fa-exclamation me-1"></i> Consecuencias
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="mb-0">
+                                            <li>Acceso perdido permanentemente</li>
+                                            <li>No podrás recuperar tus datos</li>
+                                            <li>Se perderán todos los cursos</li>
+                                            <li>La acción es inmediata</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Requisitos de confirmación -->
+                        <div class="border rounded p-3 mb-3">
+                            <h6 class="fw-bold mb-3">Para confirmar la eliminación:</h6>
+                            
+                            <!-- Confirmación 1: Escribir frase específica -->
+                            <div class="mb-3">
+                                <label for="confirmationPhrase" class="form-label">
+                                    Escribe <code class="bg-danger text-white px-2 rounded">ELIMINAR MI CUENTA</code> para confirmar:
+                                </label>
+                                <input type="text" 
+                                    class="form-control" 
+                                    id="confirmationPhrase" 
+                                    name="confirmation_phrase"
+                                    placeholder="Escribe exactamente: ELIMINAR MI CUENTA"
+                                    required>
+                                <div class="form-text">Debe coincidir exactamente, incluyendo mayúsculas.</div>
+                            </div>
+                            
+                            <!-- Confirmación 2: Contraseña actual -->
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label">Contraseña actual:</label>
+                                <input type="password" 
+                                    class="form-control" 
+                                    id="currentPassword" 
+                                    name="current_password"
+                                    placeholder="Introduce tu contraseña actual"
+                                    required>
+                            </div>
+                            
+                            <!-- Confirmación 3: Checkbox final -->
+                            <div class="form-check">
+                                <input class="form-check-input" 
+                                    type="checkbox" 
+                                    id="finalConfirmation" 
+                                    name="final_confirmation"
+                                    required>
+                                <label class="form-check-label text-danger fw-bold" for="finalConfirmation">
+                                    Confirmo que comprendo que esta acción es irreversible y deseo proceder con la eliminación permanente de todos mis datos.
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Contador de confirmación -->
+                        <div class="text-center mb-3">
+                            <div class="badge bg-secondary p-2">
+                                Confirmaciones completadas: 
+                                <span id="confirmationsCount">0</span>/3
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i> Cancelar
+                        </button>
+                        <button type="submit" 
+                                class="btn btn-danger" 
+                                id="confirmDeleteButton"
+                                disabled>
+                            <i class="fas fa-trash-alt me-1"></i> ELIMINAR CUENTA PERMANENTEMENTE
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ==============================
+            // 1. FLUJO PARA PRIMERA SELECCIÓN DE ROL
+            // ==============================
+            const roleSelectionModal = document.getElementById('roleSelectionModal');
+            if (roleSelectionModal) {
+                // Crear y mostrar modal
+                const modal = new bootstrap.Modal(roleSelectionModal, {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                modal.show();
+                
+                // Configurar opciones
+                const roleOptions = document.querySelectorAll('.role-option');
+                const confirmBtn = document.getElementById('confirmRoleBtn');
+                
+                roleOptions.forEach(option => {
+                    option.addEventListener('click', function() {
+                        const radio = this.querySelector('input[type="radio"]');
+                        radio.checked = true;
+                        
+                        roleOptions.forEach(opt => {
+                            opt.classList.remove('active');
+                            opt.style.borderColor = '';
+                        });
+                        
+                        this.classList.add('active');
+                        this.style.borderColor = '#4361ee';
+                    });
+                });
+                
+            // Manejar confirmación del modal de selección de rol
+            confirmBtn.addEventListener('click', async function() {
+                const selectedRole = document.querySelector('input[name="rol"]:checked');
+                
+                if (!selectedRole) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Selección requerida',
+                        text: 'Por favor, selecciona un tipo de cuenta para continuar.',
+                        confirmButtonColor: '#4361ee'
+                    });
+                    return;
+                }
+                
+                // Mostrar loading
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+                this.disabled = true;
+                
+                try {
+                    const response = await fetch('{{ route("user.updateRole") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            rol: selectedRole.value
+                        }),
+                        credentials: 'same-origin' // Importante para mantener la sesión
+                    });
+                    
+                   
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ 
+                            message: 'Error en el servidor' 
+                        }));
+                        throw new Error(errorData.message || `Error ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+              
+                    
+                    if (data.success && data.redirect_url) {
+                        // Redirigir inmediatamente
+                        window.location.href = '/';
+                    } else {
+                        throw new Error(data.message || 'Error al actualizar el rol');
+                    }
+                } catch (error) {
+                    console.error('Error completo:', error); // Para debug
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'Ocurrió un error al procesar la solicitud. Por favor, intenta nuevamente.',
+                        confirmButtonColor: '#4361ee'
+                    });
+                    
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }
+            });
+                
+                // Prevenir cierre del modal
+                roleSelectionModal.addEventListener('hide.bs.modal', function(event) {
+                    const selectedRole = document.querySelector('input[name="rol"]:checked');
+                    if (!selectedRole) {
+                        event.preventDefault();
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Selección requerida',
+                            text: 'Debes seleccionar un tipo de cuenta para continuar.',
+                            confirmButtonColor: '#4361ee'
+                        });
+                    }
+                });
+            }
+            
+        // ==============================
+        // 2. FLUJO PARA EDITAR PERFIL (SOLUCIÓN COMPLETA)
+        // ==============================
+            document.addEventListener('DOMContentLoaded', function() {
+                const editProfileForm = document.getElementById('editProfileForm');
+                
+                if (editProfileForm) {
+                                    
+                    // Inicializar estilos de los radio buttons
+                    function initializeRoleRadios() {
+                        const roleRadios = document.querySelectorAll('#editProfileForm input[name="rol"]');
+                        
+                        roleRadios.forEach(radio => {
+                            const label = radio.nextElementSibling;
+                            
+                            // Establecer estilo inicial
+                            if (radio.checked) {
+                                label.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+                                label.style.border = '2px solid #4361ee';
+                                label.style.borderRadius = '6px';
+                            } else {
+                                label.style.backgroundColor = '';
+                                label.style.border = '2px solid transparent';
+                            }
+                            
+                            // Agregar evento de cambio
+                            radio.addEventListener('change', function() {
+                                // Resetear todos los labels
+                                document.querySelectorAll('#editProfileForm .form-check-label').forEach(lbl => {
+                                    lbl.style.backgroundColor = '';
+                                    lbl.style.border = '2px solid transparent';
+                                });
+                                
+                                // Resaltar el seleccionado
+                                if (this.checked) {
+                                    const selectedLabel = this.nextElementSibling;
+                                    selectedLabel.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+                                    selectedLabel.style.border = '2px solid #4361ee';
+                                    selectedLabel.style.borderRadius = '6px';
+                                }
+                            });
+                            
+                            // También hacer clic en el label para seleccionar
+                            label.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                const radioBtn = this.previousElementSibling;
+                                radioBtn.checked = true;
+                                radioBtn.dispatchEvent(new Event('change'));
+                            });
+                        });
+                    }
+                    
+                    // Inicializar cuando el modal se muestra
+                    const editProfileModal = document.getElementById('editProfileModal');
+                    if (editProfileModal) {
+                        editProfileModal.addEventListener('shown.bs.modal', function() {
+                            initializeRoleRadios();
+                        });
+                    }
+                    
+                    // Manejar envío del formulario
+                    editProfileForm.addEventListener('submit', async function(e) {
+                        e.preventDefault();
+                        
+                        const nameField = document.getElementById('editName');
+                        const selectedRole = document.querySelector('#editProfileForm input[name="rol"]:checked');
+                        const currentRole = '{{ Auth::user()?->rol ?? "" }}'; 
+                        
+                        // Validaciones
+                        if (!nameField.value.trim()) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Nombre requerido',
+                                text: 'Por favor, ingresa tu nombre.',
+                                confirmButtonColor: '#4361ee'
+                            });
+                            nameField.focus();
+                            return;
+                        }
+                        
+                        if (!selectedRole) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Rol requerido',
+                                text: 'Por favor, selecciona un rol.',
+                                confirmButtonColor: '#4361ee'
+                            });
+                            return;
+                        }
+                        
+                        const isChangingRole = selectedRole.value !== currentRole;
+                        let confirmChange = true;
+                        
+                        // Confirmar cambio de rol si es diferente
+                        if (isChangingRole) {
+                            const result = await Swal.fire({
+                                icon: 'question',
+                                title: '¿Cambiar rol?',
+                                html: `Estás cambiando tu rol de <strong>${currentRole}</strong> a <strong>${selectedRole.value}</strong>.<br><br>Serás redirigido al panel correspondiente.`,
+                                showCancelButton: true,
+                                confirmButtonText: 'Sí, cambiar rol',
+                                cancelButtonText: 'Cancelar',
+                                confirmButtonColor: '#4361ee',
+                                cancelButtonColor: '#6c757d',
+                                reverseButtons: true
+                            });
+                            
+                            if (!result.isConfirmed) {
+                                console.log('Usuario canceló el cambio de rol');
+                                return;
+                            }
+                        }
+                        
+                        // Mostrar loading
+                        const submitBtn = this.querySelector('button[type="submit"]');
+                        const originalText = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Guardando...';
+                        submitBtn.disabled = true;
+                        
+                        try {
+                            // Crear FormData
+                            const formData = new FormData(this);
+                            
+                            console.log('Enviando datos:', {
+                                name: formData.get('name'),
+                                rol: formData.get('rol'),
+                                _token: formData.get('_token'),
+                                _method: formData.get('_method')
+                            });
+                            
+                            // Enviar solicitud
+                            const response = await fetch(this.action, {
+                                method: 'POST', // Laravel maneja PUT con _method
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: formData,
+                                credentials: 'same-origin'
+                            });
+                            
+    
+                            
+                            const data = await response.json();
+    
+                            
+                            if (response.ok && data.success) {
+                                // Cerrar modal
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
+                                if (modal) {
+                                    modal.hide();
+                                }
+                                
+                                // Mostrar mensaje de éxito
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '¡Éxito!',
+                                    text: data.message,
+                                    confirmButtonColor: '#4361ee',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                                
+                                // Redirigir o recargar después de un breve delay
+                                setTimeout(() => {
+                                    if (data.role_changed && data.redirect_url) {
+            
+                                        window.location.href = '/';
+                                    } else {
+                
+                                        window.location.reload();
+                                    }
+                                }, 2000);
+                            } else {
+                                throw new Error(data.message || `Error ${response.status}: No se pudo actualizar el perfil`);
+                            }
+                        } catch (error) {
+                            console.error('Error completo:', error);
+                            
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: error.message || 'Ocurrió un error al guardar los cambios. Por favor, intenta nuevamente.',
+                                confirmButtonColor: '#4361ee'
+                            });
+                            
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    });
+                    
+                    // Inicializar al cargar la página
+                    initializeRoleRadios();
+                } else {
+                    console.log('Formulario de edición de perfil NO encontrado');
+                }
+            });
+                    // ==============================
+        // 3. FLUJO PARA ELIMINAR PERFIL (SOLUCIÓN COMPLETA)
+        // ==============================
+
+            const confirmationPhrase = document.getElementById('confirmationPhrase');
+            const currentPassword = document.getElementById('currentPassword');
+            const finalConfirmation = document.getElementById('finalConfirmation');
+            const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+            const confirmationsCount = document.getElementById('confirmationsCount');
+            
+            // Frase exacta que debe escribir el usuario
+            const REQUIRED_PHRASE = 'ELIMINAR MI CUENTA';
+            
+            function updateConfirmations() {
+                let count = 0;
+                
+                // Verificar frase
+                if (confirmationPhrase.value === REQUIRED_PHRASE) {
+                    count++;
+                    confirmationPhrase.classList.remove('is-invalid');
+                    confirmationPhrase.classList.add('is-valid');
+                } else {
+                    confirmationPhrase.classList.remove('is-valid');
+                    if (confirmationPhrase.value) {
+                        confirmationPhrase.classList.add('is-invalid');
+                    }
+                }
+                
+                // Verificar contraseña (mínimo 8 caracteres)
+                if (currentPassword.value.length >= 8) {
+                    count++;
+                    currentPassword.classList.remove('is-invalid');
+                    currentPassword.classList.add('is-valid');
+                } else {
+                    currentPassword.classList.remove('is-valid');
+                    if (currentPassword.value) {
+                        currentPassword.classList.add('is-invalid');
+                    }
+                }
+                
+                // Verificar checkbox
+                if (finalConfirmation.checked) {
+                    count++;
+                }
+                
+                // Actualizar contador
+                confirmationsCount.textContent = count;
+                
+                // Habilitar/deshabilitar botón
+                confirmDeleteButton.disabled = count !== 3;
+                
+                // Cambiar color del botón según confirmaciones
+                if (count === 3) {
+                    confirmDeleteButton.classList.remove('btn-secondary');
+                    confirmDeleteButton.classList.add('btn-danger');
+                } else {
+                    confirmDeleteButton.classList.remove('btn-danger');
+                    confirmDeleteButton.classList.add('btn-secondary');
+                }
+            }
+            
+            // Escuchar cambios en todos los campos
+            confirmationPhrase.addEventListener('input', updateConfirmations);
+            currentPassword.addEventListener('input', updateConfirmations);
+            finalConfirmation.addEventListener('change', updateConfirmations);
+            
+            // Confirmación final antes de enviar
+            document.getElementById('deleteAccountForm').addEventListener('submit', function(e) {
+                if (!confirm('⚠️ ¿ESTÁS ABSOLUTAMENTE SEGURO?\n\nEsta acción eliminará permanentemente:\n• Tu cuenta y todos tus datos\n• Tu historial de cursos\n• Tus suscripciones\n\n¿Deseas continuar con la eliminación?')) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Mostrar loader en el botón
+                confirmDeleteButton.disabled = true;
+                confirmDeleteButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> ELIMINANDO...';
+            });        
+        });
+    </script>
+</body>
+</html>

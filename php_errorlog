@@ -1,0 +1,42 @@
+[28-Dec-2025 17:18:14 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.2.0". You are running 8.1.33. in /home/customer/www/redfpe.es/FPE/vendor/composer/platform_check.php on line 28
+[28-Dec-2025 17:18:37 UTC] PHP Fatal error:  Uncaught ErrorException: include(/home/customer/www/redfpe.es/FPE/vendor/composer/../filp/whoops/src/Whoops/RunInterface.php): Failed to open stream: No such file or directory in /home/customer/www/redfpe.es/FPE/vendor/composer/ClassLoader.php:576
+Stack trace:
+#0 /home/customer/www/redfpe.es/FPE/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(256): Illuminate\Foundation\Bootstrap\HandleExceptions->handleError(2, 'include(/home/c...', '/home/customer/...', 576)
+#1 /home/customer/www/redfpe.es/FPE/vendor/composer/ClassLoader.php(576): Illuminate\Foundation\Bootstrap\HandleExceptions->Illuminate\Foundation\Bootstrap\{closure}(2, 'include(/home/c...', '/home/customer/...', 576)
+#2 /home/customer/www/redfpe.es/FPE/vendor/composer/ClassLoader.php(576): include('/home/customer/...')
+#3 /home/customer/www/redfpe.es/FPE/vendor/composer/ClassLoader.php(427): Composer\Autoload\{closure}('/home/customer/...')
+#4 /home/customer/www/redfpe.es/FPE/vendor/filp/whoops/src/Whoops/Run.php(22): Composer\Autoload\ClassLoader->loadClass('Whoops\\RunInter...')
+#5 /home/customer/www/redfpe.es/FPE/vendor/composer/ClassLoader.php(576): include('/home/customer/...')
+#6 /home/customer/www/redfpe.es/FPE/vendor/composer/ClassLoader.php(427): Composer\Autoload\{closure}('/home/customer/...')
+#7 /home/customer/www/redfpe.es/FPE/vendor/nunomaduro/collision/src/Provider.php(32): Composer\Autoload\ClassLoader->loadClass('Whoops\\Run')
+#8 /home/customer/www/redfpe.es/FPE/vendor/nunomaduro/collision/src/Adapters/Laravel/CollisionServiceProvider.php(57): NunoMaduro\Collision\Provider->__construct(NULL, Object(NunoMaduro\Collision\Handler))
+#9 /home/customer/www/redfpe.es/FPE/vendor/laravel/framework/src/Illuminate/Container/Container.php(952): NunoMaduro\Collision\Adapters\Laravel\CollisionServiceProvider->NunoMaduro\Collision\Adapters\Laravel\{closure}(Object(Illuminate\Foundation\Application), Array)
+#10 /home/customer/www/redfpe.es/FPE/vendor/laravel/framework/src/Illuminate/Container/Container.php(832): Illuminate\Container\Container->build(Object(Closure))
+#11 /home/customer/www/redfpe.es/FPE/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1078): Illuminate\Container\Container->resolve('NunoMaduro\\Coll...', Array, true)
+#12 /home/customer/www/redfpe.es/FPE/vendor/laravel/framework/src/Illuminate/Container/Container.php(763): Illuminate\Foundation\Application->resolve('NunoMaduro\\Coll...', Array)
+#13 /home/customer/www/redfpe.es/FPE/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1058): Illuminate\Container\Container->make('NunoMaduro\\Coll...', Array)
+#14 /home/customer/www/redfpe.es/FPE/vendor/nunomaduro/collision/src/Adapters/Laravel/ExceptionHandler.php(66): Illuminate\Foundation\Application->make('NunoMaduro\\Coll...')
+#15 /home/customer/www/redfpe.es/FPE/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(208): NunoMaduro\Collision\Adapters\Laravel\ExceptionHandler->renderForConsole(Object(Symfony\Component\Console\Output\ConsoleOutput), Object(ErrorException))
+#16 /home/customer/www/redfpe.es/FPE/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(190): Illuminate\Foundation\Bootstrap\HandleExceptions->renderForConsole(Object(ErrorException))
+#17 /home/customer/www/redfpe.es/FPE/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(256): Illuminate\Foundation\Bootstrap\HandleExceptions->handleException(Object(ErrorException))
+#18 [internal function]: Illuminate\Foundation\Bootstrap\HandleExceptions->Illuminate\Foundation\Bootstrap\{closure}(Object(ErrorException))
+#19 {main}
+  thrown in /home/customer/www/redfpe.es/FPE/vendor/composer/ClassLoader.php on line 576
+[28-Dec-2025 18:41:48 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.2.0". You are running 8.1.33. in /home/customer/www/redfpe.es/FPE/vendor/composer/platform_check.php on line 24
+[28-Dec-2025 18:45:52 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.2.0". You are running 8.1.33. in /home/customer/www/redfpe.es/FPE/vendor/composer/platform_check.php on line 24
+[28-Dec-2025 18:58:34 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/customer/www/redfpe.es/FPE/vendor/autoload.php' (include_path='.:/usr/local/php82/pear') in /home/customer/www/redfpe.es/FPE/artisan:9
+Stack trace:
+#0 {main}
+  thrown in /home/customer/www/redfpe.es/FPE/artisan on line 9
+[28-Dec-2025 18:58:34 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/customer/www/redfpe.es/FPE/vendor/autoload.php' (include_path='.:/usr/local/php82/pear') in /home/customer/www/redfpe.es/FPE/artisan:9
+Stack trace:
+#0 {main}
+  thrown in /home/customer/www/redfpe.es/FPE/artisan on line 9
+[28-Dec-2025 18:58:34 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/customer/www/redfpe.es/FPE/vendor/autoload.php' (include_path='.:/usr/local/php82/pear') in /home/customer/www/redfpe.es/FPE/artisan:9
+Stack trace:
+#0 {main}
+  thrown in /home/customer/www/redfpe.es/FPE/artisan on line 9
+[28-Dec-2025 18:58:34 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/customer/www/redfpe.es/FPE/vendor/autoload.php' (include_path='.:/usr/local/php82/pear') in /home/customer/www/redfpe.es/FPE/artisan:9
+Stack trace:
+#0 {main}
+  thrown in /home/customer/www/redfpe.es/FPE/artisan on line 9
