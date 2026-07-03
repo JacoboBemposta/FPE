@@ -3,9 +3,16 @@
 @section('content')
 <div class="container py-5">
     <div class="card shadow-lg border-0 rounded-lg">
-        <!-- Encabezado con gradiente -->
-        <div class="card-header bg-gradient-primary text-white">
-            <h2 class="text-center my-2"><i class="fas fa-graduation-cap me-2"></i>Cursos Académicos Disponibles</h2>
+        <!-- Encabezado con gradiente y botón PDF -->
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="my-2">
+                <i class="fas fa-graduation-cap me-2"></i>Cursos Académicos Disponibles
+            </h2>
+            <a href="{{ asset('pdfs/certificados.html') }}" 
+               target="_blank" 
+               class="btn btn-light btn-lg">
+                <i class="fas fa-file-pdf me-2 text-danger"></i>Ver todos los certificados profesionales
+            </a>
         </div>
 
         <div class="card-body">
@@ -58,7 +65,7 @@
                     <!-- Selector de elementos por página -->
                     <div class="col-md-4">
                         <div class="form-floating">
-                            <select name="per_page" class="form-control" id="perPageSelect" onchange="this.form.submit()">
+                            <select name="per_page" class="form-control" id="perPageSelect">
                                 <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 por página</option>
                                 <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 por página</option>
                                 <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 por página</option>
@@ -117,8 +124,6 @@
                                 <td>{{ $cursoAcademico->curso->familiaProfesional->nombre ?? 'N/A' }}</td>
                                 <td>
                                     <button type="button" class="btn btn-primary btn-sm contact-btn" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#contactModal"
                                             data-academia-id="{{ $cursoAcademico->academia->id ?? '' }}"
                                             data-academia-nombre="{{ $cursoAcademico->academia->name ?? 'N/A' }}"
                                             data-curso-nombre="{{ $cursoAcademico->curso->nombre ?? 'N/A' }}"
@@ -206,11 +211,9 @@
                 <div class="d-flex align-items-center">
                     <span class="text-muted me-2">Ir a:</span>
                     <form method="GET" action="{{ route('alumno.index') }}" class="d-flex">
-                        <!-- Mantener los parámetros de búsqueda -->
                         @foreach(request()->except('page') as $key => $value)
                             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                         @endforeach
-                        
                         <input type="number" 
                                name="page" 
                                class="form-control form-control-sm" 
@@ -251,18 +254,18 @@
                 <input type="hidden" name="academia_id" id="academia_id" value="">
                 <div class="modal-body">
                     <div class="mb-3">
-
-                        <input type="email" class="form-control" id="recipientEmail" name="email" value="" required hidden>
+                        <input type="email" class="form-control" id="recipientEmail" name="email" value="" required>
+                        <small class="form-text text-muted">Puedes editar este campo si es necesario</small>
                     </div>
                     
                     <div class="mb-3">
                         <label for="emailSubject" class="form-label fw-bold">Asunto:</label>
-                        <input type="text" class="form-control" id="emailSubject" name="asunto" value="" required readonly>
+                        <input type="text" class="form-control" id="emailSubject" name="asunto" value="" required>
                     </div>
                     
                     <div class="mb-3">
                         <label for="emailMessage" class="form-label fw-bold">Mensaje:</label>
-                        <textarea class="form-control" id="emailMessage" name="mensaje" rows="8" required readonly></textarea>
+                        <textarea class="form-control" id="emailMessage" name="mensaje" rows="8" required></textarea>
                     </div>
 
                     <!-- Información del curso (solo lectura) -->
@@ -294,196 +297,11 @@
         </div>
     </div>
 </div>
-<!-- JavaScript para el buscador y modal -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const userName = @json(auth()->user()->name);
-    const userEmail = @json(auth()->user()->email);
 
-    // ========== LIMPIAR FORMULARIO DE BÚSQUEDA ==========
-    const clearBtn = document.getElementById('clearBtn');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-            const form = document.getElementById('searchForm');
-            const inputs = form.querySelectorAll('input[type="text"]');
-            const selects = form.querySelectorAll('select');
-            
-            // Limpiar inputs de texto
-            inputs.forEach(input => input.value = '');
-            
-            // Resetear selects a valores por defecto
-            selects.forEach(select => {
-                if (select.name === 'per_page') {
-                    select.value = '10';
-                } else if (select.name === 'familia') {
-                    select.value = '';
-                }
-            });
-            
-            form.submit();
-        });
-    }
+<!-- Meta tags para JavaScript -->
+<meta name="user-name" content="{{ Auth::user()->name ?? '' }}">
+<meta name="user-email" content="{{ Auth::user()->email ?? '' }}">
 
-    // ========== VALIDACIÓN DEL FORMULARIO DE BÚSQUEDA ==========
-    const searchForm = document.getElementById('searchForm');
-    if (searchForm) {
-        searchForm.addEventListener('submit', function(e) {
-            const inputs = form.querySelectorAll('input[type="text"]');
-            
-            // Normalizar todos los campos de texto a minúsculas y trim
-            inputs.forEach(input => {
-                if(input.value) {
-                    input.value = input.value.trim().toLowerCase();
-                }
-            });
-        });
-    }
-
-// ========== MANEJO DEL MODAL DE CONTACTO CON AJAX ==========
-document.addEventListener('click', async function(e) {
-    if (e.target.closest('.contact-btn')) {
-        const button = e.target.closest('.contact-btn');
-        
-        // Obtener datos del botón
-        const academiaId = button.getAttribute('data-academia-id');
-        const academiaNombre = button.getAttribute('data-academia-nombre');
-        const cursoNombre = button.getAttribute('data-curso-nombre');
-        const municipio = button.getAttribute('data-municipio');
-        const inicio = button.getAttribute('data-inicio');
-        const fin = button.getAttribute('data-fin');
-
-        // Actualizar información del curso en el modal
-        document.getElementById('modalAcademiaNombre').textContent = academiaNombre;
-        document.getElementById('modalCursoNombre').textContent = cursoNombre;
-        document.getElementById('modalMunicipio').textContent = municipio;
-        document.getElementById('modalFechas').textContent = `${inicio} - ${fin}`;
-
-        // Actualizar campo de academia_id en el formulario
-        document.getElementById('academia_id').value = academiaId;
-
-        // Preparar campo de email
-        const emailInput = document.getElementById('recipientEmail');
-        if (emailInput) {
-            emailInput.value = ''; // Limpiar el campo
-            emailInput.placeholder = "Ingresa el email de la academia";
-            emailInput.disabled = false; // Permitir editar
-        }
-
-        // Asunto predeterminado
-        document.getElementById('emailSubject').value = `Consulta sobre el curso: ${cursoNombre}`;
-
-        // Generar mensaje predeterminado
-        const mensajePredeterminado = `Estimado equipo responsable,
-
-Me pongo en contacto con ustedes para solicitar información adicional sobre el curso «${cursoNombre}», que se impartirá en ${municipio} entre las fechas ${inicio} y ${fin}.
-
-Agradecería que pudieran facilitarme detalles sobre el contenido del programa, los requisitos de inscripción y cualquier otra información que consideren relevante.
-
-Quedo a su disposición para ampliar cualquier dato que necesiten y agradezco de antemano su atención.
-
-Reciban un cordial saludo,
-${userName}
-${userEmail}`;
-        document.getElementById('emailMessage').value = mensajePredeterminado;
-
-        // Realizar petición AJAX para obtener el email
-        try {
-            if (academiaId) {
-                const response = await fetch(`/alumno/obtener-email/${academiaId}`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    if (data.email && emailInput) {
-                        emailInput.value = data.email;
-                        emailInput.placeholder = "";
-                        emailInput.disabled = false;
-                    } else if (data.error && emailInput) {
-                        emailInput.value = '';
-                        emailInput.placeholder = `Error: ${data.error}. Ingresa manualmente.`;
-                        emailInput.disabled = false;
-                    }
-                } else if (emailInput) {
-                    emailInput.value = '';
-                    emailInput.placeholder = `Error al cargar el email. Ingresa manualmente.`;
-                    emailInput.disabled = false;
-                }
-            } else if (emailInput) {
-                emailInput.value = '';
-                emailInput.placeholder = "No hay ID de academia. Ingresa manualmente.";
-                emailInput.disabled = false;
-            }
-        } catch (error) {
-            console.error('Error en la petición AJAX:', error);
-            if (emailInput) {
-                emailInput.value = '';
-                emailInput.placeholder = "Error de conexión. Ingresa manualmente.";
-                emailInput.disabled = false;
-            }
-        }
-    }
-});
-
-    // ========== VALIDACIÓN DEL FORMULARIO DE CONTACTO ==========
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            const email = document.getElementById('recipientEmail');
-            const asunto = document.getElementById('emailSubject');
-            const mensaje = document.getElementById('emailMessage');
-            
-            if (email && !email.value.trim()) {
-                e.preventDefault();
-                alert('No se encontró el email de la academia. Por favor, ingréselo manualmente.');
-                return;
-            }
-            
-            if (asunto && !asunto.value.trim()) {
-                e.preventDefault();
-                alert('Por favor, ingrese el asunto del mensaje.');
-                return;
-            }
-            
-            if (mensaje && !mensaje.value.trim()) {
-                e.preventDefault();
-                alert('Por favor, complete el mensaje.');
-                return;
-            }
-            
-            // Mostrar indicador de envío
-            const submitBtn = this.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
-                submitBtn.disabled = true;
-            }
-        });
-    }
-
-    // ========== HACER EL CAMPO DE EMAIL EDITABLE SI ESTÁ VACÍO ==========
-    const emailInput = document.getElementById('recipientEmail');
-    if (emailInput) {
-        emailInput.addEventListener('focus', function() {
-            if (!this.value.trim()) {
-                this.readOnly = false;
-                this.placeholder = "Ingrese el email de la academia";
-            }
-        });
-        
-        emailInput.addEventListener('blur', function() {
-            if (this.value.trim()) {
-                this.readOnly = true;
-            }
-        });
-    }
-});
-</script>
-
-<!-- Estilos CSS personalizados -->
 <style>
     .card {
         border: none;
@@ -523,10 +341,14 @@ ${userEmail}`;
         background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
     }
     
-    /* Estilo para campo de email readonly */
     input[readonly] {
         background-color: #f8f9fa;
         cursor: not-allowed;
     }
 </style>
+
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('public/js/alumno.js?v=' . time()) }}"></script>
+@endpush

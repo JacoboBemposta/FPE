@@ -64,7 +64,7 @@
                     <!-- Selector de elementos por página -->
                     <div class="col-md-3">
                         <div class="form-floating">
-                            <select name="per_page" class="form-control" id="perPageSelect" onchange="this.form.submit()">
+                            <select name="per_page" class="form-control" id="perPageSelect">
                                 <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 por página</option>
                                 <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 por página</option>
                                 <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 por página</option>
@@ -349,7 +349,7 @@
                             <div class="alert alert-info py-2">
                                 <i class="fas fa-file me-2"></i>
                                 <span id="fileName"></span>
-                                <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeFile()">
+                                <button type="button" class="btn btn-sm btn-outline-danger ms-2">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
@@ -386,191 +386,7 @@
     </div>
 </div>
 
-<script>
-    
-    // Pasar el estado del sistema desde PHP a JavaScript
-    window.sistemaSuscripcionesActivo = @json($sistema_suscripciones_activo);
-    window.userRol = @json($user->rol);
 
-
-
-    // Función para abrir el modal de contacto (solo se llama cuando sistema está inactivo)
-    function abrirModalContactoDocente(academiaId, academiaNombre, cursoAcadId, cursoNombre, municipio, inicio, fin) {
-        // Llenar los datos en el modal
-        document.getElementById('modalAcademiaNombre').textContent = academiaNombre;
-        document.getElementById('modalCursoNombre').textContent = cursoNombre;
-        document.getElementById('modalMunicipio').textContent = municipio;
-        document.getElementById('modalFechas').textContent = `${inicio} - ${fin}`;
-        
-        // Establecer el ID del curso académico
-        document.getElementById('cursoAcadIdInput').value = cursoAcadId;
-        
-        // Obtener el email de la academia
-        const emailInput = document.getElementById('recipientEmail');
-        emailInput.value = '';
-        emailInput.placeholder = "Cargando email de la academia...";
-        emailInput.disabled = true;
-        
-        // Llamar a AJAX para obtener el email de la academia
-        fetch(`/profesor/obtener-email/${academiaId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.email) {
-                    emailInput.value = data.email;
-                    emailInput.placeholder = "";
-                } else {
-                    emailInput.value = '';
-                    emailInput.placeholder = "Error al obtener email. Ingrese manualmente.";
-                }
-                emailInput.disabled = false;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                emailInput.value = '';
-                emailInput.placeholder = "Error de conexión. Ingrese manualmente.";
-                emailInput.disabled = false;
-            });
-        
-        // Generar mensaje predeterminado
-        const userName = "{{ Auth::user()->name }}";
-        const userEmail = "{{ Auth::user()->email }}";
-        const emailMessage = document.getElementById('emailMessage');
-        
-        if (emailMessage) {
-            const mensajePredeterminado = `Estimado equipo de ${academiaNombre},
-
-            Me pongo en contacto con ustedes para manifestar mi interés en la plaza docente correspondiente al curso «${cursoNombre}», que se impartirá en ${municipio}.
-
-            Tras revisar la información disponible sobre la formación, prevista entre las fechas ${inicio} y ${fin}, considero que mi perfil profesional y experiencia docente se ajustan adecuadamente a los objetivos del curso.
-
-            Adjunto mi currículum vitae para su valoración y quedo a su disposición para ampliar cualquier información o concertar una entrevista cuando lo estimen oportuno.
-
-            Agradeciendo de antemano su atención, reciban un cordial saludo.
-
-
-            ${userName}
-            Email: ${userEmail}
-            Teléfono: [Su teléfono de contacto]`;
-
-                emailMessage.value = mensajePredeterminado;
-        }
-        
-        // Abrir el modal
-        const modal = new bootstrap.Modal(document.getElementById('contactModal'));
-        modal.show();
-    }
-
-    // Manejador de clic para el botón "Contactar"
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.contact-btn')) {
-            const button = e.target.closest('.contact-btn');
-        
-            e.preventDefault();
-            e.stopPropagation();
-                    
-            // Verificar primero si el sistema está activo
-            if (window.sistemaSuscripcionesActivo) {
-
-                window.location.href = '{{ route("suscripcion.planes") }}';
-                return; // Salir de la función
-            }
-
-            
-            // Obtener datos del botón
-            const academiaId = button.getAttribute('data-academia-id');
-            const academiaNombre = button.getAttribute('data-academia-nombre');
-            const cursoAcadId = button.getAttribute('data-curso-acad-id');
-            const cursoNombre = button.getAttribute('data-curso-nombre');
-            const municipio = button.getAttribute('data-municipio');
-            const inicio = button.getAttribute('data-inicio');
-            const fin = button.getAttribute('data-fin');
-            
-            // Llamar a la función para abrir el modal
-            abrirModalContactoDocente(academiaId, academiaNombre, cursoAcadId, cursoNombre, municipio, inicio, fin);
-        }
-    });
-
-    // ========== VISTA PREVIA DEL ARCHIVO ADJUNTO ==========
-    const cvAttachment = document.getElementById('cvAttachment');
-    if (cvAttachment) {
-        cvAttachment.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const filePreview = document.getElementById('filePreview');
-            const fileName = document.getElementById('fileName');
-            
-            if (file && filePreview && fileName) {
-                // Validar tamaño (10MB máximo)
-                const maxSize = 10 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
-                    this.value = '';
-                    return;
-                }
-                
-                // Mostrar vista previa
-                fileName.textContent = file.name;
-                filePreview.style.display = 'block';
-            }
-        });
-    }
-
-    // ========== FUNCIÓN PARA ELIMINAR ARCHIVO ==========
-    window.removeFile = function() {
-        const cvAttachment = document.getElementById('cvAttachment');
-        const filePreview = document.getElementById('filePreview');
-        if (cvAttachment) cvAttachment.value = '';
-        if (filePreview) filePreview.style.display = 'none';
-    }
-
-    // ========== VALIDACIÓN DEL FORMULARIO DE CONTACTO ==========
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            const mensaje = document.getElementById('emailMessage');
-            const archivo = document.getElementById('cvAttachment');
-            
-            if (mensaje && !mensaje.value.trim()) {
-                e.preventDefault();
-                alert('Por favor, complete el mensaje de candidatura.');
-                return;
-            }
-            
-            // Validar tamaño del archivo
-            if (archivo && archivo.files[0]) {
-                const maxSize = 10 * 1024 * 1024;
-                if (archivo.files[0].size > maxSize) {
-                    e.preventDefault();
-                    alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
-                    return;
-                }
-            }
-            
-            // Mostrar indicador de envío
-            const submitBtn = this.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
-                submitBtn.disabled = true;
-            }
-        });
-    }
-    // ========== LIMPIAR FILTROS ==========
-    document.addEventListener('DOMContentLoaded', function() {
-        const clearBtn = document.getElementById('clearBtn');
-        
-        if (clearBtn) {
-            clearBtn.addEventListener('click', function() {
-  
-                window.location.href = "{{ route('profesor.ver_academias') }}";
-                
-            });
-        }
-    });
-</script>
 
 <!-- Estilos CSS personalizados -->
 <style>
@@ -679,63 +495,17 @@
         color: white;
     }
     
-    /* Mejora para inputs de búsqueda -->
-    #nombreCursoInput, #codigoInput {
-        text-transform: lowercase;
-    }
-    
-    /* Estilos para paginación -->
-    .page-item.active .page-link {
-        background-color: #4361ee;
-        border-color: #4361ee;
-    }
-    
-    .page-link {
-        color: #4361ee;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        margin: 0 2px;
-        transition: all 0.2s ease;
-    }
-    
-    .page-link:hover {
-        color: white;
-        background-color: #4361ee;
-        border-color: #4361ee;
-        transform: translateY(-1px);
-    }
-    
-    .pagination {
-        margin-bottom: 0;
-    }
-    
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%) !important;
-    }
-    
-    /* Badge para filtros activos -->
-    .badge.bg-primary {
-        background-color: #4361ee !important;
-    }
-    
-    /* Responsive -->
-    @media (max-width: 768px) {
-        .form-floating {
-            margin-bottom: 1rem;
-        }
-        
-        .d-flex.justify-content-between {
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .d-flex.justify-content-between > div:first-child {
-            order: 2;
-        }
-        
-        .d-flex.justify-content-between > div:last-child {
-            order: 1;
-        }
-    }
 </style>
+
+<!-- Meta tags para JavaScript -->
+<meta name="user-name" content="{{ Auth::user()->name ?? '' }}">
+<meta name="user-email" content="{{ Auth::user()->email ?? '' }}">
+<meta name="sistema-suscripciones-activo" content="{{ $sistema_suscripciones_activo ?? 'false' }}">
+<meta name="user-rol" content="{{ $user->rol ?? '' }}">
+
+@push('scripts')
+    <script src="{{ asset('public/js/profesor.js?v=' . time()) }}"></script>
+@endpush
 @endsection
+
+

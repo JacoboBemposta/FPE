@@ -156,7 +156,7 @@
                                 <form action="{{ route('profesor.curso.destroy', $cursoAcademico->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-delete action-btn" onclick="return confirm('¿Estás seguro de que deseas eliminar este curso?');">
+                                    <button type="submit" class="btn btn-delete action-btn">
                                         Eliminar
                                     </button>
                                 </form>
@@ -206,21 +206,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('.edit-btn').on('click', function() {
-                let cursoAcademicoId = $(this).data('id');
-                let provincia = $(this).data('provincia');
-                let inicio = $(this).data('inicio');
-                let fin = $(this).data('fin');
-
-                $('#curso_id').val(cursoAcademicoId);
-                $('#provincia').val(provincia);
-                $('#editForm').attr('action', '/profesor/curso/' + cursoAcademicoId + '/editar');
-                $('#editModal').modal('show');
-            });
-        });
-    </script>
+    @push('scripts')
+        <script src="{{ asset('public/js/profesor.js') }}"></script>
+    @endpush
 </div>
 @endsection

@@ -11,15 +11,20 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Illuminate\Foundation\Configuration\Middleware $middleware) {
-        // Añade tus middlewares personalizados AQUÍ
+        // Middlewares con alias (para rutas específicas)
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'alumno' => \App\Http\Middleware\AlumnoMiddleware::class,
-            // Agrega otros si los necesitas
         ]);
-        
-        // Si necesitas middleware global (opcional)
-        // $middleware->append(\App\Http\Middleware\CheckUserRole::class);
+
+        // Middleware global: TU PROPIO SecurityHeaders
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
+        // Si tenías AddReferrerPolicy, elimínalo (ahora está incluido en SecurityHeaders)
+        // $middleware->append(\App\Http\Middleware\AddReferrerPolicy::class);
+
+        // Si el paquete make-dev/laravel-security registraba su middleware, asegúrate de comentarlo:
+        // $middleware->append(\MakeDev\LaravelSecurity\Middleware\SecurityHeaders::class);
     })
     ->withExceptions(function (Illuminate\Foundation\Configuration\Exceptions $exceptions) {
         //

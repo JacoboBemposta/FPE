@@ -31,7 +31,7 @@ class CursoController extends Controller
     
         return view('admin.cursos.create', compact('familias_profesionales', 'familia_seleccionada'));
     }
-    
+
     public function store(Request $request)
     {
 
@@ -81,7 +81,6 @@ class CursoController extends Controller
 
     public function update(Request $request, Curso $curso)
     {
-     
         $validated = $request->validate([
             'codigo' => 'required|string|max:20|unique:cursos,codigo,'.$curso->id,
             'nombre' => 'required|string|max:100',
@@ -91,37 +90,22 @@ class CursoController extends Controller
         ]);
         
         $curso->update($validated);
- 
-        // Sincronizar módulos
         $curso->modulos()->sync($request->modulos ?? []);
     
         return redirect()->back()->with('success', 'Curso actualizado correctamente');
     }
-
-    public function getModulosByCurso(Curso $curso)
+    
+    // ✅ Este es el que conservamos (con $cursoId)
+    public function getModulosByCurso($cursoId)
     {
+        \Log::info('getModulosByCurso llamado con cursoId: ' . $cursoId);
         try {
-            $modulos = $curso->modulos()
-                ->withCount('unidades')
-                ->get()
-                ->map(function($modulo) {
-                    return [
-                        'id' => $modulo->id,
-                        'codigo' => $modulo->codigo,
-                        'nombre' => $modulo->nombre,
-                        'horas' => $modulo->horas,
-                        'unidades_count' => $modulo->unidades_count,
-                        'curso_id' => $modulo->curso_id
-                    ];
-                });
-
+            $curso = Curso::findOrFail($cursoId);
+            $modulos = $curso->modulos()->withCount('unidades')->get();
             return response()->json($modulos);
         } catch (\Exception $e) {
-            Log::error('Error en getModulosByCurso: ' . $e->getMessage());
-            return response()->json([
-                'error' => 'Error al cargar los módulos',
-                'message' => $e->getMessage()
-            ], 500);
+            \Log::error('Error en getModulosByCurso: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }

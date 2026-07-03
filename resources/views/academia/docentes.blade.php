@@ -43,7 +43,7 @@
                     <!-- Selector de elementos por página -->
                     <div class="col-md-4">
                         <div class="form-floating">
-                            <select name="per_page" class="form-control" id="perPageSelect" onchange="this.form.submit()">
+                            <select name="per_page" class="form-control" id="perPageSelect">
                                 <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 por página</option>
                                 <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 por página</option>
                                 <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 por página</option>
@@ -285,134 +285,14 @@
     </div>
 </div>
 
-<script>
-// Pasar el estado del sistema desde PHP a JavaScript
-window.sistemaSuscripcionesActivo = @json($sistema_suscripciones_activo);
-window.userRol = @json($user->rol);
 
-// Función para abrir el modal de contacto (solo se llama cuando sistema está inactivo)
-function abrirModalContactoDocente(docenteId, docenteNombre, cursoCodigo, cursoNombre, provincia) {
-    // Llenar los datos en el modal
-    document.getElementById('modalDocenteNombre').textContent = docenteNombre;
-    document.getElementById('modalCursoNombre').textContent = cursoNombre;
-    document.getElementById('modalCursoCodigo').textContent = cursoCodigo;
-    document.getElementById('modalProvincia').textContent = provincia;
-    
-    // Obtener el email del docente
-    const emailInput = document.getElementById('recipientEmail');
-    emailInput.value = '';
-    emailInput.placeholder = "Cargando email del docente...";
-    emailInput.disabled = true;
-    
-    // Llamar a AJAX para obtener el email del docente
-    fetch(`/academia/obtener-email-docente/${docenteId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.email) {
-                emailInput.value = data.email;
-                emailInput.placeholder = "";
-            } else {
-                emailInput.value = '';
-                emailInput.placeholder = "Error al obtener email. Ingrese manualmente.";
-            }
-            emailInput.disabled = false;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            emailInput.value = '';
-            emailInput.placeholder = "Error de conexión. Ingrese manualmente.";
-            emailInput.disabled = false;
-        });
-    
-    // Generar mensaje predeterminado
-    const userName = "{{ Auth::user()->name }}";
-    const userEmail = "{{ Auth::user()->email }}";
-    const academiaNombre = "{{ Auth::user()->ident }}";
-    const emailMessage = document.getElementById('emailMessage');
-    
-    if (emailMessage) {
-        const mensajePredeterminado = `Estimado/a ${docenteNombre},\n\n` +
-            `Nos ponemos en contacto con usted para ofrecerle la posibilidad de impartir el curso "${cursoNombre}" (Código: ${cursoCodigo}) en nuestra academia "${academiaNombre}".\n\n` +
-            `Hemos visto su perfil y consideramos que podría adaptarse adecuadamente a este curso. \n\n` +
-            `Quedamos a su disposición para cualquier información adicional.\n\n` +
-            `Atentamente,\n${userName}\n${userEmail}`;
-        
-        emailMessage.value = mensajePredeterminado;
-    }
-    
-    // Abrir el modal
-    const modal = new bootstrap.Modal(document.getElementById('contactModal'));
-    modal.show();
-}
-
-// Manejador de clic para el botón "Contactar"
-document.addEventListener('click', function(e) {
-    if (e.target.closest('.contact-btn')) {
-        const button = e.target.closest('.contact-btn');
-        
-        // Verificar primero si el sistema está activo
-        if (window.sistemaSuscripcionesActivo) {
-            // Sistema ACTIVO: redirigir a la vista de planes
-            window.location.href = '{{ route("suscripcion.planes") }}';
-            return; // Salir de la función
-        }
-        
-        // Sistema INACTIVO: abrir modal de contacto
-        
-        // Obtener datos del botón
-        const docenteId = button.getAttribute('data-docente-id');
-        const docenteNombre = button.getAttribute('data-docente-nombre');
-        const cursoCodigo = button.getAttribute('data-curso-codigo');
-        const cursoNombre = button.getAttribute('data-curso-nombre');
-        const provincia = button.getAttribute('data-provincia');
-        
-        // Llamar a la función para abrir el modal
-        abrirModalContactoDocente(docenteId, docenteNombre, cursoCodigo, cursoNombre, provincia);
-    }
-});
-
-// ========== VALIDACIÓN DEL FORMULARIO DE CONTACTO ==========
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
-        const mensaje = document.getElementById('emailMessage');
-        
-        if (mensaje && !mensaje.value.trim()) {
-            e.preventDefault();
-            alert('Por favor, complete el mensaje.');
-            return;
-        }
-        
-        // Mostrar indicador de envío
-        const submitBtn = this.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
-            submitBtn.disabled = true;
-        }
-    });
-}
-
-// ========== LIMPIAR FILTROS ==========
-const clearBtn = document.getElementById('clearBtn');
-if (clearBtn) {
-    clearBtn.addEventListener('click', function() {
-        // Redirigir a la ruta sin parámetros
-        window.location.href = "{{ route('academia.ver_docentes') }}";
-        
-        // Alternativa: Resetear formulario y enviar
-        // document.getElementById('searchForm').reset();
-        // document.getElementById('searchForm').submit();
-    });
-} else {
-    console.error('ERROR: No se encontró el botón con id="clearBtn" en vista docentes');
-}
-</script>
-
+@push('scripts')
+    <meta name="user-name" content="{{ Auth::user()->name ?? '' }}">
+    <meta name="user-email" content="{{ Auth::user()->email ?? '' }}">
+    <meta name="academia-nombre" content="{{ Auth::user()->ident ?? '' }}">
+    <meta name="suscripcion-planes-url" content="{{ route('suscripcion.planes') }}">
+    <script src="{{ asset('public/js/academia-docentes.js?v=' . time()) }}"></script>
+@endpush
 <!-- Estilos CSS personalizados -->
 <style>
     .card {

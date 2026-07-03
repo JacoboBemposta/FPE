@@ -109,7 +109,8 @@
     
 
 
-    <button class="btn btn-info mb-3" onclick="toggleCursoDetalles()" id="btnDetallesCurso">
+    <!-- Botón para mostrar/ocultar detalles -->
+    <button class="btn btn-info mb-3" id="btnDetallesCurso">
         <i class="fas fa-chevron-down me-2"></i>Detalles del Curso
     </button>
 
@@ -129,9 +130,9 @@
                                 {{ $modulo->unidades->count() ?? 0 }} unidades
                             </span>
                         </div>
-                        <button class="btn btn-secondary btn-sm" type="button" onclick="toggleModulo({{ $modulo->id ?? 0 }})">
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
+                    <button class="btn btn-secondary btn-sm" type="button">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
                     </div>
                     
                     <div id="modulo-{{ $modulo->id ?? 0 }}" class="modulo-content hidden">
@@ -167,8 +168,7 @@
                                                             data-unidad="{{ $unidad->id }}"
                                                             data-campo="{{ $campo }}"
                                                             data-detalle="{{ optional($detalle)->id ?? '' }}"
-                                                            value="{{ $fecha }}"
-                                                            onchange="saveFecha(this)">
+                                                            value="{{ $fecha }}">
                                                     </td>
                                                 @endforeach
                                             </tr>
@@ -316,7 +316,6 @@
                                     <!-- Formulario para eliminar alumno -->
                                     <form method="POST" action="{{ route('academia.eliminarAlumno', $alumno->id) }}" 
                                           class="d-inline" 
-                                          onsubmit="return confirm('¿Estás seguro de eliminar este alumno?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger">
@@ -393,94 +392,10 @@
 </div>
 @endforeach
 
-<script>
-
-// Toggle curso detalles
-// Toggle curso detalles
-function toggleCursoDetalles() {
-    const detallesDiv = document.getElementById('cursoDetalles');
-    const boton = document.getElementById('btnDetallesCurso');
-    
-    if (detallesDiv) {
-        detallesDiv.classList.toggle('hidden');
-        const icon = boton.querySelector('i');
-        
-        if (detallesDiv.classList.contains('hidden')) {
-            icon.className = 'fas fa-chevron-down me-2';
-            boton.innerHTML = '<i class="fas fa-chevron-down me-2"></i>Detalles del Curso';
-        } else {
-            icon.className = 'fas fa-chevron-up me-2';
-            boton.innerHTML = '<i class="fas fa-chevron-up me-2"></i>Ocultar Detalles';
-        }
-        
-
-    }
-}
-
-// Toggle módulo específico
-function toggleModulo(moduloId) {
-    const moduloDiv = document.getElementById('modulo-' + moduloId);
-    if (moduloDiv) {
-        moduloDiv.classList.toggle('hidden');
-        
-    }
-}
-
-// Guardar fecha modificada
-async function saveFecha(inputElement) {
-    try {
-        const payload = {
-            detalle_id: inputElement.dataset.detalle || null,
-            curso_academico_id: "{{ $cursoAcademico->id }}",
-            campo: inputElement.dataset.campo,
-            valor: inputElement.value,
-            _token: "{{ csrf_token() }}"
-        };
-
-        // Determinar tipo de relación
-        if (inputElement.dataset.unidad) {
-            payload.unidad_formativa_id = inputElement.dataset.unidad;
-        } else if (inputElement.dataset.modulo) {
-            payload.modulo_id = inputElement.dataset.modulo;
-        }
-
-      
-
-        const response = await fetch("{{ route('academia.crearActualizarDetalle') }}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-        
-        if (data.success) {
-            // Actualizar UI
-            inputElement.setAttribute('data-detalle', data.detalle.id);
-            
-            // Feedback visual
-            inputElement.classList.add('actualizado');
-            setTimeout(() => inputElement.classList.remove('actualizado'), 2000);
-            
-
-        } else {
-            throw new Error(data.message || 'Error al guardar');
-        }
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Error: " + error.message);
-        // Revertir cambio si hay error
-        inputElement.value = inputElement.defaultValue;
-    }
-}
-
-
-
-
-</script>
+@push('scripts')
+    <meta name="curso-academico-id" content="{{ $cursoAcademico->id ?? '' }}">
+    <meta name="crear-actualizar-detalle-route" content="{{ route('academia.crearActualizarDetalle') }}">
+    <script src="{{ asset('public/js/academia-detalle-curso.js?v=' . time()) }}"></script>
+@endpush
 
 @endsection

@@ -21,11 +21,18 @@ use App\Http\Controllers\CalificacionController;
 use App\Http\Controllers\ActaController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Middleware\SecurityHeaders;
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
 
+Route::get('/test-header', function () {
+    return response('OK')->header('X-ROUTE-TEST', 'WORKS');
+});
 
+Route::get('/debug-path', function () {
+    return base_path();
+});
 
 Route::get('/', function () {
     return view('welcome');
@@ -306,4 +313,202 @@ Route::get('/suscripcion/test', [SuscripcionController::class, 'testSuccess'])
 
 Route::get('/test', function () {
     return view('test');
+});
+
+// ==============================================
+// 📍 SITEMAP XML - Solo páginas públicas
+// ==============================================
+Route::get('/sitemap.xml', function () {
+    $sitemap = '<?xml version="1.0" encoding="UTF-8"?>';
+    $sitemap .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+    
+    // 📌 LISTA DE URLs PÚBLICAS (sin login requerido)
+    $urls = [
+        // 🟢 PÁGINA PRINCIPAL
+        [
+            'url' => url('/'), 
+            'priority' => '1.0', 
+            'changefreq' => 'daily',
+            'lastmod' => now()->toDateString()
+        ],
+        
+        // 🔵 PÁGINAS DE SERVICIOS
+        [
+            'url' => url('/academias'), 
+            'priority' => '0.9', 
+            'changefreq' => 'weekly',
+            'lastmod' => now()->toDateString()
+        ],
+        [
+            'url' => url('/docentes'), 
+            'priority' => '0.9', 
+            'changefreq' => 'weekly',
+            'lastmod' => now()->toDateString()
+        ],
+        [
+            'url' => url('/alumnos'), 
+            'priority' => '0.9', 
+            'changefreq' => 'weekly',
+            'lastmod' => now()->toDateString()
+        ],
+        
+        // ⚪ PÁGINAS DE INFORMACIÓN
+        [
+            'url' => url('/sobre-nosotros'), 
+            'priority' => '0.8', 
+            'changefreq' => 'monthly',
+            'lastmod' => now()->toDateString()
+        ],
+        [
+            'url' => url('/ayuda'), 
+            'priority' => '0.8', 
+            'changefreq' => 'monthly',
+            'lastmod' => now()->toDateString()
+        ],
+        
+        // 📄 PÁGINAS LEGALES
+        [
+            'url' => url('/privacidad'), 
+            'priority' => '0.3', 
+            'changefreq' => 'yearly',
+            'lastmod' => now()->subMonths(3)->toDateString()
+        ],
+        [
+            'url' => url('/terminos'), 
+            'priority' => '0.3', 
+            'changefreq' => 'yearly',
+            'lastmod' => now()->subMonths(3)->toDateString()
+        ],
+        
+        // 🔐 LOGIN (indexar pero baja prioridad)
+        [
+            'url' => url('/login'), 
+            'priority' => '0.1', 
+            'changefreq' => 'monthly',
+            'lastmod' => now()->subMonths(1)->toDateString()
+        ]
+    ];
+    
+    // 🔄 GENERAR EL XML
+    foreach ($urls as $item) {
+        $sitemap .= '<url>';
+        $sitemap .= '<loc>' . htmlspecialchars($item['url']) . '</loc>';
+        $sitemap .= '<lastmod>' . $item['lastmod'] . '</lastmod>';
+        $sitemap .= '<changefreq>' . $item['changefreq'] . '</changefreq>';
+        $sitemap .= '<priority>' . $item['priority'] . '</priority>';
+        $sitemap .= '</url>';
+    }
+    
+    $sitemap .= '</urlset>';
+    
+    return response($sitemap, 200, [
+        'Content-Type' => 'application/xml'
+    ]);
+});
+
+// ==============================================
+// 📍 ROBOTS.TXT DINÁMICO - Evita caché de SiteGround
+// ==============================================
+Route::get('/robots.txt', function () {
+    $content = "User-agent: *\n";
+    $content .= "Allow: /\n\n";
+    
+    $content .= "# Áreas privadas\n";
+    $content .= "Disallow: /admin/\n";
+    $content .= "Disallow: /academia/\n";
+    $content .= "Disallow: /profesor/\n";
+    $content .= "Disallow: /alumno/\n";
+    $content .= "Disallow: /dashboard/\n";
+    $content .= "Disallow: /user/\n";
+    $content .= "Disallow: /suscripcion/\n";
+    $content .= "Disallow: /stripe/\n\n";
+    
+    $content .= "# Páginas públicas\n";
+    $content .= "Allow: /sobre-nosotros\n";
+    $content .= "Allow: /privacidad\n";
+    $content .= "Allow: /terminos\n";
+    $content .= "Allow: /academias\n";
+    $content .= "Allow: /docentes\n";
+    $content .= "Allow: /alumnos\n";
+    $content .= "Allow: /ayuda\n\n";
+    
+    $content .= "# Sitemap\n";
+    $content .= "Sitemap: https://redfpe.es/sitemap.xml\n";
+    
+    return response($content, 200)
+        ->header('Content-Type', 'text/plain')
+        ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        ->header('Pragma', 'no-cache')
+        ->header('Expires', '0');
+});
+
+
+
+// ==============================================
+// 📍 ROBOTS.TXT ALTERNATIVO - Para bypassear caché de SiteGround
+// ==============================================
+Route::get('/robots-dynamic.txt', function () {
+    $content = "User-agent: *\n";
+    $content .= "Allow: /\n\n";
+    
+    $content .= "# Áreas privadas\n";
+    $content .= "Disallow: /admin/\n";
+    $content .= "Disallow: /academia/\n";
+    $content .= "Disallow: /profesor/\n";
+    $content .= "Disallow: /alumno/\n";
+    $content .= "Disallow: /dashboard/\n";
+    $content .= "Disallow: /user/\n";
+    $content .= "Disallow: /suscripcion/\n";
+    $content .= "Disallow: /stripe/\n\n";
+    
+    $content .= "# Páginas públicas\n";
+    $content .= "Allow: /sobre-nosotros\n";
+    $content .= "Allow: /privacidad\n";
+    $content .= "Allow: /terminos\n";
+    $content .= "Allow: /academias\n";
+    $content .= "Allow: /docentes\n";
+    $content .= "Allow: /alumnos\n";
+    $content .= "Allow: /ayuda\n\n";
+    
+    $content .= "# Sitemap\n";
+    $content .= "Sitemap: https://redfpe.es/sitemap-dynamic.xml\n";
+    
+    return response($content, 200)
+        ->header('Content-Type', 'text/plain')
+        ->header('Cache-Control', 'no-cache');
+});
+
+// ==============================================
+// 📍 SITEMAP ALTERNATIVO - Para bypassear caché de SiteGround
+// ==============================================
+Route::get('/sitemap-dynamic.xml', function () {
+    $sitemap = '<?xml version="1.0" encoding="UTF-8"?>';
+    $sitemap .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+    
+    $urls = [
+        ['url' => url('/'), 'priority' => '1.0', 'changefreq' => 'daily'],
+        ['url' => url('/academias'), 'priority' => '0.9', 'changefreq' => 'weekly'],
+        ['url' => url('/docentes'), 'priority' => '0.9', 'changefreq' => 'weekly'],
+        ['url' => url('/alumnos'), 'priority' => '0.9', 'changefreq' => 'weekly'],
+        ['url' => url('/sobre-nosotros'), 'priority' => '0.8', 'changefreq' => 'monthly'],
+        ['url' => url('/ayuda'), 'priority' => '0.8', 'changefreq' => 'monthly'],
+        ['url' => url('/privacidad'), 'priority' => '0.3', 'changefreq' => 'yearly'],
+        ['url' => url('/terminos'), 'priority' => '0.3', 'changefreq' => 'yearly'],
+        ['url' => url('/login'), 'priority' => '0.1', 'changefreq' => 'monthly'],
+    ];
+    
+    foreach ($urls as $item) {
+        $sitemap .= '<url>';
+        $sitemap .= '<loc>' . htmlspecialchars($item['url']) . '</loc>';
+        $sitemap .= '<lastmod>' . now()->toDateString() . '</lastmod>';
+        $sitemap .= '<changefreq>' . $item['changefreq'] . '</changefreq>';
+        $sitemap .= '<priority>' . $item['priority'] . '</priority>';
+        $sitemap .= '</url>';
+    }
+    
+    $sitemap .= '</urlset>';
+    
+    return response($sitemap, 200)
+        ->header('Content-Type', 'application/xml')
+        ->header('Cache-Control', 'no-cache');
 });

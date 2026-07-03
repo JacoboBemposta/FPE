@@ -284,42 +284,7 @@
     }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    
-        
-    // Añadir clase cuando se expande y quitarla cuando se colapsa
-    const accordionButtons = document.querySelectorAll('.family-header-modern .btn-link');
-    
-    accordionButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            console.log('Familia clickeada:', this.getAttribute('data-bs-target'));
-            
-
-            const targetId = this.getAttribute('data-bs-target');
-            const targetCollapse = document.querySelector(targetId);
-            
-            if (targetCollapse) {
-                // Esperar a que Bootstrap complete la transición
-                setTimeout(() => {
-                    if (targetCollapse.classList.contains('show')) {
-                        console.log('Familia expandida');
-                    } else {
-                        console.log('Familia colapsada');
-                    }
-                }, 350); // Tiempo aproximado de la transición de Bootstrap
-            }
-        });
-    });
-    
-    // Asegurar que todos los acordeones comiencen colapsados
-    const collapses = document.querySelectorAll('.accordion-collapse');
-    collapses.forEach(collapse => {
-        if (!collapse.classList.contains('show')) {
-            collapse.style.height = '0';
-            collapse.style.overflow = 'hidden';
-        }
-    });
-});
-</script>
+@push('scripts')
+    <script src="{{ asset('public/js/academia-cursos.js?v=' . time()) }}"></script>
+@endpush
 @endsection

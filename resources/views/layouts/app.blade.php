@@ -5,29 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="Certificados de profesionalidad. Formación para el empleo">
+    <meta name="update-role-route" content="{{ route('user.updateRole') }}">
+    <meta name="user-rol" content="{{ Auth::user()?->rol ?? '' }}">
     <title>{{ config('app.name', 'RedFPE') }} - Plataforma de Empleo Educativo</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('logo.png') }}">
     
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
+        rel="stylesheet" 
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" 
+        crossorigin="anonymous">
     
-    @vite(['resources/js/app.js'])
+    
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" 
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <!-- SweetAlert2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" integrity="sha384-dCW5imOdApH6OwpFau8cZNKjqVbJYnCA5q+8YsMYP3XwXKsV6Jfz1u6MZLnXaBsS" crossorigin="anonymous">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     
-        <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous">
+    </script>
     <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-nLoOnA/BDh8A/jxqtckg4DumuCGOBYUnNJLZdQz/zfYNp3wcjGSoWTAzgko06G/2" crossorigin="anonymous"></script>
     
     <style>
         :root {
@@ -451,160 +460,109 @@
             transition: all 0.3s ease;
         }
 
-    /* Estilos para el footer */
-    .footer-section {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        color: white;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .footer-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #4361ee, #3a0ca3, #4cc9f0);
-        background-size: 200% 100%;
-        animation: gradientAnimation 3s ease infinite;
-    }
-    
-    @keyframes gradientAnimation {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    
-    .footer-section a:hover {
-        opacity: 1 !important;
-        color: #4cc9f0 !important;
-        transform: translateX(5px);
-    }
-    
-    .social-links a:hover {
-        opacity: 1 !important;
-        color: #4cc9f0 !important;
-        transform: translateY(-3px);
-    }
-    
-    .footer-bottom-links a:hover {
-        color: #4cc9f0 !important;
-    }
-    
-    /* Estilos responsivos */
-    @media (max-width: 768px) {
-    /* Estilos para el footer */
-    .footer-section {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        color: white;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .footer-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #4361ee, #3a0ca3, #4cc9f0);
-        background-size: 200% 100%;
-        animation: gradientAnimation 3s ease infinite;
-    }
-    
-    @keyframes gradientAnimation {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    
-    .footer-section a:hover {
-        opacity: 1 !important;
-        color: #4cc9f0 !important;
-        transform: translateX(5px);
-    }
-    
-    .social-links a:hover {
-        opacity: 1 !important;
-        color: #4cc9f0 !important;
-        transform: translateY(-3px);
-    }
-    
-    .footer-bottom-links a:hover {
-        color: #4cc9f0 !important;
-    }
-    
-    /* Estilos responsivos CORREGIDOS */
-    @media (max-width: 768px) {
-        /* Solo centrar el logo y descripción en móviles */
-        .footer-section .col-lg-4.col-md-6 {
-            text-align: center;
+        /* Estilos para el footer */
+        .footer-section {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
         }
         
-        .footer-section .col-lg-4.col-md-6 .d-flex {
-            justify-content: center;
+        .footer-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4361ee, #3a0ca3, #4cc9f0);
+            background-size: 200% 100%;
+            animation: gradientAnimation 3s ease infinite;
         }
         
-        /* Las otras columnas mantienen alineación izquierda */
-        .footer-section .col-lg-2.col-md-6,
-        .footer-section .col-lg-3.col-md-6 {
-            text-align: left !important;
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
-        /* Forzar alineación izquierda específicamente en contacto */
-        .col-lg-3.col-md-6.text-start.text-md-start,
-        .col-lg-3.col-md-6.text-start.text-md-start ul,
-        .col-lg-3.col-md-6.text-start.text-md-start li,
-        .col-lg-3.col-md-6.text-start.text-md-start .social-links {
-            text-align: center !important;
-            justify-content: flex-start !important;
+        .footer-section a:hover {
+            opacity: 1 !important;
+            color: #4cc9f0 !important;
+            transform: translateX(5px);
         }
         
-        /* Remover la regla que centraba todos los li */
-        .footer-section li {
-            justify-content: flex-start !important;
+        .social-links a:hover {
+            opacity: 1 !important;
+            color: #4cc9f0 !important;
+            transform: translateY(-3px);
         }
         
-        /* Mantener el footer bottom links centrado */
-        .footer-bottom-links {
-            margin-top: 15px;
-            text-align: center;
+        .footer-bottom-links a:hover {
+            color: #4cc9f0 !important;
         }
         
-        /* Asegurar que los enlaces de las otras columnas también estén alineados a la izquierda */
-        .footer-section .col-lg-2.col-md-6 .d-flex,
-        .footer-section .col-lg-3.col-md-6 .d-flex:not(.justify-content-center) {
-            justify-content: flex-start !important;
-        }
-    }
-    }        
+        /* Estilos responsivos */
+        @media (max-width: 768px) {
+            .footer-section .col-lg-4.col-md-6 {
+                text-align: center;
+            }
+            
+            .footer-section .col-lg-4.col-md-6 .d-flex {
+                justify-content: center;
+            }
+            
+            .footer-section .col-lg-2.col-md-6,
+            .footer-section .col-lg-3.col-md-6 {
+                text-align: left !important;
+            }
+            
+            .col-lg-3.col-md-6.text-start.text-md-start,
+            .col-lg-3.col-md-6.text-start.text-md-start ul,
+            .col-lg-3.col-md-6.text-start.text-md-start li,
+            .col-lg-3.col-md-6.text-start.text-md-start .social-links {
+                text-align: center !important;
+                justify-content: flex-start !important;
+            }
+            
+            .footer-section li {
+                justify-content: flex-start !important;
+            }
+            
+            .footer-bottom-links {
+                margin-top: 15px;
+                text-align: center;
+            }
+            
+            .footer-section .col-lg-2.col-md-6 .d-flex,
+            .footer-section .col-lg-3.col-md-6 .d-flex:not(.justify-content-center) {
+                justify-content: flex-start !important;
+            }
+        }        
 
 
-.btn-navbar-bg {
-    background: rgba(255, 255, 255, 0.15) !important;
-    border: none !important;
-    color: white !important;
-    border-radius: 50px !important;
-    padding: 8px 24px !important;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow-sm);
-}
+        .btn-navbar-bg {
+            background: rgba(255, 255, 255, 0.15) !important;
+            border: none !important;
+            color: white !important;
+            border-radius: 50px !important;
+            padding: 8px 24px !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
 
-.btn-navbar-bg:hover {
-    background: rgba(255, 255, 255, 0.25) !important;
-    color: white !important;
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-}
+        .btn-navbar-bg:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+            color: white !important;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
 
-/* Estilos específicos para los íconos dentro del botón */
-.btn-navbar-bg i {
-    color: white !important;
-}    
+        /* Estilos específicos para los íconos dentro del botón */
+        .btn-navbar-bg i {
+            color: white !important;
+        }    
     </style>
 </head>
 <body>
@@ -692,12 +650,11 @@
                                     
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <a class="dropdown-item text-danger" href="{{ route('logout') }}" 
-                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                            <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
-                                        </a>
-                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                        <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                                             @csrf
+                                            <button type="submit" class="dropdown-item text-danger" style="background: none; border: none; width: 100%; text-align: left; padding: 10px 16px;">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
+                                            </button>
                                         </form>
                                     </li>
                                 </ul>
@@ -732,162 +689,152 @@
             @yield('content')
         </main>
 
-<!-- Footer Actualizado -->
-<footer class="footer-section py-5 mt-5">
-    <div class="container">
-        <div class="row g-4">
-            <!-- Columna 1: Logo y descripción -->
-            <div class="col-lg-4 col-md-6">
-                <div class="footer-logo mb-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <img src="{{ asset('logo.png') }}" alt="RedFPE Logo" style="height: 100px; filter: brightness(0) invert(1);" class="me-2">
-                        <h4 class="text-white mb-0">RedFPE</h4>
-                    </div>
-                    <p class="text-light mb-4" style="opacity: 0.8;">
-                        Plataforma educativa que conecta academias, docentes y alumnos en un ecosistema completo y eficiente.
-                    </p>
-                    <div class="privacy-badge p-3 rounded" style="background: rgba(255, 255, 255, 0.1); border-left: 3px solid #4cc9f0;">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-shield-alt text-info me-3 fa-lg"></i>
-                            <div>
-                                <small class="text-light fw-bold d-block">Sin cookies de seguimiento</small>
-                                <small class="text-light" style="opacity: 0.7; font-size: 0.8rem;">Respetamos tu privacidad. Solo usamos cookies esenciales.</small>
+        <!-- Footer Actualizado -->
+        <footer class="footer-section py-5 mt-5">
+            <div class="container">
+                <div class="row g-4">
+                    <!-- Columna 1: Logo y descripción -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="footer-logo mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="{{ asset('logo.png') }}" alt="RedFPE Logo" style="height: 100px; filter: brightness(0) invert(1);" class="me-2">
+                                <h4 class="text-white mb-0">RedFPE</h4>
                             </div>
+                            <p class="text-light mb-4" style="opacity: 0.8;">
+                                Plataforma educativa que conecta academias, docentes y alumnos en un ecosistema completo y eficiente.
+                            </p>
+                            <div class="privacy-badge p-3 rounded" style="background: rgba(255, 255, 255, 0.1); border-left: 3px solid #4cc9f0;">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-shield-alt text-info me-3 fa-lg"></i>
+                                    <div>
+                                        <small class="text-light fw-bold d-block">Sin cookies de seguimiento</small>
+                                        <small class="text-light" style="opacity: 0.7; font-size: 0.8rem;">Respetamos tu privacidad. Solo usamos cookies esenciales.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Columna 2: Enlaces rápidos -->
+                    <div class="col-lg-2 col-md-6">
+                        <h5 class="text-white mb-4 text-start text-md-start" style="position: relative; padding-bottom: 10px;">
+                            Enlaces
+                            <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
+                        </h5>
+                        <ul class="list-unstyled text-start text-md-start">
+                            <li class="mb-2">
+                                <a href="{{ url('/') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                                    <i class="fas fa-home me-2" style="width: 20px;"></i>
+                                    <span>Inicio</span>
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{{ route('about') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                                    <i class="fas fa-info-circle me-2" style="width: 20px;"></i>
+                                    <span>Sobre Nosotros</span>
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{{ route('privacy') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                                    <i class="fas fa-user-shield me-2" style="width: 20px;"></i>
+                                    <span>Privacidad</span>
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{{ route('terms') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                                    <i class="fas fa-file-contract me-2" style="width: 20px;"></i>
+                                    <span>Términos</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Columna 3: Para usuarios -->
+                    <div class="col-lg-2 col-md-6">
+                        <h5 class="text-white mb-4 text-start text-md-start" style="position: relative; padding-bottom: 10px;">
+                            Para Usuarios
+                            <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
+                        </h5>
+                        <ul class="list-unstyled text-start text-md-start">
+                            <li class="mb-2">
+                                <a href="{{ route('academias') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                                    <i class="fas fa-university me-2" style="width: 20px;"></i>
+                                    <span>Academias</span>
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{{ route('docentes') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                                    <i class="fas fa-chalkboard-teacher me-2" style="width: 20px;"></i>
+                                    <span>Docentes</span>
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{{ route('alumnos') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                                    <i class="fas fa-user-graduate me-2" style="width: 20px;"></i>
+                                    <span>Alumnos</span>
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href={{ route('ayuda') }} class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                                    <i class="fas fa-question-circle me-2" style="width: 20px;"></i>
+                                    <span>Ayuda</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Columna 4: Contacto -->
+                    <div class="col-lg-2 col-md-6 text-start text-md-start">
+                        <h5 class="text-white mb-4 text-start" style="position: relative; padding-bottom: 10px;">
+                            Contacto
+                            <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
+                        </h5>
+                        
+                        <ul class="list-unstyled mb-0" style="opacity: 0.8;">
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="fas fa-envelope mt-1 me-3" style="color: #4cc9f0; width: 20px;"></i>
+                                <span class="text-start d-block">info@redfpe.com</span>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="fas fa-phone mt-1 me-3" style="color: #4cc9f0; width: 20px;"></i>
+                                <span class="text-start d-block">+34 635 15 62 63</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-2 col-md-6 text-start text-md-start">
+                        <h5 class="text-white mb-4 text-start" style="position: relative; padding-bottom: 10px;">
+                            Comunidades colaboradoras
+                            <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
+                        </h5>
+                        <div class="social-links mt-5">
+                            <a href="#" class="text-light me-3" style="opacity: 0.7; transition: all 0.3s ease; text-decoration: none;">
+                                <i class="fab fa-linkedin fa-lg"></i>
+                            </a>
+                            <a href="#" class="text-light me-3" style="opacity: 0.7; transition: all 0.3s ease; text-decoration: none;">
+                                <i class="fab fa-telegram fa-lg"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-5" style="border-color: rgba(255, 255, 255, 0.1);">
+                
+                <!-- Fila inferior -->
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="text-light mb-0" style="opacity: 0.7;">
+                            &copy; {{ date('Y') }} RedFPE. Todos los derechos reservados.
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="footer-bottom-links">
+                            <a href="{{ route('privacy') }}" class="text-light text-decoration-none me-3" style="opacity: 0.7; font-size: 0.9rem;">Política de Privacidad</a>
+                            <a href="{{ route('terms') }}" class="text-light text-decoration-none me-3" style="opacity: 0.7; font-size: 0.9rem;">Términos de Uso</a>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Columna 2: Enlaces rápidos -->
-            <div class="col-lg-2 col-md-6">
-                <h5 class="text-white mb-4 text-start text-md-start" style="position: relative; padding-bottom: 10px;">
-                    Enlaces
-                    <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
-                </h5>
-                <ul class="list-unstyled text-start text-md-start">
-                    <li class="mb-2">
-                        <a href="{{ url('/') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
-                            <i class="fas fa-home me-2" style="width: 20px;"></i>
-                            <span>Inicio</span>
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="{{ route('about') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
-                            <i class="fas fa-info-circle me-2" style="width: 20px;"></i>
-                            <span>Sobre Nosotros</span>
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="{{ route('privacy') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
-                            <i class="fas fa-user-shield me-2" style="width: 20px;"></i>
-                            <span>Privacidad</span>
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="{{ route('terms') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
-                            <i class="fas fa-file-contract me-2" style="width: 20px;"></i>
-                            <span>Términos</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Columna 3: Para usuarios -->
-            <div class="col-lg-2 col-md-6">
-                <h5 class="text-white mb-4 text-start text-md-start" style="position: relative; padding-bottom: 10px;">
-                    Para Usuarios
-                    <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
-                </h5>
-                <ul class="list-unstyled text-start text-md-start">
-                    <li class="mb-2">
-                        <a href="{{ route('academias') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
-                            <i class="fas fa-university me-2" style="width: 20px;"></i>
-                            <span>Academias</span>
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="{{ route('docentes') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
-                            <i class="fas fa-chalkboard-teacher me-2" style="width: 20px;"></i>
-                            <span>Docentes</span>
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="{{ route('alumnos') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
-                            <i class="fas fa-user-graduate me-2" style="width: 20px;"></i>
-                            <span>Alumnos</span>
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href={{ route('ayuda') }} class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
-                            <i class="fas fa-question-circle me-2" style="width: 20px;"></i>
-                            <span>Ayuda</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Columna 4: Contacto -->
-            <div class="col-lg-2 col-md-6 text-start text-md-start">
-                <h5 class="text-white mb-4 text-start" style="position: relative; padding-bottom: 10px;">
-                    Contacto
-                    <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
-                </h5>
-                
-                <ul class="list-unstyled mb-0" style="opacity: 0.8;">
-                    <li class="mb-3 d-flex align-items-start">
-                        <i class="fas fa-envelope mt-1 me-3" style="color: #4cc9f0; width: 20px;"></i>
-                        <span class="text-start d-block">info@redfpe.com</span>
-                    </li>
-                    <li class="mb-3 d-flex align-items-start">
-                        <i class="fas fa-phone mt-1 me-3" style="color: #4cc9f0; width: 20px;"></i>
-                        <span class="text-start d-block">+34 635 15 62 63</span>
-                    </li>
-                    <!-- <li class="mb-5 d-flex align-items-start">
-                        <i class="fas fa-map-marker-alt mt-1 me-3 " style="color: #4cc9f0; width: 20px;"></i>
-                        <span class="text-start d-block">Avenida de Vigo 63<br>Pontevedra, España</span>
-                    </li> -->
-                </ul>
-            </div>
-                <div class="col-lg-2 col-md-6 text-start text-md-start">
-                    <h5 class="text-white mb-4 text-start" style="position: relative; padding-bottom: 10px;">
-                        Comunidades colaboradoras
-                        <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
-                    </h5>
-                    <div class="social-links mt-5">
-                    <!-- <a href="#" class="text-light me-3" style="opacity: 0.7; transition: all 0.3s ease; text-decoration: none;">
-                        <i class="fab fa-facebook fa-lg"></i>
-                    </a> -->
-                    <a href="#" class="text-light me-3" style="opacity: 0.7; transition: all 0.3s ease; text-decoration: none;">
-                        <i class="fab fa-linkedin fa-lg"></i>
-                    </a>
-                    <a href="#" class="text-light me-3" style="opacity: 0.7; transition: all 0.3s ease; text-decoration: none;">
-                        <i class="fab fa-telegram fa-lg"></i>
-                    </a>
-                    <!-- <a href="#" class="text-light" style="opacity: 0.7; transition: all 0.3s ease;">
-                        <i class="fab fa-youtube fa-lg"></i>
-                    </a> -->
-                </div>
-            </div>
-        </div>
-        
-        <hr class="my-5" style="border-color: rgba(255, 255, 255, 0.1);">
-        
-        <!-- Fila inferior -->
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <p class="text-light mb-0" style="opacity: 0.7;">
-                    &copy; {{ date('Y') }} RedFPE. Todos los derechos reservados.
-                </p>
-            </div>
-            <div class="col-md-6 text-md-end">
-                <div class="footer-bottom-links">
-                    <a href="{{ route('privacy') }}" class="text-light text-decoration-none me-3" style="opacity: 0.7; font-size: 0.9rem;">Política de Privacidad</a>
-                    <a href="{{ route('terms') }}" class="text-light text-decoration-none me-3" style="opacity: 0.7; font-size: 0.9rem;">Términos de Uso</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</footer>
+        </footer>
     </div>
 
     <!-- ============================================== -->
@@ -1163,398 +1110,13 @@
         </div>
     </div>
 
+    <!-- ============================================== -->
+    <!-- CONFIGURACIÓN DE VARIABLES PARA EL JS EXTERNO   -->
+    <!-- ============================================== -->
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // ==============================
-            // 1. FLUJO PARA PRIMERA SELECCIÓN DE ROL
-            // ==============================
-            const roleSelectionModal = document.getElementById('roleSelectionModal');
-            if (roleSelectionModal) {
-                // Crear y mostrar modal
-                const modal = new bootstrap.Modal(roleSelectionModal, {
-                    backdrop: 'static',
-                    keyboard: false
-                });
-                modal.show();
-                
-                // Configurar opciones
-                const roleOptions = document.querySelectorAll('.role-option');
-                const confirmBtn = document.getElementById('confirmRoleBtn');
-                
-                roleOptions.forEach(option => {
-                    option.addEventListener('click', function() {
-                        const radio = this.querySelector('input[type="radio"]');
-                        radio.checked = true;
-                        
-                        roleOptions.forEach(opt => {
-                            opt.classList.remove('active');
-                            opt.style.borderColor = '';
-                        });
-                        
-                        this.classList.add('active');
-                        this.style.borderColor = '#4361ee';
-                    });
-                });
-                
-            // Manejar confirmación del modal de selección de rol
-            confirmBtn.addEventListener('click', async function() {
-                const selectedRole = document.querySelector('input[name="rol"]:checked');
-                
-                if (!selectedRole) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Selección requerida',
-                        text: 'Por favor, selecciona un tipo de cuenta para continuar.',
-                        confirmButtonColor: '#4361ee'
-                    });
-                    return;
-                }
-                
-                // Mostrar loading
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
-                this.disabled = true;
-                
-                try {
-                    const response = await fetch('{{ route("user.updateRole") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: JSON.stringify({
-                            rol: selectedRole.value
-                        }),
-                        credentials: 'same-origin' // Importante para mantener la sesión
-                    });
-                    
-                   
-                    
-                    if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({ 
-                            message: 'Error en el servidor' 
-                        }));
-                        throw new Error(errorData.message || `Error ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-              
-                    
-                    if (data.success && data.redirect_url) {
-                        // Redirigir inmediatamente
-                        window.location.href = '/';
-                    } else {
-                        throw new Error(data.message || 'Error al actualizar el rol');
-                    }
-                } catch (error) {
-                    console.error('Error completo:', error); // Para debug
-                    
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: error.message || 'Ocurrió un error al procesar la solicitud. Por favor, intenta nuevamente.',
-                        confirmButtonColor: '#4361ee'
-                    });
-                    
-                    this.innerHTML = originalText;
-                    this.disabled = false;
-                }
-            });
-                
-                // Prevenir cierre del modal
-                roleSelectionModal.addEventListener('hide.bs.modal', function(event) {
-                    const selectedRole = document.querySelector('input[name="rol"]:checked');
-                    if (!selectedRole) {
-                        event.preventDefault();
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Selección requerida',
-                            text: 'Debes seleccionar un tipo de cuenta para continuar.',
-                            confirmButtonColor: '#4361ee'
-                        });
-                    }
-                });
-            }
-            
-        // ==============================
-        // 2. FLUJO PARA EDITAR PERFIL (SOLUCIÓN COMPLETA)
-        // ==============================
-            document.addEventListener('DOMContentLoaded', function() {
-                const editProfileForm = document.getElementById('editProfileForm');
-                
-                if (editProfileForm) {
-                                    
-                    // Inicializar estilos de los radio buttons
-                    function initializeRoleRadios() {
-                        const roleRadios = document.querySelectorAll('#editProfileForm input[name="rol"]');
-                        
-                        roleRadios.forEach(radio => {
-                            const label = radio.nextElementSibling;
-                            
-                            // Establecer estilo inicial
-                            if (radio.checked) {
-                                label.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
-                                label.style.border = '2px solid #4361ee';
-                                label.style.borderRadius = '6px';
-                            } else {
-                                label.style.backgroundColor = '';
-                                label.style.border = '2px solid transparent';
-                            }
-                            
-                            // Agregar evento de cambio
-                            radio.addEventListener('change', function() {
-                                // Resetear todos los labels
-                                document.querySelectorAll('#editProfileForm .form-check-label').forEach(lbl => {
-                                    lbl.style.backgroundColor = '';
-                                    lbl.style.border = '2px solid transparent';
-                                });
-                                
-                                // Resaltar el seleccionado
-                                if (this.checked) {
-                                    const selectedLabel = this.nextElementSibling;
-                                    selectedLabel.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
-                                    selectedLabel.style.border = '2px solid #4361ee';
-                                    selectedLabel.style.borderRadius = '6px';
-                                }
-                            });
-                            
-                            // También hacer clic en el label para seleccionar
-                            label.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                const radioBtn = this.previousElementSibling;
-                                radioBtn.checked = true;
-                                radioBtn.dispatchEvent(new Event('change'));
-                            });
-                        });
-                    }
-                    
-                    // Inicializar cuando el modal se muestra
-                    const editProfileModal = document.getElementById('editProfileModal');
-                    if (editProfileModal) {
-                        editProfileModal.addEventListener('shown.bs.modal', function() {
-                            initializeRoleRadios();
-                        });
-                    }
-                    
-                    // Manejar envío del formulario
-                    editProfileForm.addEventListener('submit', async function(e) {
-                        e.preventDefault();
-                        
-                        const nameField = document.getElementById('editName');
-                        const selectedRole = document.querySelector('#editProfileForm input[name="rol"]:checked');
-                        const currentRole = '{{ Auth::user()?->rol ?? "" }}'; 
-                        
-                        // Validaciones
-                        if (!nameField.value.trim()) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Nombre requerido',
-                                text: 'Por favor, ingresa tu nombre.',
-                                confirmButtonColor: '#4361ee'
-                            });
-                            nameField.focus();
-                            return;
-                        }
-                        
-                        if (!selectedRole) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Rol requerido',
-                                text: 'Por favor, selecciona un rol.',
-                                confirmButtonColor: '#4361ee'
-                            });
-                            return;
-                        }
-                        
-                        const isChangingRole = selectedRole.value !== currentRole;
-                        let confirmChange = true;
-                        
-                        // Confirmar cambio de rol si es diferente
-                        if (isChangingRole) {
-                            const result = await Swal.fire({
-                                icon: 'question',
-                                title: '¿Cambiar rol?',
-                                html: `Estás cambiando tu rol de <strong>${currentRole}</strong> a <strong>${selectedRole.value}</strong>.<br><br>Serás redirigido al panel correspondiente.`,
-                                showCancelButton: true,
-                                confirmButtonText: 'Sí, cambiar rol',
-                                cancelButtonText: 'Cancelar',
-                                confirmButtonColor: '#4361ee',
-                                cancelButtonColor: '#6c757d',
-                                reverseButtons: true
-                            });
-                            
-                            if (!result.isConfirmed) {
-                                console.log('Usuario canceló el cambio de rol');
-                                return;
-                            }
-                        }
-                        
-                        // Mostrar loading
-                        const submitBtn = this.querySelector('button[type="submit"]');
-                        const originalText = submitBtn.innerHTML;
-                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Guardando...';
-                        submitBtn.disabled = true;
-                        
-                        try {
-                            // Crear FormData
-                            const formData = new FormData(this);
-                            
-                            console.log('Enviando datos:', {
-                                name: formData.get('name'),
-                                rol: formData.get('rol'),
-                                _token: formData.get('_token'),
-                                _method: formData.get('_method')
-                            });
-                            
-                            // Enviar solicitud
-                            const response = await fetch(this.action, {
-                                method: 'POST', // Laravel maneja PUT con _method
-                                headers: {
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'Accept': 'application/json',
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                },
-                                body: formData,
-                                credentials: 'same-origin'
-                            });
-                            
-    
-                            
-                            const data = await response.json();
-    
-                            
-                            if (response.ok && data.success) {
-                                // Cerrar modal
-                                const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
-                                if (modal) {
-                                    modal.hide();
-                                }
-                                
-                                // Mostrar mensaje de éxito
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: '¡Éxito!',
-                                    text: data.message,
-                                    confirmButtonColor: '#4361ee',
-                                    timer: 2000,
-                                    showConfirmButton: false
-                                });
-                                
-                                // Redirigir o recargar después de un breve delay
-                                setTimeout(() => {
-                                    if (data.role_changed && data.redirect_url) {
-            
-                                        window.location.href = '/';
-                                    } else {
-                
-                                        window.location.reload();
-                                    }
-                                }, 2000);
-                            } else {
-                                throw new Error(data.message || `Error ${response.status}: No se pudo actualizar el perfil`);
-                            }
-                        } catch (error) {
-                            console.error('Error completo:', error);
-                            
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: error.message || 'Ocurrió un error al guardar los cambios. Por favor, intenta nuevamente.',
-                                confirmButtonColor: '#4361ee'
-                            });
-                            
-                            submitBtn.innerHTML = originalText;
-                            submitBtn.disabled = false;
-                        }
-                    });
-                    
-                    // Inicializar al cargar la página
-                    initializeRoleRadios();
-                } else {
-                    console.log('Formulario de edición de perfil NO encontrado');
-                }
-            });
-                    // ==============================
-        // 3. FLUJO PARA ELIMINAR PERFIL (SOLUCIÓN COMPLETA)
-        // ==============================
-
-            const confirmationPhrase = document.getElementById('confirmationPhrase');
-            const currentPassword = document.getElementById('currentPassword');
-            const finalConfirmation = document.getElementById('finalConfirmation');
-            const confirmDeleteButton = document.getElementById('confirmDeleteButton');
-            const confirmationsCount = document.getElementById('confirmationsCount');
-            
-            // Frase exacta que debe escribir el usuario
-            const REQUIRED_PHRASE = 'ELIMINAR MI CUENTA';
-            
-            function updateConfirmations() {
-                let count = 0;
-                
-                // Verificar frase
-                if (confirmationPhrase.value === REQUIRED_PHRASE) {
-                    count++;
-                    confirmationPhrase.classList.remove('is-invalid');
-                    confirmationPhrase.classList.add('is-valid');
-                } else {
-                    confirmationPhrase.classList.remove('is-valid');
-                    if (confirmationPhrase.value) {
-                        confirmationPhrase.classList.add('is-invalid');
-                    }
-                }
-                
-                // Verificar contraseña (mínimo 8 caracteres)
-                if (currentPassword.value.length >= 8) {
-                    count++;
-                    currentPassword.classList.remove('is-invalid');
-                    currentPassword.classList.add('is-valid');
-                } else {
-                    currentPassword.classList.remove('is-valid');
-                    if (currentPassword.value) {
-                        currentPassword.classList.add('is-invalid');
-                    }
-                }
-                
-                // Verificar checkbox
-                if (finalConfirmation.checked) {
-                    count++;
-                }
-                
-                // Actualizar contador
-                confirmationsCount.textContent = count;
-                
-                // Habilitar/deshabilitar botón
-                confirmDeleteButton.disabled = count !== 3;
-                
-                // Cambiar color del botón según confirmaciones
-                if (count === 3) {
-                    confirmDeleteButton.classList.remove('btn-secondary');
-                    confirmDeleteButton.classList.add('btn-danger');
-                } else {
-                    confirmDeleteButton.classList.remove('btn-danger');
-                    confirmDeleteButton.classList.add('btn-secondary');
-                }
-            }
-            
-            // Escuchar cambios en todos los campos
-            confirmationPhrase.addEventListener('input', updateConfirmations);
-            currentPassword.addEventListener('input', updateConfirmations);
-            finalConfirmation.addEventListener('change', updateConfirmations);
-            
-            // Confirmación final antes de enviar
-            document.getElementById('deleteAccountForm').addEventListener('submit', function(e) {
-                if (!confirm('⚠️ ¿ESTÁS ABSOLUTAMENTE SEGURO?\n\nEsta acción eliminará permanentemente:\n• Tu cuenta y todos tus datos\n• Tu historial de cursos\n• Tus suscripciones\n\n¿Deseas continuar con la eliminación?')) {
-                    e.preventDefault();
-                    return false;
-                }
-                
-                // Mostrar loader en el botón
-                confirmDeleteButton.disabled = true;
-                confirmDeleteButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> ELIMINANDO...';
-            });        
-        });
-    </script>
+    <script src="{{ asset('public/js/perfil.js') }}"></script>
+    <script src="{{ asset('public/js/config.js') }}"></script>
+    @yield('scripts')
+    @stack('scripts')
 </body>
 </html>

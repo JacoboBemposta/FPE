@@ -19,12 +19,18 @@ class GoogleLoginController extends Controller
     public function redirectToGoogle()
     {
         try {
+            // Obtener la URI desde el .env (asegúrate de que esté bien definida)
+            $redirectUri = env('GOOGLE_REDIRECT_URI');
 
+            // Si por algún motivo no se obtiene, ponla directamente (pero mejor desde env)
+            if (empty($redirectUri)) {
+                $redirectUri = 'https://redfpe.es/auth/google/callback';
+            }
 
-            // Forzar selección de cuenta y stateless
             return Socialite::driver('google')
                 ->stateless()
                 ->with(['prompt' => 'select_account'])
+                ->redirectUrl($redirectUri)   // <--- FORZAMOS LA URL
                 ->redirect();
 
         } catch (\Exception $e) {

@@ -105,33 +105,10 @@
 
 @endsection
 
+
 @push('scripts')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        // Manejo del evento para actualizar la calificación
-        $('input.calificacion').on('blur', function() {
-            var calificacionId = $(this).data('calificacion-id');
-            var nota = $(this).val();
-            if(calificacionId) {
-                $.ajax({
-                    url: '/calificaciones/update/' + calificacionId,
-                    type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        nota: nota
-                    },
-                    success: function(response) {
-                        if(response.success) {
-                            alert(response.message);
-                        }
-                    },
-                    error: function() {
-                        alert('Hubo un error al actualizar la calificación');
-                    }
-                });
-            }
-        });
-    });
-</script>
+    <script src="{{ asset('public/js/academia.js?v=' . time()) }}"></script>
+@endpush
+
+
 @endpush --}}

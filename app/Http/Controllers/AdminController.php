@@ -12,14 +12,8 @@ class AdminController extends Controller
 {
     public function index()
     {
-        $familiasProfesionales = FamiliaProfesional::with(['cursos.modulos.unidades'])->get();
-        $modulosDisponibles = Modulo::all();
+        $familiasProfesionales = FamiliaProfesional::withCount('cursos')->get();
         $sistema_suscripciones_activo = SistemaHelper::sistemaSuscripcionesActivo();
-       
-        return view('admin.index', compact('familiasProfesionales', 'modulosDisponibles', 'sistema_suscripciones_activo'));
+        return view('admin.index', compact('familiasProfesionales', 'sistema_suscripciones_activo'));
     }
-
-
-
-
 }

@@ -212,7 +212,7 @@
                                 <form action="{{ route('academia.curso_academico.restore', $cursoAcademico->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('PUT')
-                                    <button type="submit" class="btn btn-restore action-btn" onclick="return confirm('¿Restaurar este curso?')">
+                                    <button type="submit" class="btn btn-restore action-btn">
                                         <i class="fas fa-undo"></i>
                                     </button>
                                 </form>
@@ -224,7 +224,7 @@
                                 <form action="{{ route('academia.curso_academico.destroy', $cursoAcademico->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-delete action-btn" onclick="return confirm('¿Estás seguro de que deseas eliminar definitivamente este curso? Esta acción no se puede deshacer.')">
+                                    <button type="submit" class="btn btn-delete action-btn">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -248,4 +248,8 @@
     </div>
     @endif
 </div>
+
+@push('scripts')
+    <script src="{{ asset('public/js/academia.js?v=' . time()) }}"></script>
+@endpush
 @endsection

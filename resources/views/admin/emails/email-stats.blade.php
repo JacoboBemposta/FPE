@@ -914,7 +914,10 @@
 </div>
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+        integrity="sha384-7Z5E1QJ/9bT9T5sXqI8WCSO5Jm9PQ4rR7oR2H/PSDFc8P4yhG08AZl0c5s8cB79K"
+        crossorigin="anonymous">
+</script>
 <script>
 function verDetalle(id) {
     fetch(`/admin/email-stats/detalle/${id}`)

@@ -40,3 +40,18 @@ Stack trace:
 Stack trace:
 #0 {main}
   thrown in /home/customer/www/redfpe.es/FPE/artisan on line 9
+[01-Jul-2026 20:29:16 UTC] PHP Warning:  require(/home/customer/www/redfpe.es/public_html/FPE/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/customer/www/redfpe.es/public_html/FPE/index.php on line 14
+[01-Jul-2026 20:29:16 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/customer/www/redfpe.es/public_html/FPE/../vendor/autoload.php' (include_path='.:/usr/local/php82/pear') in /home/customer/www/redfpe.es/public_html/FPE/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/customer/www/redfpe.es/public_html/FPE/index.php on line 14
+[03-Jul-2026 05:38:39 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\CursoController::getModulosByCurso() in /home/customer/www/redfpe.es/public_html/app/Http/Controllers/CursoController.php on line 106
+[03-Jul-2026 06:41:38 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\CursoController::getModulosByCurso() in /home/customer/www/redfpe.es/public_html/app/Http/Controllers/CursoController.php on line 106
+[03-Jul-2026 06:43:29 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\CursoController::getModulosByCurso() in /home/customer/www/redfpe.es/public_html/app/Http/Controllers/CursoController.php on line 112
+[03-Jul-2026 06:44:52 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\CursoController::getModulosByCurso() in /home/customer/www/redfpe.es/public_html/app/Http/Controllers/CursoController.php on line 106
+[03-Jul-2026 06:45:26 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\CursoController::getModulosByCurso() in /home/customer/www/redfpe.es/public_html/app/Http/Controllers/CursoController.php on line 112
+[03-Jul-2026 06:47:58 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\CursoController::getModulosByCurso() in /home/customer/www/redfpe.es/public_html/app/Http/Controllers/CursoController.php on line 104
+[03-Jul-2026 06:48:04 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\CursoController::getModulosByCurso() in /home/customer/www/redfpe.es/public_html/app/Http/Controllers/CursoController.php on line 104
+[03-Jul-2026 06:49:17 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\CursoController::getModulosByCurso() in /home/customer/www/redfpe.es/public_html/app/Http/Controllers/CursoController.php on line 112
+[03-Jul-2026 06:50:54 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\CursoController::getModulosByCurso() in /home/customer/www/redfpe.es/public_html/app/Http/Controllers/CursoController.php on line 112
+[03-Jul-2026 06:51:13 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\CursoController::getModulosByCurso() in /home/customer/www/redfpe.es/public_html/app/Http/Controllers/CursoController.php on line 112

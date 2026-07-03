@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /FPE/
+
+    # Si la petición es para un archivo o directorio existente en public/, servirlo directamente
+    RewriteCond %{DOCUMENT_ROOT}/FPE/public/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/FPE/public/$1 -d
+    RewriteRule ^(.*)$ public/$1 [L]
+
+    # Para todo lo demás (rutas de Laravel), enviar a public/index.php
+    RewriteRule ^(.*)$ public/index.php [L]
+</IfModule>
