@@ -1,0 +1,16 @@
+# ===================================================
+# REDIRECCIÓN - Para la versión actualizada usar:
+# https://redfpe.es/robots-dynamic.txt
+# ===================================================
+
+User-agent: *
+Allow: /
+
+# Áreas privadas (básico)
+Disallow: /admin/
+Disallow: /academia/
+Disallow: /profesor/
+Disallow: /alumno/
+
+# Sitemap actualizado
+Sitemap: https://redfpe.es/sitemap-dynamic.xml
