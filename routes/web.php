@@ -23,6 +23,13 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Middleware\SecurityHeaders;
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+
+// Compatibilidad local (php artisan serve) para scripts referenciados como asset('public/js/...')
+Route::get('/public/js/{file}', function (string $file) {
+    $path = public_path('js/' . basename($file));
+    abort_unless(file_exists($path), 404);
+    return response()->file($path, ['Content-Type' => 'application/javascript']);
+})->where('file', '.*\.js$');
 Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
 
 Route::get('/', function () {

@@ -14,6 +14,10 @@ class CalificacionController extends Controller
     public function update(Request $request, Calificacion $calificacion)
     {
         try {
+            if ($request->has('nota') && is_string($request->nota)) {
+                $request->merge(['nota' => str_replace(',', '.', $request->nota)]);
+            }
+
             $request->validate([
                 'nota' => 'required|numeric|min:0|max:10',
             ]);
@@ -49,7 +53,12 @@ class CalificacionController extends Controller
     public function store(Request $request)
     {
         try {
+            if ($request->has('nota') && is_string($request->nota)) {
+                $request->merge(['nota' => str_replace(',', '.', $request->nota)]);
+            }
+
             $validated = $request->validate([
+                'calificacion_id' => 'nullable|integer',
                 'alumno_curso_id' => 'required|exists:alumnos_curso,id',
                 'curso_academico_id' => 'required|exists:curso_academicos,id',
                 'unidad_formativa_id' => 'nullable|exists:unidades_formativas,id',
@@ -82,16 +91,54 @@ class CalificacionController extends Controller
                 ], 422);
             }
 
-            // Crear o actualizar la calificación directamente
-            $calificacion = Calificacion::updateOrCreate(
-                [
+            $calificacion = null;
+
+            if (!empty($validated['calificacion_id'])) {
+                $calificacion = Calificacion::where('id', $validated['calificacion_id'])
+                    ->where('alumno_curso_id', $validated['alumno_curso_id'])
+                    ->first();
+            }
+
+            if (!$calificacion) {
+                if (!empty($validated['unidad_formativa_id'])) {
+                    $calificacion = Calificacion::where('alumno_curso_id', $validated['alumno_curso_id'])
+                        ->where('unidad_formativa_id', $validated['unidad_formativa_id'])
+                        ->first();
+                } else {
+                    $calificacion = Calificacion::where('alumno_curso_id', $validated['alumno_curso_id'])
+                        ->where('modulo_id', $validated['modulo_id'])
+                        ->whereNull('unidad_formativa_id')
+                        ->first();
+                }
+            }
+
+            if ($calificacion) {
+                $calificacion->nota = $validated['nota'];
+                $calificacion->curso_academico_id = $validated['curso_academico_id'];
+                $calificacion->save();
+
+                // Asegurar consistencia si existieran registros duplicados previos para la misma unidad/módulo
+                if (!empty($validated['unidad_formativa_id'])) {
+                    Calificacion::where('alumno_curso_id', $validated['alumno_curso_id'])
+                        ->where('unidad_formativa_id', $validated['unidad_formativa_id'])
+                        ->where('id', '!=', $calificacion->id)
+                        ->update(['nota' => $validated['nota']]);
+                } else {
+                    Calificacion::where('alumno_curso_id', $validated['alumno_curso_id'])
+                        ->where('modulo_id', $validated['modulo_id'])
+                        ->whereNull('unidad_formativa_id')
+                        ->where('id', '!=', $calificacion->id)
+                        ->update(['nota' => $validated['nota']]);
+                }
+            } else {
+                $calificacion = Calificacion::create([
                     'alumno_curso_id' => $validated['alumno_curso_id'],
                     'unidad_formativa_id' => $validated['unidad_formativa_id'] ?? null,
                     'modulo_id' => $validated['modulo_id'] ?? null,
-                    'curso_academico_id' => $validated['curso_academico_id']
-                ],
-                ['nota' => $validated['nota']]
-            );
+                    'curso_academico_id' => $validated['curso_academico_id'],
+                    'nota' => $validated['nota']
+                ]);
+            }
 
             return response()->json([
                 'success' => true,

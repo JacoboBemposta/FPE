@@ -33,6 +33,11 @@
         border-radius: 4px;
         border: 1px solid #ced4da;
         padding: 5px;
+        transition: all 0.2s ease;
+    }
+    .calificacion-input.calificacion-guardada {
+        background-color: #e8f4e3;
+        border-color: #28a745;
     }
     .checkbox-modulo {
         transform: scale(1.2);
@@ -189,96 +194,9 @@
     </div>
 </div>
 
-<script>
-const CALIFICACIONES_BASE_URL = "{{ route('academia.calificaciones.store', [], false) }}";
-
-async function guardarCalificacion(input) {
-    const nota = parseFloat(input.value);
-    
-    if (isNaN(nota)) {
-        alert('Por favor ingrese un número válido');
-        input.value = '';
-        return;
-    }
-
-    if (nota < 0 || nota > 10) {
-        alert('La nota debe estar entre 0 y 10');
-        input.value = '';
-        return;
-    }
-
-    const tipo = input.getAttribute('data-tipo');
-    const data = {
-        alumno_curso_id: input.getAttribute('data-alumno-curso-id'),
-        curso_academico_id: input.getAttribute('data-curso-academico-id'),
-        nota: nota
-    };
-
-    if (tipo === 'unidad') {
-        data.unidad_formativa_id = input.getAttribute('data-unidad-id');
-        data.modulo_id = null;
-    } else {
-        data.modulo_id = input.getAttribute('data-modulo-id');
-        data.unidad_formativa_id = null;
-    }
-
-    const calificacionId = input.getAttribute('data-calificacion-id');
-    let url, method, data_send;
-
-    if (calificacionId) {
-        url = `${CALIFICACIONES_BASE_URL}/${calificacionId}`;
-        method = 'PUT';
-        data_send = { nota: nota };
-    } else {
-        url = CALIFICACIONES_BASE_URL;
-        method = 'POST';
-        data_send = data;
-    }
-
-    try {
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(data_send)
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            let errorMsg = result.message || 'Error al guardar la calificación';
-            if (result.errors) {
-                errorMsg += '\n' + Object.values(result.errors).flat().join('\n');
-            }
-            throw new Error(errorMsg);
-        }
-
-        if (!calificacionId && result.data && result.data.id) {
-            input.setAttribute('data-calificacion-id', result.data.id);
-        }
-
-        // Feedback visual
-        input.classList.add('border-success');
-        setTimeout(() => input.classList.remove('border-success'), 1000);
-        
-    } catch (error) {
-        console.error('Error completo:', error);
-        alert('Error: ' + error.message);
-        input.value = '';
-        input.focus();
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.calificacion-input').forEach(input => {
-        input.addEventListener('change', function() {
-            guardarCalificacion(this);
-        });
-    });
-});
-</script>
+@push('scripts')
+    <meta name="calificaciones-store-route" content="{{ route('academia.calificaciones.store', [], false) }}">
+    <script src="{{ asset('public/js/academia-calificaciones.js?v=' . time()) }}"></script>
+@endpush
 
 @endsection
