@@ -8,7 +8,13 @@
     <meta name="update-role-route" content="{{ route('user.updateRole') }}">
     <meta name="user-rol" content="{{ Auth::user()?->rol ?? '' }}">
     <title>{{ config('app.name', 'RedFPE') }} - Plataforma de Empleo Educativo</title>
-    <link rel="icon" type="image/x-icon" href="{{ asset('logo.png') }}">
+    <link rel="icon" type="image/webp" href="{{ asset('logo.webp') }}">
+
+    <!-- Preconnect hints for critical CDNs -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
@@ -16,29 +22,51 @@
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" 
         crossorigin="anonymous">
     
-    
-    
-    <!-- Font Awesome -->
+    <!-- Font Awesome (carga diferida sin bloqueo) -->
     <link rel="stylesheet" 
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+        crossorigin="anonymous" referrerpolicy="no-referrer" media="print" data-async-css />
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    </noscript>
     
-    <!-- SweetAlert2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" integrity="sha384-dCW5imOdApH6OwpFau8cZNKjqVbJYnCA5q+8YsMYP3XwXKsV6Jfz1u6MZLnXaBsS" crossorigin="anonymous">
+    <!-- SweetAlert2 CSS (carga diferida sin bloqueo) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" integrity="sha384-dCW5imOdApH6OwpFau8cZNKjqVbJYnCA5q+8YsMYP3XwXKsV6Jfz1u6MZLnXaBsS" crossorigin="anonymous" media="print" data-async-css>
+    <noscript>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" crossorigin="anonymous">
+    </noscript>
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Google Fonts (carga diferida sin bloqueo) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" media="print" data-async-css>
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    </noscript>
     
-    <!-- Bootstrap 5 JS Bundle -->
+    <!-- Bootstrap 5 JS Bundle (defer) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-            crossorigin="anonymous">
+            crossorigin="anonymous"
+            defer>
     </script>
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-nLoOnA/BDh8A/jxqtckg4DumuCGOBYUnNJLZdQz/zfYNp3wcjGSoWTAzgko06G/2" crossorigin="anonymous"></script>
+    <!-- SweetAlert2 JS (defer) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-nLoOnA/BDh8A/jxqtckg4DumuCGOBYUnNJLZdQz/zfYNp3wcjGSoWTAzgko06G/2" crossorigin="anonymous" defer></script>
     
     <style>
+        @font-face {
+            font-family: "Font Awesome 6 Free";
+            font-style: normal;
+            font-weight: 900;
+            font-display: swap;
+            src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2") format("woff2");
+        }
+        @font-face {
+            font-family: "Font Awesome 6 Brands";
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-brands-400.woff2") format("woff2");
+        }
         :root {
             --primary-color: #4361ee;
             --secondary-color: #3a0ca3;
@@ -571,7 +599,7 @@
         <nav class="navbar navbar-expand-lg">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <img src="{{ asset('logo.png') }}" alt="RedFPE Logo" style="height: 80px; width: auto; object-fit: contain;">
+                    <img src="{{ asset('logo.webp') }}" alt="RedFPE Logo" width="80" height="80" fetchpriority="high" style="height: 80px; width: 80px; object-fit: contain;">
                     RedFPE
                 </a>
                 
@@ -697,7 +725,7 @@
                     <div class="col-lg-4 col-md-6">
                         <div class="footer-logo mb-4">
                             <div class="d-flex align-items-center mb-3">
-                                <img src="{{ asset('logo.png') }}" alt="RedFPE Logo" style="height: 100px; filter: brightness(0) invert(1);" class="me-2">
+                                <img src="{{ asset('logo.webp') }}" alt="RedFPE Logo" width="100" height="100" loading="lazy" style="height: 100px; width: 100px; filter: brightness(0) invert(1);" class="me-2">
                                 <h4 class="text-white mb-0">RedFPE</h4>
                             </div>
                             <p class="text-light mb-4" style="opacity: 0.8;">
@@ -1114,8 +1142,8 @@
     <!-- CONFIGURACIÓN DE VARIABLES PARA EL JS EXTERNO   -->
     <!-- ============================================== -->
 
-    <script src="{{ asset('public/js/perfil.js') }}"></script>
-    <script src="{{ asset('public/js/config.js') }}"></script>
+    <script src="{{ asset('public/js/config.js') }}" defer></script>
+    <script src="{{ asset('public/js/perfil.js') }}" defer></script>
     @yield('scripts')
     @stack('scripts')
 </body>
