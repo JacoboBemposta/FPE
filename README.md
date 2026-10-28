@@ -12,7 +12,7 @@
 
 ---
 
-*Desarrollada por educadores para educadores. RedFPE elimina la fragmentación del sector de la Formación Profesional para el Empleo (FPE), ofreciendo una plataforma centralizada, transparente y sin intermediarios para la gestión académica y la búsqueda de talento docente.*
+*Proyecto personal Full-Stack concebido, diseñado y desarrollado íntegramente por **Jacobo Bemposta**. RedFPE nace para eliminar la fragmentación del sector de la Formación Profesional para el Empleo (FPE), ofreciendo una plataforma centralizada, transparente y sin intermediarios para la gestión académica y la búsqueda de talento docente.*
 
 </div>
 
@@ -22,7 +22,7 @@
 
 El sector de los **Certificados de Profesionalidad y la Formación Profesional para el Empleo (FPE)** en España se enfrentaba tradicionalmente a procesos lentos y desconectados: los centros de formación tenían dificultades para localizar docentes acreditados para módulos específicos, mientras que los formadores carecían de un canal especializado donde visibilizar su perfil y disponibilidad.
 
-**RedFPE** transforma esta realidad en un **ecosistema colaborativo 360°** donde cada actor educativo cuenta con herramientas diseñadas a medida:
+**RedFPE** transforma esta realidad en un **ecosistema digital 360°** donde cada actor educativo cuenta con herramientas diseñadas a medida:
 
 ```
    ┌──────────────────────┐         Candidaturas / CV          ┌──────────────────────┐
@@ -90,62 +90,32 @@ RedFPE está construida sobre **Laravel 11.47** y **PHP 8.4**, siguiendo estrict
 
 ---
 
-## 🛠️ Stack Tecnológico
+## 🛠️ Stack Tecnológico e Infraestructura
 
 - **Backend**: PHP 8.4 · Laravel 11.47
-- **Base de Datos**: MySQL / MariaDB (Eloquent ORM + Query Builder optimizado)
+- **Base de Datos**: MySQL 8.0 / MariaDB (Eloquent ORM + Query Builder optimizado con prevención de consultas N+1)
 - **Frontend**: Blade Templates · Bootstrap 5.3 · SASS · Vite · FontAwesome 6 · SweetAlert2
-- **Servicios Externos**:
+- **Servicios e Integraciones**:
   - **Google Cloud OAuth 2.0** (`laravel/socialite`)
   - **Stripe API & Webhooks** (`stripe/stripe-php`)
-- **SEO & Rendimiento**: Generación dinámica de `sitemap.xml` y `robots.txt`, compatible con caché completa de configuración, rutas y vistas (`artisan optimize`).
+- **Optimización en Producción & SEO**:
+  - Compilación y minificación de assets estáticos mediante **Vite**.
+  - Caché integral de configuración, rutas, eventos y vistas en servidor (`artisan optimize`).
+  - Generación dinámica de `sitemap.xml` y `robots.txt` para indexación orgánica.
 
 ---
 
-## ⚙️ Instalación y Despliegue
+## 🧠 Roadmap & Evolución con Inteligencia Artificial
 
-### Requisitos previos
-- **PHP** >= 8.2 (Recomendado **PHP 8.4**) con extensiones `openssl`, `pdo_mysql`, `mbstring`, `curl`, `xml`, `zip`.
-- **Composer** 2.x
-- **Node.js** >= 18.x & NPM
-- **MySQL** >= 8.0 / MariaDB >= 10.6
-
-### Pasos para entorno local
-
-1. **Clonar el repositorio**
-   ```bash
-   git clone https://github.com/JacoboBemposta/FPE.git
-   cd FPE
-   ```
-
-2. **Instalar dependencias PHP y JS**
-   ```bash
-   composer install
-   npm install && npm run build
-   ```
-
-3. **Configurar variables de entorno**
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
-   Configura en tu archivo `.env` las credenciales de base de datos (`DB_*`), correo (`MAIL_*`), Google OAuth (`GOOGLE_CLIENT_*`) y Stripe (`STRIPE_*`).
-
-4. **Ejecutar migraciones**
-   ```bash
-   php artisan migrate
-   ```
-
-5. **Optimización para Producción (SiteGround / Hosting)**
-   ```bash
-   php artisan config:cache
-   php artisan route:cache
-   php artisan view:cache
-   ```
+El proyecto se encuentra en evolución continua hacia la automatización inteligente de procesos educativos:
+- **Matching Inteligente con IA**: Recomendación automática de perfiles docentes según los requisitos técnicos de cada Certificado de Profesionalidad y análisis de CV.
+- **Asistente de Planificación Académica**: Generación y validación asistida de cronogramas formativos y distribución de horas por Módulo y Unidad Formativa.
+- **Optimización de Candidaturas**: Herramientas inteligentes para ayudar a docentes y centros a agilizar la validación de acreditaciones.
 
 ---
 
-## 📄 Licencia y Autoría
+## 📄 Propiedad Intelectual y Autoría
 
-Proyecto desarrollado y mantenido por **Jacobo Bemposta** para **[RedFPE (redfpe.es)](https://redfpe.es)**.  
-Todos los derechos reservados.
+Proyecto personal ideado, desarrollado y mantenido en solitario por **Jacobo Bemposta** — **[RedFPE (redfpe.es)](https://redfpe.es)**.
+
+> ⚠️ **Aviso de Propiedad Intelectual**: Este repositorio se publica con fines de **portafolio de ingeniería y demostración técnica**. El código fuente, diseño y arquitectura de RedFPE son propietarios (**Todos los derechos reservados**). No se permite su clonación, redistribución, modificación ni explotación comercial total o parcial sin autorización expresa del autor.
