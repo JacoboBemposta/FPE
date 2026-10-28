@@ -5,7 +5,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-chart-bar mr-2"></i>Panel de Estadísticas
+                <i class="fas fa-chart-bar me-2"></i>Panel de Estadísticas
             </h1>
             <p class="text-muted">Estadísticas completas de la plataforma</p>
         </div>
@@ -15,7 +15,7 @@
     <div class="row mb-4">
         <div class="col-12 mb-3">
             <h4 class="h5 mb-0 text-gray-800">
-                <i class="fas fa-users mr-2"></i>Estadísticas de Usuarios
+                <i class="fas fa-users me-2"></i>Estadísticas de Usuarios
             </h4>
             <hr class="mt-2">
         </div>
@@ -25,7 +25,7 @@
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Total Usuarios</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['total_usuarios']) }}</div>
@@ -42,7 +42,7 @@
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Academias</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['total_academias']) }}</div>
@@ -59,7 +59,7 @@
             <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Docentes</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['total_profesores']) }}</div>
@@ -76,10 +76,10 @@
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                 Alumnos</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['total_alumnos'])  }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['total_alumnos']) }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
@@ -94,10 +94,10 @@
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Activos</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['usuarios_activos'])  }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['usuarios_activos']) }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-check-circle fa-2x text-gray-300"></i>
@@ -111,10 +111,10 @@
             <div class="card border-left-danger shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                                 Inactivos</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['usuarios_inactivos'])  }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($userStats['usuarios_inactivos']) }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-times-circle fa-2x text-gray-300"></i>
@@ -131,13 +131,13 @@
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-pie mr-2"></i>Distribución de Usuarios por Rol
+                        <i class="fas fa-chart-pie me-2"></i>Distribución de Usuarios por Rol
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead class="thead-light">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Rol</th>
                                     <th>Cantidad</th>
@@ -159,7 +159,7 @@
                                 @endphp
                                 <tr>
                                     <td>
-                                        <span class="badge badge-{{ $color }}">
+                                        <span class="badge bg-{{ $color }}">
                                             @if($rol->rol === 'academia')
                                                 Academia
                                             @elseif($rol->rol === 'profesor')
@@ -205,13 +205,13 @@
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-line mr-2"></i>Evolución de Registros (últimos 6 meses)
+                        <i class="fas fa-chart-line me-2"></i>Evolución de Registros (últimos 6 meses)
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead class="thead-light">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Mes</th>
                                     <th>Nuevos Usuarios</th>
@@ -252,7 +252,7 @@
     <div class="row mb-4">
         <div class="col-12 mb-3">
             <h4 class="h5 mb-0 text-gray-800">
-                <i class="fas fa-credit-card mr-2"></i>Estadísticas de Suscripciones
+                <i class="fas fa-credit-card me-2"></i>Estadísticas de Suscripciones
             </h4>
             <hr class="mt-2">
         </div>
@@ -262,7 +262,7 @@
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Suscripciones Activas</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $subscriptionStats['suscripciones_activas'] ?? 0 }}</div>
@@ -279,7 +279,7 @@
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Ingresos Este Mes</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($subscriptionStats['ingresos_mes_actual'] ?? 0, 2) }}€</div>
@@ -296,7 +296,7 @@
             <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Ingresos Año Actual</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($subscriptionStats['ingresos_anio_actual'] ?? 0, 2) }}€</div>
@@ -313,7 +313,7 @@
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                 Por Vencer (7 días)</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $subscriptionStats['suscripciones_por_vencer'] ?? 0 }}</div>
@@ -333,13 +333,13 @@
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-pie mr-2"></i>Distribución de Suscripciones por Tipo
+                        <i class="fas fa-chart-pie me-2"></i>Distribución de Suscripciones por Tipo
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead class="thead-light">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Tipo</th>
                                     <th>Cantidad</th>
@@ -351,7 +351,7 @@
                                     @foreach($ingresosPorTipo as $tipo)
                                     <tr>
                                         <td>
-                                            <span class="badge badge-{{ $tipo->tipo == 'academia' ? 'success' : 'primary' }}">
+                                            <span class="badge bg-{{ $tipo->tipo == 'academia' ? 'success' : 'primary' }}">
                                                 {{ $tipo->tipo == 'academia' ? 'Academias' : 'Docentes' }}
                                             </span>
                                         </td>
@@ -366,7 +366,7 @@
                                 @else
                                     <tr>
                                         <td colspan="3" class="text-center text-muted">
-                                            <i class="fas fa-info-circle mr-1"></i> No hay datos de suscripciones disponibles
+                                            <i class="fas fa-info-circle me-1"></i> No hay datos de suscripciones disponibles
                                         </td>
                                     </tr>
                                 @endif
@@ -381,13 +381,13 @@
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-bar mr-2"></i>Suscripciones por Plan
+                        <i class="fas fa-chart-bar me-2"></i>Suscripciones por Plan
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead class="thead-light">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Plan</th>
                                     <th>Suscripciones</th>
@@ -422,7 +422,7 @@
                                 @else
                                     <tr>
                                         <td colspan="3" class="text-center text-muted">
-                                            <i class="fas fa-info-circle mr-1"></i> No hay datos de planes disponibles
+                                            <i class="fas fa-info-circle me-1"></i> No hay datos de planes disponibles
                                         </td>
                                     </tr>
                                 @endif
@@ -440,13 +440,13 @@
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-trophy mr-2"></i>Top 10 Suscriptores
+                        <i class="fas fa-trophy me-2"></i>Top 10 Suscriptores
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead class="thead-light">
+                            <thead class="table-light">
                                 <tr>
                                     <th>#</th>
                                     <th>Usuario</th>
@@ -461,7 +461,7 @@
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $suscriptor->name }}</td>
                                         <td>
-                                            <span class="badge badge-{{ $suscriptor->rol == 'academia' ? 'success' : 'primary' }}">
+                                            <span class="badge bg-{{ $suscriptor->rol == 'academia' ? 'success' : 'primary' }}">
                                                 {{ $suscriptor->rol == 'academia' ? 'Academia' : 'Docente' }}
                                             </span>
                                         </td>
@@ -471,7 +471,7 @@
                                 @else
                                     <tr>
                                         <td colspan="4" class="text-center text-muted">
-                                            <i class="fas fa-info-circle mr-1"></i> No hay datos de suscriptores disponibles
+                                            <i class="fas fa-info-circle me-1"></i> No hay datos de suscriptores disponibles
                                         </td>
                                     </tr>
                                 @endif
@@ -486,13 +486,13 @@
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-line mr-2"></i>Evolución de Ingresos (últimos 6 meses)
+                        <i class="fas fa-chart-line me-2"></i>Evolución de Ingresos (últimos 6 meses)
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead class="thead-light">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Mes</th>
                                     <th>Ingresos</th>
@@ -525,7 +525,7 @@
                                 @else
                                     <tr>
                                         <td colspan="3" class="text-center text-muted">
-                                            <i class="fas fa-info-circle mr-1"></i> No hay datos de ingresos disponibles
+                                            <i class="fas fa-info-circle me-1"></i> No hay datos de ingresos disponibles
                                         </td>
                                     </tr>
                                 @endif
@@ -541,7 +541,7 @@
     <div class="row mb-4">
         <div class="col-12 mb-3">
             <h4 class="h5 mb-0 text-gray-800">
-                <i class="fas fa-envelope mr-2"></i>Estadísticas de Emails
+                <i class="fas fa-envelope me-2"></i>Estadísticas de Emails
             </h4>
             <hr class="mt-2">
         </div>
@@ -551,7 +551,7 @@
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Total Emails Enviados</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($stats['total']) }}</div>
@@ -568,7 +568,7 @@
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Emails Hoy</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['enviados_hoy'] }}</div>
@@ -585,7 +585,7 @@
             <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Esta Semana</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['enviados_semana'] }}</div>
@@ -602,7 +602,7 @@
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="col me-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                 Este Mes</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['enviados_mes'] }}</div>
@@ -622,13 +622,13 @@
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-project-diagram mr-2"></i>Distribución por Contexto
+                        <i class="fas fa-project-diagram me-2"></i>Distribución por Contexto
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead class="thead-light">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Contexto</th>
                                     <th>Cantidad</th>
@@ -642,9 +642,9 @@
                                 @php $porcentaje = $total > 0 ? ($item->total / $total) * 100 : 0; @endphp
                                 <tr>
                                     <td>
-                                        <span class="badge badge-{{ 
+                                        <span class="badge bg-{{ 
                                             $item->contexto == 'academia_a_docente' ? 'primary' : 
-                                            ($item->contexto == 'docente_a_academia' ? 'success' : 
+                                            (in_array($item->contexto, ['docente_a_academia', 'profesor_a_academia']) ? 'success' : 
                                             ($item->contexto == 'registro' ? 'info' : 'warning'))
                                         }}">
                                             {{ $item->contexto }}
@@ -655,7 +655,7 @@
                                         <div class="progress">
                                             <div class="progress-bar bg-{{ 
                                                 $item->contexto == 'academia_a_docente' ? 'primary' : 
-                                                ($item->contexto == 'docente_a_academia' ? 'success' : 
+                                                (in_array($item->contexto, ['docente_a_academia', 'profesor_a_academia']) ? 'success' : 
                                                 ($item->contexto == 'registro' ? 'info' : 'warning'))
                                             }}" 
                                             role="progressbar" 
@@ -687,7 +687,7 @@
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-check-circle mr-2"></i>Distribución por Estado
+                        <i class="fas fa-check-circle me-2"></i>Distribución por Estado
                     </h6>
                 </div>
                 <div class="card-body">
@@ -701,7 +701,7 @@
                             }} shadow h-100">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
+                                        <div class="col me-2">
                                             <div class="text-xs font-weight-bold text-{{ 
                                                 $estado->status == 'sent' ? 'success' : 
                                                 ($estado->status == 'failed' ? 'danger' : 
@@ -735,13 +735,13 @@
             <div class="card shadow">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-users mr-2"></i>Top 10 Destinatarios
+                        <i class="fas fa-users me-2"></i>Top 10 Destinatarios
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead class="thead-light">
+                            <thead class="table-light">
                                 <tr>
                                     <th>#</th>
                                     <th>Email Destinatario</th>
@@ -756,7 +756,7 @@
                                         <code>{{ $destinatario->destinatario_email }}</code>
                                     </td>
                                     <td>
-                                        <span class="badge badge-primary">{{ $destinatario->total }}</span>
+                                        <span class="badge bg-primary">{{ $destinatario->total }}</span>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -771,13 +771,13 @@
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-line mr-2"></i>Evolución últimos 6 meses
+                        <i class="fas fa-chart-line me-2"></i>Evolución últimos 6 meses
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead class="thead-light">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Mes</th>
                                     <th>Cantidad</th>
@@ -820,24 +820,22 @@
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-search mr-2"></i>Búsqueda Avanzada
+                        <i class="fas fa-search me-2"></i>Búsqueda Avanzada
                     </h6>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.stats.buscar-emails') }}" method="GET" class="form-inline">
+                    <form action="{{ route('admin.stats.buscar-emails') }}" method="GET">
                         <div class="input-group w-100">
-                            <select name="tipo" class="form-control mr-2" style="width: 150px;">
+                            <select name="tipo" class="form-select me-2" style="max-width: 180px;">
                                 <option value="email">Por Email</option>
                                 <option value="remitente">Por Remitente</option>
                                 <option value="contexto">Por Contexto</option>
                             </select>
                             <input type="text" name="busqueda" class="form-control" 
                                    placeholder="Buscar..." required>
-                            <div class="input-group-append">
-                                <button class="btn btn-primary" type="submit">
-                                    <i class="fas fa-search"></i> Buscar
-                                </button>
-                            </div>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -851,7 +849,7 @@
             <div class="card shadow">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-history mr-2"></i>Últimos 50 Emails Enviados
+                        <i class="fas fa-history me-2"></i>Últimos 50 Emails Enviados
                     </h6>
                     <a href="{{ route('admin.stats') }}" class="btn btn-sm btn-primary">
                         <i class="fas fa-sync-alt"></i> Actualizar
@@ -860,7 +858,7 @@
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover">
-                            <thead class="thead-light">
+                            <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
                                     <th>Remitente</th>
@@ -888,16 +886,16 @@
                                         <code>{{ $email->destinatario_email }}</code>
                                     </td>
                                     <td>
-                                        <span class="badge badge-{{ 
+                                        <span class="badge bg-{{ 
                                             $email->contexto == 'academia_a_docente' ? 'primary' : 
-                                            ($email->contexto == 'docente_a_academia' ? 'success' : 
+                                            (in_array($email->contexto, ['docente_a_academia', 'profesor_a_academia']) ? 'success' : 
                                             ($email->contexto == 'registro' ? 'info' : 'warning'))
                                         }}">
                                             {{ $email->contexto }}
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge badge-{{ 
+                                        <span class="badge bg-{{ 
                                             $email->status == 'sent' ? 'success' : 
                                             ($email->status == 'failed' ? 'danger' : 
                                             ($email->status == 'delivered' ? 'info' : 'warning'))
@@ -911,7 +909,7 @@
                                     <td>
                                         <button class="btn btn-sm btn-outline-info" 
                                                 onclick="verDetalle({{ $email->id }})"
-                                                data-toggle="tooltip" title="Ver detalles">
+                                                title="Ver detalles">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </td>
@@ -926,15 +924,13 @@
     </div>
 </div>
 
-{{-- Modal para ver detalles --}}
-<div class="modal fade" id="detalleModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
+{{-- Modal para ver detalles (Bootstrap 5) --}}
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Detalles del Email</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="detalleContent">
                 Cargando...
@@ -949,12 +945,13 @@ function verDetalle(id) {
     fetch(`/admin/stats/email/${id}`)
         .then(response => response.json())
         .then(data => {
+            const vars = data.variables || {};
             let html = `
                 <div class="row">
                     <div class="col-md-6">
                         <h6>Información Básica</h6>
                         <p><strong>ID:</strong> ${data.id}</p>
-                        <p><strong>Estado:</strong> <span class="badge badge-${data.status === 'sent' ? 'success' : 'danger'}">${data.status}</span></p>
+                        <p><strong>Estado:</strong> <span class="badge bg-${data.status === 'sent' ? 'success' : 'danger'}">${data.status}</span></p>
                         <p><strong>Contexto:</strong> ${data.contexto}</p>
                     </div>
                     <div class="col-md-6">
@@ -966,7 +963,7 @@ function verDetalle(id) {
                 <div class="row mt-3">
                     <div class="col-12">
                         <h6>Variables (JSON)</h6>
-                        <pre class="bg-light p-3 rounded">${JSON.stringify(data.variables, null, 2)}</pre>
+                        <pre class="bg-light p-3 rounded">${JSON.stringify(vars, null, 2)}</pre>
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -974,18 +971,21 @@ function verDetalle(id) {
                         <h6>Contenido</h6>
                         <div class="card">
                             <div class="card-body">
-                                <h5>${data.variables.asunto || 'Sin asunto'}</h5>
+                                <h5>${vars.asunto || 'Sin asunto'}</h5>
                                 <hr>
-                                <p>${data.variables.mensaje || 'Sin mensaje'}</p>
+                                <p>${vars.mensaje || 'Sin mensaje'}</p>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
             document.getElementById('detalleContent').innerHTML = html;
-            $('#detalleModal').modal('show');
+            const modalEl = document.getElementById('detalleModal');
+            if (modalEl && typeof bootstrap !== 'undefined') {
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            }
         })
-        .catch(error => {
+        .catch(() => {
             document.getElementById('detalleContent').innerHTML = '<div class="alert alert-danger">Error al cargar los detalles</div>';
         });
 }
@@ -998,7 +998,6 @@ function verDetalle(id) {
 }
 .badge {
     font-size: 0.8em;
-    color: black;
 }
 .progress {
     height: 20px;

@@ -68,25 +68,6 @@ class AlumnoController extends Controller
         return view('alumno.index', compact('cursosAcademicos', 'familias'));
     }
 
-    public function listarAcademias()
-    {
-        $academias = User::where('rol', 'academia')->paginate(10);
-        return view('alumno.academias', compact('academias'));
-    }
-
-    public function verAcademia($id)
-    {
-        $academia = User::where('rol', 'academia')->findOrFail($id);
-        
-        // Obtener cursos académicos de esta academia
-        $cursosAcademicos = CursoAcademico::where('academia_id', $id)
-            ->with(['curso.familiaProfesional'])
-            ->where('archivado', false)
-            ->get();
-        
-        return view('alumno.academia', compact('academia', 'cursosAcademicos'));
-    }
-
     public function enviarEmailAcademia(Request $request)
     {
         $request->validate([

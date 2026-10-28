@@ -8,67 +8,44 @@ use App\Models\Curso;
 use App\Models\CursoAcademico;
 use App\Models\AlumnoCurso;
 use App\Models\User;
-use App\Models\Calificacion;
 use App\Models\DetalleCurso;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use App\Traits\EnviaEmails;
 use App\Helpers\SistemaHelper;
 
 class AcademiaController extends Controller
 {
     use EnviaEmails;
+
     public function index()
     {
+        return $this->misCursos();
+    }
+
+    public function misCursos()
+    {
         $user = Auth::user();
-        
+
         if (!$user) {
             return redirect()->route('login');
         }
-        
+
         if ($user->rol !== 'academia') {
-            return back()->withErrors(['error' => 'No tienes permisos para acceder a esta sección.']);
+            return back()->withErrors([
+                'error' => 'No tienes permisos para acceder a esta sección.'
+            ]);
         }
-        
-        // Obtener todas las familias profesionales con sus cursos, módulos y unidades formativas asociadas
-        $familias_profesionales = FamiliaProfesional::with('cursos.modulos.unidades')->get();
-        
-        // Obtener los cursos académicos del usuario (para la tabla)
-        $misCursos = CursoAcademico::where('academia_id', $user->id)->get();
-        
-        $sistemaSuscripcionesActivo = SistemaHelper::sistemaSuscripcionesActivo();
-        
-        return view('academia.index', compact('familias_profesionales', 'misCursos', 'sistemaSuscripcionesActivo'));
+
+        $misCursos = CursoAcademico::where('academia_id', Auth::id())
+            ->where('archivado', false)
+            ->with('curso')
+            ->orderBy('inicio', 'desc')
+            ->get();
+
+        return view('academia.index', compact('misCursos'));
     }
 
-
-public function misCursos()
-{
-    $user = Auth::user();
-
-    if (!$user) {
-        return redirect()->route('login');
-    }
-
-    if ($user->rol !== 'academia') {
-        return back()->withErrors([
-            'error' => 'No tienes permisos para acceder a esta sección.'
-        ]);
-    }
-
-    $misCursos = CursoAcademico::where('academia_id', Auth::id())
-        ->where('archivado', false)
-        ->with('curso')
-        ->orderBy('inicio', 'desc')
-        ->get();
-
-    return view('academia.index', compact('misCursos'));
-}
-        
     public function verDocentes(Request $request)
     {
         $perPage = $request->get('per_page', 10);
@@ -77,56 +54,50 @@ public function misCursos()
             ->join('curso_academicos', 'users.id', '=', 'curso_academicos.academia_id')
             ->join('cursos', 'curso_academicos.curso_id', '=', 'cursos.id')
             ->where('users.rol', 'profesor')
+            // filtros opcionales
+            ->when($request->filled('docente_nombre'), function($q) use ($request) {
+                $search = trim($request->docente_nombre);
+                $q->whereRaw("MATCH(users.name) AGAINST(? IN BOOLEAN MODE)", ["*{$search}*"]);
+            })
+            ->when($request->filled('nombre'), function($q) use ($request) {
+                $search = trim($request->nombre);
+                $q->whereRaw("MATCH(cursos.nombre) AGAINST(? IN BOOLEAN MODE)", ["*{$search}*"]);
+            })
+            ->when($request->filled('codigo'), function($q) use ($request) {
+                $search = trim($request->codigo);
+                $q->whereRaw("MATCH(cursos.codigo) AGAINST(? IN BOOLEAN MODE)", ["*{$search}*"]);
+            })
+            ->when($request->filled('municipio'), fn($q) =>
+                $q->where('curso_academicos.municipio', 'like', '%' . strtolower(trim($request->municipio)) . '%')
+            )
+            ->when($request->filled('provincia'), fn($q) =>
+                $q->where('curso_academicos.provincia', 'like', '%' . strtolower(trim($request->provincia)) . '%')
+            )
+            ->select([
+                'users.id as docente_id',
+                'users.name as docente_nombre',
+                'users.email as docente_email',
+                'curso_academicos.id as curso_acad_id',
+                'curso_academicos.municipio',
+                'curso_academicos.provincia',
+                'curso_academicos.inicio',
+                'curso_academicos.fin',
+                'cursos.nombre as curso_nombre',
+                'cursos.codigo as curso_codigo',
+            ])
+            ->orderBy('cursos.nombre')
+            ->orderBy('users.inicio_suscripcion', 'desc')
+            ->orderBy('users.name');
 
-        // filtros opcionales
-        ->when($request->filled('docente_nombre'), function($q) use ($request) {
-            $search = trim($request->docente_nombre);
-            $q->whereRaw("MATCH(users.name) AGAINST(? IN BOOLEAN MODE)", ["*{$search}*"]);
-        })
-        ->when($request->filled('nombre'), function($q) use ($request) {
-            $search = trim($request->nombre);
-            $q->whereRaw("MATCH(cursos.nombre) AGAINST(? IN BOOLEAN MODE)", ["*{$search}*"]);
-        })
-        ->when($request->filled('codigo'), function($q) use ($request) {
-            $search = trim($request->codigo);
-            $q->whereRaw("MATCH(cursos.codigo) AGAINST(? IN BOOLEAN MODE)", ["*{$search}*"]);
-        })
-        ->when($request->filled('municipio'), fn($q) =>
-            $q->where('curso_academicos.municipio', 'like', '%' . strtolower(trim($request->municipio)) . '%')
-        )
-        ->when($request->filled('provincia'), fn($q) =>
-            $q->where('curso_academicos.provincia', 'like', '%' . strtolower(trim($request->provincia)) . '%')
-        )
-        ->select([
-            'users.id as docente_id',
-            'users.name as docente_nombre',
-            'users.email as docente_email',
-            'curso_academicos.id as curso_acad_id',
-            'curso_academicos.municipio',
-            'curso_academicos.provincia',
-            'curso_academicos.inicio',
-            'curso_academicos.fin',
-            'cursos.nombre as curso_nombre',
-            'cursos.codigo as curso_codigo',
-        ])
-        ->orderBy('cursos.nombre')
-        ->orderBy('users.inicio_suscripcion', 'desc')
-        ->orderBy('users.name');
-
-        
         $docentesConCursos = $query->paginate($perPage);
+        $sistema_suscripciones_activo = SistemaHelper::sistemaSuscripcionesActivo();
 
-    $sistema_suscripciones_activo = \App\Helpers\SistemaHelper::sistemaSuscripcionesActivo();
-    
-    return view('academia.docentes', [
-        'docentesConCursos' => $docentesConCursos,
-        'sistema_suscripciones_activo' => $sistema_suscripciones_activo,
-        'user' => Auth::user()
-    ]);
-
-        return view('academia.docentes', compact('docentesConCursos'));
+        return view('academia.docentes', [
+            'docentesConCursos' => $docentesConCursos,
+            'sistema_suscripciones_activo' => $sistema_suscripciones_activo,
+            'user' => Auth::user()
+        ]);
     }
-
 
     public function obtenerEmailDocente($docenteId)
     {
@@ -135,7 +106,6 @@ public function misCursos()
                 return response()->json(['error' => 'No autorizado'], 403);
             }
 
-            // Obtener el email del docente
             $docente = DB::table('users')
                 ->where('id', $docenteId)
                 ->where('rol', 'profesor')
@@ -147,18 +117,13 @@ public function misCursos()
             }
 
             return response()->json(['email' => $docente->email]);
-
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error interno'], 500);
         }
     }
 
-
-
-    
     public function enviarMensajeDocente(Request $request)
     {
-        
         $request->validate([
             'email' => 'required|email',
             'subject' => 'required|string|max:255',
@@ -179,41 +144,35 @@ public function misCursos()
         }
     }
 
-
-
     public function asignarCurso(Request $request, $curso_id)
     {
         $user = Auth::user();
-        
 
         if (!$user || $user->rol !== 'academia') {
             return redirect()->route('login')->withErrors(['error' => 'Acceso no autorizado']);
         }
-    
-   
+
         $curso = Curso::find($curso_id);
         if (!$curso) {
             return back()->withErrors(['error' => 'El curso no existe']);
         }
-    
-        $cursoAcademico = CursoAcademico::create([
-            'curso_id' => $curso->id, 
-            'academia_id' => $user->id,
 
+        $cursoAcademico = CursoAcademico::create([
+            'curso_id' => $curso->id,
+            'academia_id' => $user->id,
         ]);
-    
+
         // Vincular al usuario en la tabla pivote
         $user->cursosAcademicos()->attach($cursoAcademico->id, [
-
             'created_at' => now(),
             'updated_at' => now()
         ]);
-    
+
         return redirect()
-               ->route('academia.miscursos')
-               ->with('success', 'Curso asignado correctamente. Ahora puedes editar los detalles.');
+            ->route('academia.miscursos')
+            ->with('success', 'Curso asignado correctamente. Ahora puedes editar los detalles.');
     }
-    
+
     public function destroyCursoAcademico($id)
     {
         $curso = CursoAcademico::findOrFail($id);
@@ -227,94 +186,26 @@ public function misCursos()
 
     public function cursos()
     {
-        // Obtener todas las familias profesionales con sus cursos, módulos y unidades formativas asociadas
         $familias_profesionales = FamiliaProfesional::with('cursos.modulos.unidades')->get();
-    
-        
         $cursosDisponibles = Curso::all();
-    
+
         return view('cursos.index', compact('familias_profesionales', 'cursosDisponibles'));
     }
-    
+
     public function detalleCurso($id)
     {
-        // Buscar el CursoAcademico por su ID con la relación de cursos, modulos y unidades
         $cursoAcademico = CursoAcademico::with([
-            'curso.modulos.unidades', 
+            'curso.modulos.unidades',
             'detallesCurso',
-            'curso.FamiliaProfesional'
+            'curso.FamiliaProfesional',
+            'alumnos'
         ])->findOrFail($id);
 
-        // Preparar los detalles, incluyendo los módulos para cada unidad formativa
-        $detalles = [];
-        foreach ($cursoAcademico->curso->modulos as $modulo) {
-            foreach ($modulo->unidades as $unidad) {
-                // Aquí se accede al módulo desde la unidad formativa
-                $detalles[] = [
-                    'unidad_formativa' => $unidad->nombre,
-                    'codigo' => $unidad->codigo,
-                    'inicio' => $unidad->inicio,  
-                    'fin' => $unidad->fin,        
-                    'Examen0' => $unidad->examen0, 
-                    'ExamenF' => $unidad->examenF, 
-                    'modulo' => $modulo->nombre,  
-                ];
-            }
+        if ($cursoAcademico->academia_id != Auth::id()) {
+            abort(403, 'No tienes permiso para acceder a este curso.');
         }
 
-
-        return view('academia.detalle_curso', compact('cursoAcademico', 'detalles'));
-    }
-
-    public function guardarNotaModulo(Request $request)
-    {
-        // Forzar el manejo como JSON
-        if (!$request->wantsJson()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Esta ruta solo acepta solicitudes JSON',
-                'received_data' => $request->all()
-            ], 400);
-        }
-    
-        try {
-            $validated = $request->validate([
-                'modulo_id' => 'required|exists:modulos,id',
-                'alumno_curso_id' => 'required|exists:alumnos_curso,id',
-                'curso_academico_id' => 'required|exists:curso_academicos,id',
-                'nota' => 'required|numeric|min:0|max:10'
-            ]);
-    
-            $calificacion = Calificacion::updateOrCreate(
-                [
-                    'alumno_curso_id' => $validated['alumno_curso_id'],
-                    'modulo_id' => $validated['modulo_id'],
-                    'unidad_formativa_id' => null
-                ],
-                [
-                    'nota' => $validated['nota'],
-                    'curso_academico_id' => $validated['curso_academico_id']
-                ]
-            );
-    
-            return response()->json([
-                'success' => true,
-                'message' => 'Nota guardada correctamente',
-                'data' => $calificacion
-            ]);
-    
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al guardar: ' . $e->getMessage()
-            ], 500);
-        }
+        return view('academia.detalle_curso', compact('cursoAcademico'));
     }
 
     public function actualizarCurso(Request $request, $id)
@@ -324,7 +215,6 @@ public function misCursos()
             abort(403, 'No tienes permiso para modificar este curso.');
         }
 
-        
         $request->validate([
             'municipio' => 'nullable|string|max:100',
             'provincia' => 'nullable|string|max:100',
@@ -332,7 +222,6 @@ public function misCursos()
             'fin' => 'nullable|date',
         ]);
 
-        
         $cursoAcademico->update([
             'municipio' => strip_tags($request->municipio),
             'provincia' => strip_tags($request->provincia),
@@ -340,7 +229,6 @@ public function misCursos()
             'fin' => $request->fin,
         ]);
 
-        // Redirigir de vuelta con mensaje de éxito
         return redirect()->route('academia.miscursos')->with('success', 'Curso actualizado correctamente.');
     }
 
@@ -359,40 +247,28 @@ public function misCursos()
         if ($cursoAcademico->academia_id != Auth::id()) {
             return response()->json(['error' => 'No autorizado'], 403);
         }
-    
-        // Usar solo estos dos campos como "where" para evitar duplicados
+
         $attributes = [
             'curso_academico_id'  => $v['curso_academico_id'],
             'unidad_formativa_id' => $v['unidad_formativa_id'] ?? null,
             'modulo_id'           => $v['modulo_id'] ?? null,
         ];
-    
-        // Y el campo dinámico en "values"
+
         $values = [
             $v['campo'] => $v['valor']
         ];
-    
+
         $detalle = DetalleCurso::updateOrCreate($attributes, $values);
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Cambios guardados correctamente',
             'detalle' => $detalle->fresh(),
         ]);
     }
-    
+
     public function guardarAlumno(Request $request)
     {
-          
-        $dni = strip_tags($request->dni);
-        $nombre = strip_tags($request->nombre);
-        $email = strip_tags($request->email);
-        $telefono = strip_tags($request->telefono);
-        $es_profesor = filter_var($request->es_profesor, FILTER_VALIDATE_BOOLEAN);
-        $es_profesor = $request->has('es_profesor') ? 1 : 0;
-
-     
-        
         $request->validate([
             'dni' => 'required|string|max:15',
             'nombre' => 'required|string|max:255',
@@ -401,38 +277,40 @@ public function misCursos()
             'curso_academico_id' => 'required|exists:curso_academicos,id',
             'es_profesor' => 'nullable|boolean',
         ]);
-  
-       
-        $cursoAcademicoId = $request->curso_academico_id;
-  
-        
+
+        $cursoAcademico = CursoAcademico::findOrFail($request->curso_academico_id);
+        if ($cursoAcademico->academia_id != Auth::id()) {
+            abort(403, 'No tienes permiso para añadir participantes a este curso.');
+        }
+
+        $dni = strip_tags($request->dni);
+        $nombre = strip_tags($request->nombre);
+        $email = strip_tags($request->email);
+        $telefono = strip_tags((string) $request->telefono);
+        $es_profesor = $request->has('es_profesor') ? 1 : 0;
+
         AlumnoCurso::create([
             'dni' => $dni,
             'nombre' => $nombre,
             'email' => $email,
             'telefono' => $telefono,
-            'curso_academico_id' => $cursoAcademicoId,
+            'curso_academico_id' => $cursoAcademico->id,
             'es_profesor' => $es_profesor,
         ]);
 
-        // Cargar el curso académico junto con sus relaciones usando el ID correcto
-        $cursoAcademico = CursoAcademico::with(['curso', 'curso.FamiliaProfesional', 'alumnos'])
-            ->findOrFail($cursoAcademicoId);
-        
-        
-        return view('academia.detalle_curso', compact('cursoAcademico'));
+        return redirect()
+            ->route('academia.detalleCurso', $cursoAcademico->id)
+            ->with('success', 'Participante guardado correctamente.');
     }
 
     public function actualizarAlumno(Request $request, $id)
     {
-    
-        
         $dni = strip_tags($request->dni);
         $nombre = strip_tags($request->nombre);
         $email = strip_tags($request->email);
-        $telefono = strip_tags($request->telefono);
-        $es_profesor = $request->es_profesor;
-        
+        $telefono = strip_tags((string) $request->telefono);
+        $es_profesor = $request->has('es_profesor') ? 1 : 0;
+
         $request->validate([
             'dni' => 'required|string|max:255',
             'nombre' => 'required|string|max:255',
@@ -441,74 +319,64 @@ public function misCursos()
             'es_profesor' => 'nullable|boolean',
         ]);
 
-        // Verificar si alguna de las entradas tiene una longitud de solo espacios o está vacía después de eliminar las etiquetas HTML
         if (empty($dni) || empty($nombre) || empty($email)) {
             return redirect()->back()->withErrors(['error' => 'Los campos no pueden contener solo etiquetas HTML.'])->withInput();
         }
 
-        
+        $alumno = AlumnoCurso::findOrFail($id);
+        $cursoAcademico = CursoAcademico::findOrFail($alumno->curso_academico_id);
+        if ($cursoAcademico->academia_id != Auth::id()) {
+            abort(403, 'No tienes permiso para modificar este participante.');
+        }
+
         try {
-            $alumno = AlumnoCurso::findOrFail($id);
             $alumno->update([
                 'dni' => $dni,
                 'nombre' => $nombre,
                 'email' => $email,
                 'telefono' => $telefono,
-                'es_profesor' => $request->es_profesor,
+                'es_profesor' => $es_profesor,
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Hubo un problema al intentar actualizar el alumno.'])->withInput();
         }
 
-        
-        $cursoAcademico = CursoAcademico::with(['curso', 'curso.FamiliaProfesional', 'alumnos'])
-            ->findOrFail($request->curso_academico_id);
-
-        return view('academia.detalle_curso', compact('cursoAcademico'));
+        return redirect()
+            ->route('academia.detalleCurso', $cursoAcademico->id)
+            ->with('success', 'Participante actualizado correctamente.');
     }
-
-    // public function mostrarDetallesCurso($id)
-    // {
-    //     $cursoAcademico = CursoAcademico::with(['detallesCurso', 'curso.modulos.unidades'])
-    //         ->findOrFail($id)
-    //         ->refresh(); // Recarga el modelo y sus relaciones
-        
-    //     return view('tu_vista', compact('cursoAcademico'));
-    // }
 
     public function eliminarAlumno($id)
     {
-        
-        $alumno = AlumnoCurso::find($id);
+        $alumno = AlumnoCurso::findOrFail($id);
+        $cursoAcademico = CursoAcademico::findOrFail($alumno->curso_academico_id);
 
-        if (!$alumno) {
-            return response()->json(['error' => 'Alumno no encontrado'], 404);
+        if ($cursoAcademico->academia_id != Auth::id()) {
+            abort(403, 'No tienes permiso para eliminar este participante.');
         }
-        $cursoAcademicoId = $alumno->curso_academico_id;     
-        
+
         $alumno->delete();
-        
-        $cursoAcademico = CursoAcademico::with(['curso', 'curso.FamiliaProfesional', 'alumnos'])
-            ->findOrFail($cursoAcademicoId);
-        return view('academia.detalle_curso', compact('cursoAcademico'));
+
+        return redirect()
+            ->route('academia.detalleCurso', $cursoAcademico->id)
+            ->with('success', 'Participante eliminado correctamente.');
     }
 
     public function showCalificaciones($cursoAcademicoId)
     {
         $cursoAcademico = CursoAcademico::with([
-            'curso', 
+            'curso',
             'curso.modulos.unidades',
             'alumnos' => function($query) {
                 $query->where('es_profesor', false)
                       ->with('calificaciones');
             }
         ])->findOrFail($cursoAcademicoId);
-    
-        
-        if (!$cursoAcademico) {
-            return abort(404, "Curso académico no encontrado");
+
+        if ($cursoAcademico->academia_id != Auth::id()) {
+            abort(403, 'No tienes permiso para ver las calificaciones de este curso.');
         }
-    
+
         return view('academia.calificaciones', compact('cursoAcademico'));
     }
 
@@ -530,12 +398,11 @@ public function misCursos()
     public function archive($id)
     {
         $cursoAcademico = CursoAcademico::findOrFail($id);
-        
-        // Verificar que el curso pertenece a esta academia
+
         if ($cursoAcademico->academia_id != Auth::id()) {
             return redirect()->back()->with('error', 'No tienes permiso para archivar este curso.');
         }
-        
+
         $cursoAcademico->archivado = true;
         $cursoAcademico->archivado_en = now();
         $cursoAcademico->save();
@@ -547,12 +414,11 @@ public function misCursos()
     public function restore($id)
     {
         $cursoAcademico = CursoAcademico::findOrFail($id);
-        
-        // Verificar que el curso pertenece a esta academia
+
         if ($cursoAcademico->academia_id != Auth::id()) {
             return redirect()->back()->with('error', 'No tienes permiso para restaurar este curso.');
         }
-        
+
         $cursoAcademico->archivado = false;
         $cursoAcademico->archivado_en = null;
         $cursoAcademico->save();

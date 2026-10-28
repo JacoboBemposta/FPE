@@ -11,45 +11,6 @@ use Illuminate\Support\Facades\Auth;
 
 class CalificacionController extends Controller
 {
-    public function update(Request $request, Calificacion $calificacion)
-    {
-        try {
-            if ($request->has('nota') && is_string($request->nota)) {
-                $request->merge(['nota' => str_replace(',', '.', $request->nota)]);
-            }
-
-            $request->validate([
-                'nota' => 'required|numeric|min:0|max:10',
-            ]);
-
-            $cursoAcademico = CursoAcademico::find($calificacion->curso_academico_id);
-            if ($cursoAcademico && (int) $cursoAcademico->academia_id !== (int) Auth::id()) {
-                return response()->json(['success' => false, 'message' => 'No autorizado'], 403);
-            }
-
-            $calificacion->nota = $request->nota;
-            $calificacion->save();
-
-            return response()->json([
-                'success' => true,
-                'data' => $calificacion,
-                'message' => 'Nota actualizada correctamente'
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            Log::error('Error en update calificacion: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al actualizar la nota'
-            ], 500);
-        }
-    }
-
     public function store(Request $request)
     {
         try {

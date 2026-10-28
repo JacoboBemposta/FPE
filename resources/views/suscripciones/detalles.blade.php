@@ -49,8 +49,8 @@
                                         </h6>
                                         <p class="mb-1"><strong>Plan:</strong> {{ $suscripcion->plan }}</p>
                                         <p class="mb-1"><strong>Precio:</strong> {{ number_format($suscripcion->precio, 2) }}€/mes</p>
-                                        <p class="mb-1"><strong>Periodo:</strong> {{ $suscripcion->intervalo }}</p>
-                                        <p class="mb-0"><strong>Estado:</strong> {{ ucfirst($suscripcion->estado) }}</p>
+                                        <p class="mb-1"><strong>Periodo:</strong> {{ $suscripcion->intervalo ?? 'Mensual' }}</p>
+                                        <p class="mb-0"><strong>Estado:</strong> {{ $suscripcion->activa ? 'Activa' : 'Inactiva' }}</p>
                                     </div>
                                 </div>
                             </div>

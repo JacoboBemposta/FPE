@@ -22,14 +22,11 @@ class UserController extends Controller
         $user->rol = $request->rol;
         $user->save();
         
-        // Solo actualizar la sesión
         Auth::setUser($user);
         
-        // Marcar en sesión que ya seleccionó rol
         Session::put('role_selected', true);
         Session::save();
         
-        // Para AJAX, devolver redirección
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -38,7 +35,6 @@ class UserController extends Controller
             ]);
         }
         
-        // Redirigir según el rol
         return redirect($this->getRedirectUrlByRole($user->rol));
     }
     
@@ -66,12 +62,10 @@ class UserController extends Controller
         $user->rol = $request->rol;
         $user->save();
         
-        // Actualizar sesión
         Auth::setUser($user);
         
         $roleChanged = $oldRole !== $user->rol;
         
-        // Para AJAX
         if ($request->expectsJson() || $request->ajax()) {
             $response = [
                 'success' => true,
@@ -88,7 +82,6 @@ class UserController extends Controller
             return response()->json($response);
         }
         
-        // Redirigir si cambió el rol
         if ($roleChanged) {
             return redirect($this->getRedirectUrlByRole($user->rol))->with('success', 'Perfil actualizado correctamente.');
         }
@@ -114,8 +107,7 @@ class UserController extends Controller
 
     public function destroy(Request $request)
     {
-        // Validación
-        $validated = $request->validate([
+        $request->validate([
             'confirmation_phrase' => 'required|in:ELIMINAR MI CUENTA',
             'current_password' => [
                 'required',
@@ -142,27 +134,17 @@ class UserController extends Controller
             DB::table('pagos')->where('user_id', $user->id)->delete();
             DB::table('pagos')->where('academia_id', $user->id)->delete();
             
-            // Si es academia, eliminar sus cursos académicos primero
-            if ($user->rol === 'academia') {
-                $cursoIds = DB::table('curso_academicos')
-                    ->where('academia_id', $user->id)
-                    ->pluck('id');
-                
-                if ($cursoIds->isNotEmpty()) {
-                    DB::table('user_curso')->whereIn('curso_academico_id', $cursoIds)->delete();
-                    DB::table('alumnos_curso')->whereIn('curso_academico_id', $cursoIds)->delete();
-                    DB::table('curso_academicos')->whereIn('id', $cursoIds)->delete();
-                }
-            }
-            if ($user->rol === 'profesor') {
-                $cursoIds = DB::table('curso_academicos')
-                    ->where('academia_id', $user->id)
-                    ->pluck('id');
-                
-                if ($cursoIds->isNotEmpty()) {
-                    DB::table('user_curso')->whereIn('curso_academico_id', $cursoIds)->delete();
-                    DB::table('curso_academicos')->whereIn('id', $cursoIds)->delete();
-                }
+            // Eliminar cursos académicos asociados al usuario (academia o profesor) y sus datos dependientes
+            $cursoIds = DB::table('curso_academicos')
+                ->where('academia_id', $user->id)
+                ->pluck('id');
+            
+            if ($cursoIds->isNotEmpty()) {
+                DB::table('calificaciones')->whereIn('curso_academico_id', $cursoIds)->delete();
+                DB::table('detalles_curso')->whereIn('curso_academico_id', $cursoIds)->delete();
+                DB::table('user_curso')->whereIn('curso_academico_id', $cursoIds)->delete();
+                DB::table('alumnos_curso')->whereIn('curso_academico_id', $cursoIds)->delete();
+                DB::table('curso_academicos')->whereIn('id', $cursoIds)->delete();
             }
 
             // Finalmente eliminar el usuario
@@ -170,7 +152,6 @@ class UserController extends Controller
 
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
             
-            // Cerrar sesión
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

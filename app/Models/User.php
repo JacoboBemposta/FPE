@@ -102,28 +102,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->cursosAcademicos();
     }
 
-    // Relación de una academia con los profesores asignados
-    public function profesores()
-    {
-        return $this->belongsToMany(User::class, 'user_curso', 'curso_academico_id', 'user_id')
-            ->where('rol', 'profesor');
-    }
-
     // Relación de una academia con los cursos académicos que gestiona
     public function cursosAcademicosComoAcademia()
     {
         return $this->hasMany(CursoAcademico::class, 'academia_id');
-    }
-
-    public function asignaciones()
-    {
-        return $this->hasMany(AlumnoCurso::class, 'email', 'email');
-    }
-
-    // Sólo donde es_profesor = true
-    public function asignacionesComoProfesor()
-    {
-        return $this->asignaciones()->where('es_profesor', 1);
     }
 
     // Método para obtener la fecha de fin de suscripción formateada

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Suscripcion;
@@ -7,13 +8,10 @@ use App\Models\User;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
 use Stripe\Webhook;
-use Stripe\Customer;
 use Stripe\Subscription;
-use Stripe\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class SuscripcionController extends Controller
@@ -164,7 +162,6 @@ class SuscripcionController extends Controller
             
             // Si estamos en desarrollo y el session_id es simulado
             if (strpos($sessionId, 'simulated_') === 0) {
-                // Activación simulada para desarrollo
                 $fechaFin = now()->addMonth();
                 
                 // Crear suscripción
@@ -224,7 +221,6 @@ class SuscripcionController extends Controller
                     'payment_status' => $session->payment_status
                 ]);
                 
-                // Crear registro pendiente
                 $suscripcionPendiente = new Suscripcion();
                 $suscripcionPendiente->user_id = $user->id;
                 $suscripcionPendiente->stripe_id = $session->customer;
@@ -234,7 +230,7 @@ class SuscripcionController extends Controller
                 $suscripcionPendiente->tipo = ($user->rol === 'profesor') ? 'docente' : 'academia';
                 $suscripcionPendiente->fecha_inicio = now();
                 $suscripcionPendiente->fecha_fin = now()->addMonth();
-                $suscripcionPendiente->activa = 0; // Pendiente
+                $suscripcionPendiente->activa = 0;
                 $suscripcionPendiente->save();
                 
                 return redirect()->route('suscripciones.index')
@@ -252,7 +248,6 @@ class SuscripcionController extends Controller
             
             $subscription = Subscription::retrieve($subscriptionId);
             
-            // Verificar que la suscripción tiene los datos necesarios
             if (!isset($subscription->current_period_start) || !isset($subscription->current_period_end)) {
                 Log::warning('Subscription missing period dates, using defaults', [
                     'subscription_id' => $subscriptionId
@@ -265,7 +260,7 @@ class SuscripcionController extends Controller
             }
             
             // Crear/actualizar suscripción
-            $suscripcion = Suscripcion::updateOrCreate(
+            Suscripcion::updateOrCreate(
                 ['stripe_subscription_id' => $subscriptionId],
                 [
                     'user_id' => $user->id,
@@ -317,7 +312,6 @@ class SuscripcionController extends Controller
     {
         $user = Auth::user();
         
-        // Obtener suscripción activa
         $suscripcionActiva = Suscripcion::where('user_id', $user->id)
             ->where('activa', 1)
             ->where('fecha_fin', '>', now())
@@ -347,7 +341,6 @@ class SuscripcionController extends Controller
     {
         $user = Auth::user();
         
-        // Buscar suscripción activa
         $suscripcion = Suscripcion::where('user_id', $user->id)
             ->where('activa', 1)
             ->where('fecha_fin', '>', now())
@@ -361,7 +354,6 @@ class SuscripcionController extends Controller
         }
         
         try {
-            // Cancelar en Stripe si existe stripe_subscription_id
             if ($suscripcion->stripe_subscription_id) {
                 try {
                     $stripeSubscription = Subscription::retrieve($suscripcion->stripe_subscription_id);
@@ -370,19 +362,17 @@ class SuscripcionController extends Controller
                     $fechaFin = Carbon::createFromTimestamp($stripeSubscription->current_period_end);
                 } catch (\Exception $e) {
                     Log::warning('Error al cancelar en Stripe: ' . $e->getMessage());
-                    $fechaFin = now(); // Cancelar inmediatamente
+                    $fechaFin = now();
                 }
             } else {
-                $fechaFin = now(); // Cancelar inmediatamente
+                $fechaFin = now();
             }
             
-            // Actualizar suscripción
             $suscripcion->activa = 0;
             $suscripcion->cancelado_en = now();
             $suscripcion->fecha_fin = $fechaFin;
             $suscripcion->save();
             
-            // Actualizar usuario
             $user->premium = 0;
             $user->save();
             
@@ -487,7 +477,6 @@ class SuscripcionController extends Controller
             return;
         }
         
-        // Actualizar stripe_id en usuario si no existe
         if ($session->customer && empty($user->stripe_id)) {
             $user->stripe_id = $session->customer;
             $user->save();
@@ -505,7 +494,6 @@ class SuscripcionController extends Controller
         ]);
         
         try {
-            // Buscar usuario por stripe_id
             $user = User::where('stripe_id', $subscription->customer)->first();
             
             if (!$user) {
@@ -515,7 +503,6 @@ class SuscripcionController extends Controller
                 return;
             }
             
-            // Verificar que tenemos period dates
             if (!isset($subscription->current_period_start) || !isset($subscription->current_period_end)) {
                 Log::warning('Subscription missing period dates', [
                     'subscription_id' => $subscription->id
@@ -523,11 +510,9 @@ class SuscripcionController extends Controller
                 return;
             }
             
-            // Calcular fechas
             $startDate = Carbon::createFromTimestamp($subscription->current_period_start);
             $endDate = Carbon::createFromTimestamp($subscription->current_period_end);
             
-            // Determinar plan basado en el precio
             $plan = 'Plan Academia';
             $tipo = 'academia';
             $precio = 10;
@@ -541,8 +526,7 @@ class SuscripcionController extends Controller
                 }
             }
             
-            // Crear/actualizar suscripción
-            $suscripcion = Suscripcion::updateOrCreate(
+            Suscripcion::updateOrCreate(
                 ['stripe_subscription_id' => $subscription->id],
                 [
                     'user_id' => $user->id,
@@ -557,7 +541,6 @@ class SuscripcionController extends Controller
                 ]
             );
             
-            // Actualizar usuario si la suscripción está activa
             if ($subscription->status === 'active') {
                 $user->inicio_suscripcion = $startDate->toDateString();
                 $user->fin_suscripcion = $endDate->toDateString();
@@ -589,7 +572,6 @@ class SuscripcionController extends Controller
                 return;
             }
 
-            // Buscar suscripción
             $suscripcion = Suscripcion::where('stripe_subscription_id', $invoice->subscription)->first();
             
             if (!$suscripcion) {
@@ -597,7 +579,6 @@ class SuscripcionController extends Controller
                 return;
             }
 
-            // Crear registro de pago
             $pago = new Pago();
             $pago->suscripcion_id = $suscripcion->id;
             $pago->user_id = $suscripcion->user_id;
@@ -631,7 +612,7 @@ class SuscripcionController extends Controller
     private function calculateIVA($invoice)
     {
         $total = $invoice->total / 100;
-        $base = $total / 1.21; // 21% IVA para España
+        $base = $total / 1.21;
         return round($total - $base, 2);
     }
 
@@ -651,7 +632,6 @@ class SuscripcionController extends Controller
                 $suscripcion->fecha_fin = Carbon::createFromTimestamp($subscription->current_period_end);
                 $suscripcion->save();
                 
-                // Actualizar usuario
                 $user = $suscripcion->user;
                 if ($user) {
                     $user->premium = 0;
@@ -667,47 +647,5 @@ class SuscripcionController extends Controller
         } catch (\Exception $e) {
             Log::error('Error en handleSubscriptionDeleted: ' . $e->getMessage());
         }
-    }
-
-    
-
-    public function probarSuscripcion(Request $request)
-    {
-        $user = Auth::user();
-        
-        // Crear suscripción de prueba (sin Stripe)
-        $suscripcion = new Suscripcion();
-        $suscripcion->user_id = $user->id;
-        $suscripcion->plan = $user->rol === 'profesor' ? 'Plan Docente' : 'Plan Academia';
-        $suscripcion->precio = $user->rol === 'profesor' ? 5 : 10;
-        $suscripcion->tipo = $user->rol === 'profesor' ? 'docente' : 'academia';
-        $suscripcion->fecha_inicio = now();
-        $suscripcion->fecha_fin = now()->addMonth();
-        $suscripcion->activa = 1;
-        $suscripcion->save();
-        
-        // Crear pago de prueba
-        $pago = new Pago();
-        $pago->user_id = $user->id;
-        $pago->suscripcion_id = $suscripcion->id;
-        $pago->monto = $user->rol === 'profesor' ? 5 : 10;
-        $pago->moneda = 'EUR';
-        $pago->iva = 21.00;
-        $pago->monto_total = $user->rol === 'profesor' ? 5 : 10;
-        $pago->fecha_inicio_periodo = now();
-        $pago->fecha_fin_periodo = now()->addMonth();
-        $pago->estado = 'completado';
-        $pago->metodo_pago = 'tarjeta';
-        $pago->fecha_pago = now();
-        $pago->save();
-        
-        // Actualizar usuario
-        $user->inicio_suscripcion = now();
-        $user->fin_suscripcion = now()->addMonth();
-        $user->premium = 1;
-        $user->save();
-        
-        return redirect()->route('suscripciones.detalles')
-            ->with('success', 'Suscripción de prueba creada');
     }
 }

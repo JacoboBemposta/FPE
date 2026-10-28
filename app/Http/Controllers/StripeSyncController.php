@@ -10,7 +10,6 @@ use Stripe\Customer;
 use Stripe\Subscription;
 use Stripe\Invoice;
 use Stripe\PaymentIntent;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
@@ -72,14 +71,6 @@ class StripeSyncController extends Controller
                 return;
             }
 
-            // Convertir periodo de Stripe a formato local
-            $intervalMap = [
-                'month' => 'mensual',
-                'year' => 'anual',
-                'week' => 'semanal',
-                'day' => 'diario'
-            ];
-
             // Buscar o crear la suscripción en nuestra base de datos
             $suscripcion = Suscripcion::updateOrCreate(
                 [
@@ -90,19 +81,12 @@ class StripeSyncController extends Controller
                     'stripe_id' => $stripeSubscription->customer,
                     'plan' => $plan->nickname ?? $plan->id,
                     'tipo' => $this->determinarTipoUsuario($user),
-                    'precio' => $plan->amount / 100, // Stripe usa centavos
-                    'intervalo' => $intervalMap[$plan->interval] ?? $plan->interval,
+                    'precio' => $plan->amount / 100,
                     'fecha_inicio' => Carbon::createFromTimestamp($stripeSubscription->current_period_start),
                     'fecha_fin' => Carbon::createFromTimestamp($stripeSubscription->current_period_end),
                     'cancelado_en' => $stripeSubscription->cancel_at_period_end ? 
                         Carbon::createFromTimestamp($stripeSubscription->current_period_end) : null,
-                    'estado' => $stripeSubscription->status,
-                    'metadata' => [
-                        'stripe_plan_id' => $plan->id,
-                        'stripe_price_id' => $plan->price_id ?? null,
-                        'billing_cycle_anchor' => $stripeSubscription->billing_cycle_anchor,
-                        'cancel_at_period_end' => $stripeSubscription->cancel_at_period_end,
-                    ],
+                    'activa' => $stripeSubscription->status === 'active' ? 1 : 0,
                 ]
             );
 
@@ -122,10 +106,9 @@ class StripeSyncController extends Controller
     private function syncPaymentsForSubscription($suscripcion, $stripeSubscription)
     {
         try {
-            // Obtener facturas de esta suscripción
             $invoices = Invoice::all([
                 'subscription' => $stripeSubscription->id,
-                'limit' => 12 // Últimos 12 meses
+                'limit' => 12
             ]);
 
             foreach ($invoices as $invoice) {
@@ -147,7 +130,6 @@ class StripeSyncController extends Controller
         try {
             $paymentIntent = PaymentIntent::retrieve($invoice->payment_intent);
             
-            // Determinar fechas del periodo
             $periodStart = Carbon::createFromTimestamp($invoice->period_start);
             $periodEnd = Carbon::createFromTimestamp($invoice->period_end);
             
@@ -178,14 +160,12 @@ class StripeSyncController extends Controller
     }
 
     /**
-     * Calcular IVA (ajusta según tu país)
+     * Calcular IVA (21% para España)
      */
     private function calculateIVA($invoice)
     {
-        // Por defecto 21% para España
-        // Puedes ajustar esta lógica según tus necesidades
         $total = $invoice->total / 100;
-        $base = $total / 1.21; // Asumiendo 21% IVA
+        $base = $total / 1.21;
         $iva = $total - $base;
         
         return round($iva, 2);
@@ -235,7 +215,6 @@ class StripeSyncController extends Controller
         $localPayments = Pago::count();
         
         try {
-            // Contar suscripciones activas en Stripe
             $stripeSubscriptions = Subscription::all(['limit' => 1, 'status' => 'active']);
             $stripeCount = $stripeSubscriptions->has_more ? '100+' : $stripeSubscriptions->count();
             

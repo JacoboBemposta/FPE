@@ -1,16 +1,15 @@
-{{-- resources/views/admin/emails/busqueda.blade.php
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-search mr-2"></i>Resultados de Búsqueda
+                <i class="fas fa-search me-2"></i>Resultados de Búsqueda
             </h1>
             <p class="text-muted">Resultados para: "{{ request('busqueda') }}" ({{ $resultados->total() }} encontrados)</p>
-            <a href="{{ route('admin.email.stats') }}" class="btn btn-outline-primary">
-                <i class="fas fa-arrow-left mr-2"></i>Volver a estadísticas
+            <a href="{{ route('admin.stats') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Volver a estadísticas
             </a>
         </div>
     </div>
@@ -22,7 +21,7 @@
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover">
-                            <thead class="thead-light">
+                            <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
                                     <th>Remitente</th>
@@ -47,16 +46,16 @@
                                     </td>
                                     <td><code>{{ $email->destinatario_email }}</code></td>
                                     <td>
-                                        <span class="badge badge-{{ 
+                                        <span class="badge bg-{{ 
                                             $email->contexto == 'academia_a_docente' ? 'primary' : 
-                                            ($email->contexto == 'docente_a_academia' ? 'success' : 
+                                            (in_array($email->contexto, ['docente_a_academia', 'profesor_a_academia']) ? 'success' : 
                                             ($email->contexto == 'registro' ? 'info' : 'warning'))
                                         }}">
                                             {{ $email->contexto }}
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge badge-{{ 
+                                        <span class="badge bg-{{ 
                                             $email->status == 'sent' ? 'success' : 
                                             ($email->status == 'failed' ? 'danger' : 
                                             ($email->status == 'delivered' ? 'info' : 'warning'))
@@ -73,7 +72,7 @@
                         </table>
                     </div>
                     
-                    <div class="d-flex justify-content-center">
+                    <div class="d-flex justify-content-center mt-3">
                         {{ $resultados->appends(request()->query())->links() }}
                     </div>
                 </div>
@@ -94,4 +93,4 @@
     </div>
     @endif
 </div>
-@endsection --}}
+@endsection

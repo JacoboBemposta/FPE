@@ -101,20 +101,15 @@ class AdminStatsController extends Controller
         $topSuscriptores = $this->getTopSubscribers();
 
         return view('admin.stats', compact(
-            // Datos de usuarios
             'userStats',
             'usuariosPorRol',
             'evolucionUsuarios',
-            
-            // Datos de emails
             'stats',
             'porContexto',
             'porEstado',
             'topDestinatarios',
             'ultimosEmails',
             'evolucion',
-            
-            // Datos de suscripciones
             'subscriptionStats',
             'suscripcionesPorPlan',
             'ingresosMensuales',
@@ -141,10 +136,11 @@ class AdminStatsController extends Controller
 
         $titulo = match($contexto) {
             'academia_a_docente' => 'Emails de Academia a Docente',
-            'docente_a_academia' => 'Emails de Docente a Academia',
+            'profesor_a_academia', 'docente_a_academia' => 'Emails de Docente a Academia',
+            'alumno_a_academia' => 'Emails de Alumno a Academia',
             'registro' => 'Emails de Registro',
             'notificacion' => 'Emails de Notificación',
-            default => 'Emails de ' . ucfirst($contexto)
+            default => 'Emails de ' . ucfirst(str_replace('_', ' ', $contexto))
         };
 
         return view('admin.emails.detalle-contexto', compact('emails', 'titulo', 'contexto'));
@@ -208,20 +204,21 @@ class AdminStatsController extends Controller
             abort(404);
         }
 
+        $variables = isset($email->variables) ? (json_decode($email->variables, true) ?? []) : [];
+
         return response()->json([
             'id' => $email->id,
             'status' => $email->status,
             'contexto' => $email->contexto,
             'remitente_id' => $email->remitente_id,
+            'remitente_nombre' => $email->remitente_nombre ?? null,
+            'remitente_email' => $email->remitente_email_db ?? null,
             'destinatario_email' => $email->destinatario_email,
-            'variables' => json_decode($email->variables, true) ?? []
+            'created_at' => $email->created_at ?? null,
+            'variables' => $variables
         ]);
     }
 
-    /**
-     * Métodos para estadísticas de suscripciones
-     */
-    
     /**
      * Obtener estadísticas generales de suscripciones
      */
@@ -230,8 +227,11 @@ class AdminStatsController extends Controller
         try {
             return [
                 'total_suscripciones' => Suscripcion::count(),
-                'suscripciones_activas' => Suscripcion::where('estado', 'activa')->count(),
-                'suscripciones_por_vencer' => Suscripcion::where('estado', 'activa')
+                'suscripciones_activas' => Suscripcion::where('activa', 1)
+                    ->where('fecha_fin', '>', Carbon::now())
+                    ->count(),
+                'suscripciones_por_vencer' => Suscripcion::where('activa', 1)
+                    ->where('fecha_fin', '>', Carbon::now())
                     ->whereDate('fecha_fin', '<=', Carbon::now()->addDays(7))
                     ->count(),
                 'ingresos_mes_actual' => Pago::where('estado', 'completado')
@@ -366,7 +366,6 @@ class AdminStatsController extends Controller
                 $fechaInicio = Carbon::now()->subMonths(6);
         }
 
-        // Ingresos mensuales
         $ingresosMensuales = Pago::select(
                 DB::raw('DATE_FORMAT(fecha_pago, "%Y-%m") as mes'),
                 DB::raw('SUM(monto_total) as total')
@@ -377,7 +376,6 @@ class AdminStatsController extends Controller
             ->orderBy('mes')
             ->get();
 
-        // Suscripciones nuevas por mes
         $suscripcionesNuevas = Suscripcion::select(
                 DB::raw('DATE_FORMAT(created_at, "%Y-%m") as mes'),
                 DB::raw('COUNT(*) as total')

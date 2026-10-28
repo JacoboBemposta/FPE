@@ -22,6 +22,8 @@ class SuscripcionConfigController extends Controller
                     'valor' => $request->activo ? '1' : '0',
                     'updated_at' => now()
                 ]);
+
+            Cache::forget('configuracion_sistema_suscripciones_activo');
             
             return response()->json([
                 'success' => true,

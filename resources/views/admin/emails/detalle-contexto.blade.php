@@ -1,16 +1,15 @@
-{{-- resources/views/admin/emails/detalle-contexto.blade.php
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-envelope mr-2"></i>{{ $titulo }}
+                <i class="fas fa-envelope me-2"></i>{{ $titulo }}
             </h1>
             <p class="text-muted">Listado de emails con contexto: {{ $contexto }}</p>
-            <a href="{{ route('admin.email.stats') }}" class="btn btn-outline-primary">
-                <i class="fas fa-arrow-left mr-2"></i>Volver a estadísticas
+            <a href="{{ route('admin.stats') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Volver a estadísticas
             </a>
         </div>
     </div>
@@ -21,7 +20,7 @@
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover">
-                            <thead class="thead-light">
+                            <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
                                     <th>Remitente</th>
@@ -46,18 +45,17 @@
                                     </td>
                                     <td><code>{{ $email->destinatario_email }}</code></td>
                                     <td>
-                                        <span class="badge badge-{{ 
+                                        <span class="badge bg-{{ 
                                             $email->status == 'sent' ? 'success' : 
                                             ($email->status == 'failed' ? 'danger' : 
                                             ($email->status == 'delivered' ? 'info' : 'warning'))
                                         }}">
-                                            <small class="text-muted">{{ ucfirst($email->status) }}</small>
+                                            {{ ucfirst($email->status) }}
                                         </span>
                                     </td>
                                     <td>
                                         <small>{{ \Carbon\Carbon::parse($email->created_at)->format('d/m/Y H:i') }}</small>
                                     </td>
-
                                     <td>
                                         <button class="btn btn-sm btn-outline-info" onclick="verDetalle({{ $email->id }})">
                                             <i class="fas fa-eye"></i>
@@ -69,7 +67,7 @@
                         </table>
                     </div>
                     
-                    <div class="d-flex justify-content-center">
+                    <div class="d-flex justify-content-center mt-3">
                         {{ $emails->links() }}
                     </div>
                 </div>
@@ -78,15 +76,13 @@
     </div>
 </div>
 
-{{-- Modal para ver detalles (puedes reutilizar el mismo de la vista principal) --}}
-<div class="modal fade" id="detalleModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
+{{-- Modal para ver detalles --}}
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Detalles del Email</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="detalleContent">
                 Cargando...
@@ -98,39 +94,41 @@
 @push('scripts')
 <script>
 function verDetalle(id) {
-    // Implementa la función para cargar los detalles del email
-
-    fetch(`/admin/email-stats/detalle/${id}`)  
+    fetch(`/admin/stats/email/${id}`)
         .then(response => response.json())
         .then(data => {
-            // Mostrar datos en el modal
+            const vars = data.variables || {};
             let html = `
                 <div class="row">
                     <div class="col-md-6">
                         <h6>Información Básica</h6>
                         <p><strong>ID:</strong> ${data.id}</p>
-                        <p><strong>Estado:</strong> <span class="badge badge-${data.status === 'sent' ? 'success' : 'danger'}">${data.status}</span></p>
+                        <p><strong>Estado:</strong> <span class="badge bg-${data.status === 'sent' ? 'success' : 'danger'}">${data.status}</span></p>
                         <p><strong>Contexto:</strong> ${data.contexto}</p>
-                        <p><strong>Template:</strong> ${data.template}</p>
                     </div>
                     <div class="col-md-6">
                         <h6>Remitente/Destinatario</h6>
                         <p><strong>Remitente ID:</strong> ${data.remitente_id}</p>
                         <p><strong>Destinatario:</strong> ${data.destinatario_email}</p>
-                        <p><strong>IP:</strong> ${data.ip}</p>
                     </div>
                 </div>
                 <div class="row mt-3">
                     <div class="col-12">
                         <h6>Variables (JSON)</h6>
-                        <pre class="bg-light p-3 rounded">${JSON.stringify(data.variables, null, 2)}</pre>
+                        <pre class="bg-light p-3 rounded">${JSON.stringify(vars, null, 2)}</pre>
                     </div>
                 </div>
             `;
             document.getElementById('detalleContent').innerHTML = html;
-            $('#detalleModal').modal('show');
+            const modalEl = document.getElementById('detalleModal');
+            if (modalEl && typeof bootstrap !== 'undefined') {
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            }
+        })
+        .catch(() => {
+            document.getElementById('detalleContent').innerHTML = '<div class="alert alert-danger">Error al cargar los detalles</div>';
         });
 }
 </script>
 @endpush
-@endsection --}}
+@endsection

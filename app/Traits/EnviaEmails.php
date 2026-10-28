@@ -2,46 +2,28 @@
 
 namespace App\Traits;
 
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use App\Mail\EmailBase;
 
 trait EnviaEmails
 {
     public function enviarEmailRegistrado($datos)
     {
-        
         $remitente_nombre = Auth::user()->ident ?? Auth::user()->name;
         $remitente_email = Auth::user()->email;
-        
+
         $asuntoOriginal = $datos['asunto'] ?? 'Sin asunto';
         $asuntoConNombre = $asuntoOriginal . ' - ' . $remitente_nombre;
 
-        // Obtener el archivo si existe
+        // Obtener el archivo adjunto si existe
         $attachmentFile = null;
         $attachmentName = null;
-        
+
         if (request()->hasFile('attachment') && request()->file('attachment')->isValid()) {
             $attachmentFile = request()->file('attachment');
             $attachmentName = $attachmentFile->getClientOriginalName();
-            
         }
-
-        $variables = [
-            'asunto' => $asuntoConNombre,
-            'mensaje' => $datos['mensaje'] ?? 'Sin mensaje',
-            'remitente_nombre' => $remitente_nombre,
-            'remitente_email' => $remitente_email,
-            'remitente_tipo' => Auth::user()->rol ?? 'usuario',
-            'destinatario_tipo' => $datos['destinatario_tipo'] ?? null,
-            'destinatario_email' => $datos['destinatario_email'],
-            'fecha' => now()->format('d/m/Y H:i'),
-            'curso_id' => $datos['curso_id'] ?? null,
-            'tiene_adjunto' => !is_null($attachmentFile),
-            'attachment_name' => $attachmentName,
-        ];
 
         try {
             // Insertar registro en la base de datos
@@ -53,48 +35,69 @@ trait EnviaEmails
                 'status' => 'sent',
                 'created_at' => now(),
             ]);
-            
-
         } catch (\Exception $e) {
             Log::error('Error insertando email en BD: ' . $e->getMessage());
             return false;
         }
 
         try {
-            // ========== ENVÍO DEL EMAIL CON ADJUNTO ==========
-            $mailData = [
-                'asunto' => $asuntoConNombre,
-                'mensaje' => $datos['mensaje'] ?? 'Sin mensaje',
-                'remitente_nombre' => $remitente_nombre,
-                'remitente_email' => $remitente_email,
-            ];
-
-                // Enviar usando mail() de PHP
             $to = $datos['destinatario_email'];
-            $subject = $mailData['asunto'];
-            $message = $mailData['mensaje'];
-            $headers = [
-                'From: info@redfpe.es',
-                'Reply-To: info@redfpe.es',
-                'X-Mailer: PHP/' . phpversion(),
-                'Content-Type: text/plain; charset=utf-8'
-            ];
-                    
-             $result = mail($to, $subject, $message, implode("\r\n", $headers));
+            $subject = '=?UTF-8?B?' . base64_encode($asuntoConNombre) . '?=';
+            $plainMessage = $datos['mensaje'] ?? 'Sin mensaje';
+            $replyTo = filter_var($remitente_email, FILTER_VALIDATE_EMAIL) ? $remitente_email : 'info@redfpe.es';
 
+            if ($attachmentFile && is_readable($attachmentFile->getRealPath())) {
+                $boundary = '=_NextPart_' . md5((string) microtime(true));
+                $mimeType = $attachmentFile->getMimeType() ?: 'application/octet-stream';
+                $fileContent = chunk_split(base64_encode(file_get_contents($attachmentFile->getRealPath())));
+                $safeFilename = addslashes(basename($attachmentName));
+
+                $headers = [
+                    'From: RedFPE <info@redfpe.es>',
+                    'Reply-To: ' . $replyTo,
+                    'MIME-Version: 1.0',
+                    'X-Mailer: PHP/' . phpversion(),
+                    'Content-Type: multipart/mixed; boundary="' . $boundary . '"',
+                ];
+
+                $body = "--{$boundary}\r\n"
+                    . "Content-Type: text/plain; charset=utf-8\r\n"
+                    . "Content-Transfer-Encoding: 8bit\r\n\r\n"
+                    . $plainMessage . "\r\n\r\n"
+                    . "--{$boundary}\r\n"
+                    . "Content-Type: {$mimeType}; name=\"{$safeFilename}\"\r\n"
+                    . "Content-Disposition: attachment; filename=\"{$safeFilename}\"\r\n"
+                    . "Content-Transfer-Encoding: base64\r\n\r\n"
+                    . $fileContent . "\r\n"
+                    . "--{$boundary}--";
+
+                $result = @mail($to, $subject, $body, implode("\r\n", $headers));
+            } else {
+                $headers = [
+                    'From: RedFPE <info@redfpe.es>',
+                    'Reply-To: ' . $replyTo,
+                    'MIME-Version: 1.0',
+                    'X-Mailer: PHP/' . phpversion(),
+                    'Content-Type: text/plain; charset=utf-8',
+                ];
+
+                $result = @mail($to, $subject, $plainMessage, implode("\r\n", $headers));
+            }
+
+            if ($result === false) {
+                throw new \RuntimeException('La función mail() devolvió false.');
+            }
 
             return true;
-
         } catch (\Exception $e) {
-            // Actualizar registro si hay error
             DB::table('emails_enviados')
                 ->where('id', $id)
                 ->update([
                     'status' => 'failed',
                 ]);
-            
+
             Log::error('Error enviando email: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             return false;
         }

@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admin\SuscripcionConfigController;
 use App\Http\Controllers\CursoModuloController;
 use App\Http\Controllers\Auth\GoogleLoginController;
@@ -20,9 +19,6 @@ use App\Http\Controllers\StripeSyncController;
 use App\Http\Controllers\CalificacionController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Middleware\SecurityHeaders;
-
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 
 // Compatibilidad local (php artisan serve) para scripts referenciados como asset('public/js/...')
 Route::get('/public/js/{file}', function (string $file) {
@@ -30,7 +26,6 @@ Route::get('/public/js/{file}', function (string $file) {
     abort_unless(file_exists($path), 404);
     return response()->file($path, ['Content-Type' => 'application/javascript']);
 })->where('file', '.*\.js$');
-Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
 
 Route::get('/', function () {
     return view('welcome');
@@ -50,10 +45,11 @@ Route::put('/user/profile', [UserController::class, 'updateProfile'])
 Route::middleware(['auth'])->group(function () {
     Route::delete('/user/destroy', [UserController::class, 'destroy'])
         ->name('user.destroy')
-        ->middleware('throttle:300,1440'); // Máximo 3 intentos por día
+        ->middleware('throttle:300,1440');
 });
 
 Auth::routes(['verify' => true]);
+Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
 
 // Rutas para el footer
 Route::get('/sobre-nosotros', function () {
@@ -94,28 +90,18 @@ Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':admin'])
 
     // Familias Profesionales
     Route::post('/familias-profesionales', [FamiliaProfesionalController::class, 'store'])->name('familias-profesionales.store');
+    Route::delete('/familia/{id}', [FamiliaProfesionalController::class, 'destroy'])->name('familia.destroy');
     
     // Cursos
-    Route::get('/cursos/create', [CursoController::class, 'create'])->name('cursos.create');
     Route::post('/cursos', [CursoController::class, 'store'])->name('cursos.store');
-    Route::delete('/cursos/{curso}', [CursoController::class, 'destroy'])->name('cursos.destroy');
-    Route::get('/cursos/{curso}/edit', [CursoController::class, 'edit'])->name('cursos.edit');
     Route::put('/cursos/{curso}', [CursoController::class, 'update'])->name('cursos.update');
+    Route::delete('/cursos/{curso}', [CursoController::class, 'destroy'])->name('cursos.destroy');
     
-    // Unidades
-    Route::post('/unidades', [UnidadFormativaController::class, 'store'])->name('unidades.store');
+    // Módulos y Unidades
     Route::post('/cursos/{curso}/modulos', [CursoModuloController::class, 'store'])->name('cursos.modulos.store');
-    
-    // Eliminar
-    Route::delete('/familia/{id}', [FamiliaProfesionalController::class, 'destroy'])->name('familia.destroy');
     Route::delete('/cursos/{curso}/modulos/{modulo}', [CursoModuloController::class, 'destroy'])->name('cursos.modulos.destroy');
+    Route::post('/unidades', [UnidadFormativaController::class, 'store'])->name('unidades.store');
     Route::delete('unidades/{unidad}', [UnidadFormativaController::class, 'destroy'])->name('unidades.destroy');
-
-    // Unidades formativas por módulo
-    Route::get('/modulo/{modulo}/unidades', [UnidadFormativaController::class, 'index'])->name('modulos.unidades.index');
-    Route::get('/modulo/{modulo}/unidades/create', [UnidadFormativaController::class, 'create'])->name('modulos.unidades.create');
-    Route::get('/modulo/{modulo}/unidades/{id}/edit', [UnidadFormativaController::class, 'edit'])->name('modulos.unidades.edit');
-    Route::put('/modulo/{modulo}/unidades/{id}', [UnidadFormativaController::class, 'update'])->name('modulos.unidades.update');
     
     // Rutas AJAX
     Route::get('/familias/{familia}/cursos', [FamiliaProfesionalController::class, 'getCursosByFamilia'])->name('familias.cursos');
@@ -124,7 +110,6 @@ Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':admin'])
 
     // Suscripciones
     Route::post('/toggle-suscripciones', [SuscripcionConfigController::class, 'toggleSuscripciones']);
-    Route::get('/estado-suscripciones', [SuscripcionConfigController::class, 'getEstado']);
 
     // Estadísticas
     Route::get('/stats', [AdminStatsController::class, 'index'])->name('stats');
@@ -164,18 +149,13 @@ Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':academia'])
         Route::get('ver-docentes', [AcademiaController::class, 'verDocentes'])->name('ver_docentes');
         Route::put('/curso/{id}', [AcademiaController::class, 'actualizarCurso'])->name('curso_academico.update');
         Route::delete('/curso/{id}', [AcademiaController::class, 'destroyCursoAcademico'])->name('curso_academico.destroy');
-        
 
+        Route::post('/detalle/guardar', [AcademiaController::class, 'crearActualizarDetalle'])->name('crearActualizarDetalle');
 
-        Route::post('/guardar-nota', [AcademiaController::class, 'guardarNotaModulo'])->name('guardarNotaModulo');
-
-        Route::post('/detalle/guardar', [AcademiaController::class,'crearActualizarDetalle'])->name('crearActualizarDetalle');
-            // Calificaciones
+        // Calificaciones
         Route::post('/calificaciones', [CalificacionController::class, 'store'])->name('calificaciones.store');
-        Route::put('/calificaciones/{calificacion}', [CalificacionController::class, 'update'])->name('calificaciones.update');
         Route::get('/calificaciones/{cursoAcademicoId}', [AcademiaController::class, 'showCalificaciones'])->name('calificaciones');
 
-        
         // Comunicación
         Route::get('/obtener-email-docente/{docenteId}', [AcademiaController::class, 'obtenerEmailDocente'])->name('obtener-email-docente');
         Route::post('/enviar-mensaje-docente', [AcademiaController::class, 'enviarMensajeDocente'])->name('enviar_mensaje_docente');
@@ -184,28 +164,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':academia'])
         Route::put('/curso_academico/{id}/archive', [AcademiaController::class, 'archive'])->name('curso_academico.archive');
         Route::put('/curso_academico/{id}/restore', [AcademiaController::class, 'restore'])->name('curso_academico.restore');
         Route::get('/cursos_archivados', [AcademiaController::class, 'cursosArchivados'])->name('cursos_archivados');
-
-        // Suscripciones
-        Route::get('/verificar-sistema-suscripciones', function() {
-            $sistemaActivo = \App\Helpers\SistemaHelper::sistemaSuscripcionesActivo();
-            
-            return response()->json([
-                'sistema_activo' => $sistemaActivo
-            ]);
-        });
-        
-        Route::get('/verificar-mi-suscripcion', function() {
-            $user = Auth::user();
-            
-            return response()->json([
-                'tiene_suscripcion_valida' => $user->tieneSuscripcionActiva(),
-                'premium' => $user->premium,
-                'fin_suscripcion' => $user->fin_suscripcion,
-                'inicio_suscripcion' => $user->inicio_suscripcion,
-            ]);
-        })->name('verificar_suscripcion');
-
-        });
+    });
 
 // PROFESOR ROUTES
 Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':profesor'])
@@ -219,26 +178,11 @@ Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':profesor'])
         Route::delete('/curso/{id}', [ProfesorController::class, 'destroy'])->name('curso.destroy');
         Route::get('/ver-academias', [ProfesorController::class, 'verAcademias'])->name('ver_academias');
         Route::put('curso/{id}/editar', [ProfesorController::class, 'actualizarCurso'])->name('curso.update');
-        Route::get('curso/{id}', [ProfesorController::class, 'detalleCurso'])->name('detalleCurso');
         Route::post('/enviar-candidatura', [ProfesorController::class, 'enviarCandidatura'])->name('enviar_candidatura');
         
         Route::get('/obtener-email/{academiaId}', [ProfesorController::class, 'obtenerEmailAcademia'])
             ->name('obtener-email');
-
-        Route::get('/verificar-mi-suscripcion', function() {
-            $user = Auth::user();
-            
-            $tieneSuscripcionValida = false;
-            
-            if ($user->suscripcion && $user->suscripcion->estaActiva()) {
-                $tieneSuscripcionValida = true;
-            }
-            
-            return response()->json([
-                'tiene_suscripcion_valida' => $tieneSuscripcionValida
-            ]);
-        })->name('verificar_suscripcion');
-});
+    });
 
 // ALUMNO ROUTES  
 Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':alumno'])
@@ -246,18 +190,13 @@ Route::middleware(['auth', \App\Http\Middleware\CheckRole::class . ':alumno'])
     ->name('alumno.')
     ->group(function () {
         Route::get('/', [AlumnoController::class, 'index'])->name('index');
-        Route::get('/academias', [AlumnoController::class, 'listarAcademias'])->name('academias');
-        Route::get('/academia/{id}', [AlumnoController::class, 'verAcademia'])->name('academia.ver');
         Route::post('/contactar-academia', [AlumnoController::class, 'enviarEmailAcademia'])->name('academia.enviar_email');
         Route::get('/obtener-email/{id}', [AlumnoController::class, 'obtenerEmailAcademia'])->name('obtener.email');
-});
+    });
 
 // Rutas de Google OAuth
 Route::get('/auth/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('login.google');
 Route::get('/auth/google/callback', [GoogleLoginController::class, 'handleGoogleCallback']);
-
-
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/suscripcion', [SuscripcionController::class, 'index'])->name('suscripciones.index');
@@ -272,7 +211,6 @@ Route::middleware('auth')->group(function () {
 // Webhook de Stripe (sin CSRF)
 Route::post('/stripe/webhook', [SuscripcionController::class, 'handleWebhook'])->name('stripe.webhook');
 
-
 // ==============================================
 // 📍 SITEMAP XML - Solo páginas públicas
 // ==============================================
@@ -280,17 +218,13 @@ Route::get('/sitemap.xml', function () {
     $sitemap = '<?xml version="1.0" encoding="UTF-8"?>';
     $sitemap .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
     
-    // 📌 LISTA DE URLs PÚBLICAS (sin login requerido)
     $urls = [
-        // 🟢 PÁGINA PRINCIPAL
         [
             'url' => url('/'), 
             'priority' => '1.0', 
             'changefreq' => 'daily',
             'lastmod' => now()->toDateString()
         ],
-        
-        // 🔵 PÁGINAS DE SERVICIOS
         [
             'url' => url('/academias'), 
             'priority' => '0.9', 
@@ -309,8 +243,6 @@ Route::get('/sitemap.xml', function () {
             'changefreq' => 'weekly',
             'lastmod' => now()->toDateString()
         ],
-        
-        // ⚪ PÁGINAS DE INFORMACIÓN
         [
             'url' => url('/sobre-nosotros'), 
             'priority' => '0.8', 
@@ -323,8 +255,6 @@ Route::get('/sitemap.xml', function () {
             'changefreq' => 'monthly',
             'lastmod' => now()->toDateString()
         ],
-        
-        // 📄 PÁGINAS LEGALES
         [
             'url' => url('/privacidad'), 
             'priority' => '0.3', 
@@ -337,8 +267,6 @@ Route::get('/sitemap.xml', function () {
             'changefreq' => 'yearly',
             'lastmod' => now()->subMonths(3)->toDateString()
         ],
-        
-        // 🔐 LOGIN (indexar pero baja prioridad)
         [
             'url' => url('/login'), 
             'priority' => '0.1', 
@@ -347,7 +275,6 @@ Route::get('/sitemap.xml', function () {
         ]
     ];
     
-    // 🔄 GENERAR EL XML
     foreach ($urls as $item) {
         $sitemap .= '<url>';
         $sitemap .= '<loc>' . htmlspecialchars($item['url']) . '</loc>';

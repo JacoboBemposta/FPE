@@ -94,7 +94,7 @@
     
                 <!-- Mostrar número de participantes (alumnos + docente) -->
                 <strong>Número de Participantes:</strong> 
-                {{ $cursoAcademico->alumnos->count() + ($cursoAcademico->alumnos->where('es_profesor', 1)->count() > 0 ? 1 : 0) }}<br>
+                {{ $cursoAcademico->alumnos->count() }}<br>
     
                 <!-- Mostrar nombre del docente si existe -->
                 @php
@@ -106,8 +106,6 @@
             </p>
         </div>
     </div>
-    
-
 
     <!-- Botón para mostrar/ocultar detalles -->
     <button class="btn btn-info mb-3" id="btnDetallesCurso">
@@ -130,9 +128,9 @@
                                 {{ $modulo->unidades->count() ?? 0 }} unidades
                             </span>
                         </div>
-                    <button class="btn btn-secondary btn-sm" type="button">
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
+                        <button class="btn btn-secondary btn-sm" type="button">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
                     </div>
                     
                     <div id="modulo-{{ $modulo->id ?? 0 }}" class="modulo-content hidden">
@@ -192,8 +190,7 @@
                                                         data-modulo="{{ $modulo->id }}"
                                                         data-campo="{{ $campo }}"
                                                         data-detalle="{{ optional($detalleModulo)->id ?? '' }}"
-                                                        value="{{ $fecha }}"
-                                                        onchange="saveFecha(this)">
+                                                        value="{{ $fecha }}">
                                                 </td>
                                             @endforeach
                                         </tr>
@@ -277,7 +274,6 @@
         </div>
     </div>
 
-
     <!-- Lista de alumnos inscritos -->
     <div class="card">
         <div class="card-header">
@@ -314,8 +310,7 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <!-- Formulario para eliminar alumno -->
-                                    <form method="POST" action="{{ route('academia.eliminarAlumno', $alumno->id) }}" 
-                                          class="d-inline" 
+                                    <form method="POST" action="{{ route('academia.eliminarAlumno', $alumno->id) }}" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger">
