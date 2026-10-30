@@ -100,7 +100,7 @@
         gap: 10px;
         position: relative;
         overflow: hidden;
-        z-index: 1;
+        z-index: 1; text-decoration: none;
     }
     
     .hero-btn::before {
@@ -235,7 +235,7 @@
         color: white;
     }
     
-    .role-card h4 {
+    .role-card h3, .role-card h4, .feature-card h3, .feature-card h4 {
         font-size: 1.5rem;
         font-weight: 600;
         margin-bottom: 1rem;
@@ -264,7 +264,7 @@
         gap: 8px;
         min-width: 160px;
         margin: 0 auto;
-        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2); text-decoration: none;
     }
     
     .role-btn:hover {
@@ -478,7 +478,7 @@
                     <div class="role-icon">
                         <i class="fas fa-university"></i>
                     </div>
-                    <h4>Academia</h4>
+                    <h3>Academia</h3>
                     <p>Crea cursos, asigna docentes, administra estudiantes.</p>
                     
                     @auth
@@ -505,7 +505,7 @@
                     <div class="role-icon">
                         <i class="fas fa-chalkboard-teacher"></i>
                     </div>
-                    <h4>Docente</h4>
+                    <h3>Docente</h3>
                     <p>Gestiona tus cursos, contacta con las academias.</p>
 
                     @auth
@@ -532,7 +532,7 @@
                     <div class="role-icon">
                         <i class="fas fa-user-graduate"></i>
                     </div>
-                    <h4>Alumno</h4>
+                    <h3>Alumno</h3>
                     <p>Accede a los cursos que te interesan en tu localidad.</p>
 
                     @auth
@@ -568,7 +568,7 @@
                     <div class="feature-icon">
                         <i class="fas fa-bolt"></i>
                     </div>
-                    <h4>Rápida Implementación</h4>
+                    <h3>Rápida Implementación</h3>
                     <p>Comienza a usar la plataforma en minutos, sin necesidad de complejas configuraciones.</p>
                 </div>
             </div>
@@ -577,7 +577,7 @@
                     <div class="feature-icon">
                         <i class="fas fa-shield-alt"></i>
                     </div>
-                    <h4>Seguridad Garantizada</h4>
+                    <h3>Seguridad Garantizada</h3>
                     <p>Tus datos están protegidos con los más altos estándares de encriptación y seguridad.</p>
                 </div>
             </div>
@@ -586,7 +586,7 @@
                     <div class="feature-icon">
                         <i class="fas fa-headset"></i>
                     </div>
-                    <h4>Soporte Personalizado</h4>
+                    <h3>Soporte Personalizado</h3>
                     <p>Nuestro equipo está disponible para ayudarte en lo que necesites.</p>
                 </div>
             </div>

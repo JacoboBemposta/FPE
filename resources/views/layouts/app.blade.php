@@ -16,48 +16,109 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Bootstrap 5 CSS -->
+    <!-- Bootstrap 5 CSS (carga asíncrona; el CSS crítico del layout va inline abajo) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
         rel="stylesheet" 
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" 
-        crossorigin="anonymous">
+        crossorigin="anonymous"
+        media="print" data-async-css>
     
-    <!-- Font Awesome -->
+    <!-- Font Awesome (carga asíncrona) -->
     <link rel="stylesheet" 
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+        crossorigin="anonymous" referrerpolicy="no-referrer"
+        media="print" data-async-css />
     
+    @if(Auth::check() || request()->routeIs('ayuda'))
     <!-- SweetAlert2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" integrity="sha384-dCW5imOdApH6OwpFau8cZNKjqVbJYnCA5q+8YsMYP3XwXKsV6Jfz1u6MZLnXaBsS" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" integrity="sha384-dCW5imOdApH6OwpFau8cZNKjqVbJYnCA5q+8YsMYP3XwXKsV6Jfz1u6MZLnXaBsS" crossorigin="anonymous" media="print" data-async-css>
+    @endif
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Google Fonts (carga asíncrona) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" media="print" data-async-css>
+
+    <noscript>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    </noscript>
     
+    <!-- Activador temprano de CSS asíncrono y configuración -->
+    <script src="{{ asset('public/js/config.js?v=3') }}" defer></script>
+
     <!-- Bootstrap 5 JS Bundle (defer) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
             crossorigin="anonymous"
             defer>
     </script>
+    @if(Auth::check() || request()->routeIs('ayuda'))
     <!-- SweetAlert2 JS (defer) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-nLoOnA/BDh8A/jxqtckg4DumuCGOBYUnNJLZdQz/zfYNp3wcjGSoWTAzgko06G/2" crossorigin="anonymous" defer></script>
+    @endif
     
     <style>
+        /* Fallback de métricas de fuentes para evitar CLS al cargar Google Fonts */
         @font-face {
-            font-family: "Font Awesome 6 Free";
-            font-style: normal;
-            font-weight: 900;
-            font-display: swap;
-            src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2") format("woff2");
+            font-family: 'Poppins-fallback';
+            src: local('Arial');
+            size-adjust: 112%;
+            ascent-override: 93%;
+            descent-override: 31%;
+            line-gap-override: 9%;
         }
         @font-face {
-            font-family: "Font Awesome 6 Brands";
-            font-style: normal;
-            font-weight: 400;
-            font-display: swap;
-            src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-brands-400.woff2") format("woff2");
+            font-family: 'Roboto-fallback';
+            src: local('Arial');
+            size-adjust: 100%;
+            ascent-override: 92.8%;
+            descent-override: 24.4%;
+            line-gap-override: 0%;
         }
+
+        /* CSS Crítico de Layout (Bootstrap Reboot + Grid + Navbar + Utilidades esenciales) */
+        *, ::after, ::before { box-sizing: border-box; }
+        body { margin: 0; font-size: 1rem; font-weight: 400; line-height: 1.5; }
+        h1, h2, h3, h4, h5, h6, .h4, .h5 { margin-top: 0; margin-bottom: 0.5rem; line-height: 1.2; }
+        .h4, h4 { font-size: 1.5rem; }
+        .h5, h5 { font-size: 1.25rem; }
+        p { margin-top: 0; margin-bottom: 1rem; }
+        ul { margin-top: 0; margin-bottom: 1rem; padding-left: 2rem; }
+        a { color: #0d6efd; text-decoration: underline; }
+        img, svg { vertical-align: middle; }
+        button { font-family: inherit; font-size: inherit; line-height: inherit; margin: 0; }
+        hr { margin: 1rem 0; color: inherit; border: 0; border-top: 1px solid; opacity: .25; }
+        .container { width: 100%; padding-right: 0.75rem; padding-left: 0.75rem; margin-right: auto; margin-left: auto; }
+        @media (min-width: 576px) { .container { max-width: 540px; } }
+        @media (min-width: 768px) { .container { max-width: 720px; } .col-md-4 { flex: 0 0 auto; width: 33.33333333%; } .col-md-6 { flex: 0 0 auto; width: 50%; } .text-md-end { text-align: right !important; } }
+        @media (min-width: 992px) { .container { max-width: 960px; } .col-lg-2 { flex: 0 0 auto; width: 16.66666667%; } .col-lg-4 { flex: 0 0 auto; width: 33.33333333%; } .navbar-expand-lg { flex-wrap: nowrap; justify-content: flex-start; } .navbar-expand-lg .navbar-nav { flex-direction: row; } .navbar-expand-lg .navbar-collapse { display: flex !important; flex-basis: auto; } .navbar-expand-lg .navbar-toggler { display: none; } }
+        @media (min-width: 1200px) { .container { max-width: 1140px; } }
+        @media (min-width: 1400px) { .container { max-width: 1320px; } }
+        .row { --bs-gutter-x: 1.5rem; --bs-gutter-y: 0; display: flex; flex-wrap: wrap; margin-top: calc(-1 * var(--bs-gutter-y)); margin-right: calc(-.5 * var(--bs-gutter-x)); margin-left: calc(-.5 * var(--bs-gutter-x)); }
+        .row > * { flex-shrink: 0; width: 100%; max-width: 100%; padding-right: calc(var(--bs-gutter-x) * .5); padding-left: calc(var(--bs-gutter-x) * .5); margin-top: var(--bs-gutter-y); }
+        .g-4 { --bs-gutter-x: 1.5rem; --bs-gutter-y: 1.5rem; }
+        .navbar { position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+        .navbar > .container { display: flex; flex-wrap: inherit; align-items: center; justify-content: space-between; }
+        .navbar-brand { text-decoration: none; white-space: nowrap; }
+        .navbar-nav { display: flex; flex-direction: column; padding-left: 0; margin-bottom: 0; list-style: none; }
+        .nav-link { display: block; text-decoration: none; }
+        .navbar-collapse { flex-basis: 100%; flex-grow: 1; align-items: center; }
+        .collapse:not(.show) { display: none; }
+        .navbar-toggler { padding: 0.25rem 0.75rem; font-size: 1.25rem; line-height: 1; background-color: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 0.375rem; cursor: pointer; }
+        .navbar-toggler-icon { display: inline-block; width: 1.5em; height: 1.5em; vertical-align: middle; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: center; background-size: 100%; }
+        .d-flex { display: flex !important; } .d-block { display: block !important; }
+        .align-items-center { align-items: center !important; } .align-items-start { align-items: flex-start !important; }
+        .justify-content-start { justify-content: flex-start !important; } .justify-content-center { justify-content: center !important; }
+        .ms-auto { margin-left: auto !important; } .me-1 { margin-right: 0.25rem !important; } .me-2 { margin-right: 0.5rem !important; } .me-3 { margin-right: 1rem !important; }
+        .mb-0 { margin-bottom: 0 !important; } .mb-2 { margin-bottom: 0.5rem !important; } .mb-3 { margin-bottom: 1rem !important; } .mb-4 { margin-bottom: 1.5rem !important; }
+        .mt-1 { margin-top: 0.25rem !important; } .mt-3 { margin-top: 1rem !important; } .mt-5 { margin-top: 3rem !important; } .my-5 { margin-top: 3rem !important; margin-bottom: 3rem !important; }
+        .py-5 { padding-top: 3rem !important; padding-bottom: 3rem !important; } .p-2 { padding: 0.5rem !important; } .p-3 { padding: 1rem !important; }
+        .text-white { color: #fff !important; } .text-light { color: #f8f9fa !important; } .text-info { color: #0dcaf0 !important; }
+        .text-decoration-none { text-decoration: none !important; } .text-start { text-align: left !important; } .text-center { text-align: center !important; }
+        .fw-bold { font-weight: 700 !important; } .list-unstyled { padding-left: 0; list-style: none; } .rounded { border-radius: 0.375rem !important; } .rounded-circle { border-radius: 50% !important; }
+        .fas, .fab, .far, .fa { display: inline-block; min-width: 1em; text-align: center; }
+
         :root {
             --primary-color: #4361ee;
             --secondary-color: #3a0ca3;
@@ -77,11 +138,11 @@
         }
         
         * {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Roboto', 'Roboto-fallback', sans-serif;
         }
         
         h1, h2, h3, h4, h5, h6, .navbar-brand {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins', 'Poppins-fallback', sans-serif;
             font-weight: 600;
         }
         
@@ -717,7 +778,7 @@
                         <div class="footer-logo mb-4">
                             <div class="d-flex align-items-center mb-3">
                                 <img src="{{ asset('logo.webp') }}" alt="RedFPE Logo" width="100" height="100" loading="lazy" style="height: 100px; width: 100px; filter: brightness(0) invert(1);" class="me-2">
-                                <h4 class="text-white mb-0">RedFPE</h4>
+                                <h2 class="h4 text-white mb-0">RedFPE</h2>
                             </div>
                             <p class="text-light mb-4" style="opacity: 0.8;">
                                 Plataforma educativa que conecta academias, docentes y alumnos en un ecosistema completo y eficiente.
@@ -736,10 +797,10 @@
                     
                     <!-- Columna 2: Enlaces rápidos -->
                     <div class="col-lg-2 col-md-6">
-                        <h5 class="text-white mb-4 text-start text-md-start" style="position: relative; padding-bottom: 10px;">
+                        <h3 class="h5 text-white mb-4 text-start text-md-start" style="position: relative; padding-bottom: 10px;">
                             Enlaces
                             <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
-                        </h5>
+                        </h3>
                         <ul class="list-unstyled text-start text-md-start">
                             <li class="mb-2">
                                 <a href="{{ url('/') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
@@ -770,10 +831,10 @@
 
                     <!-- Columna 3: Para usuarios -->
                     <div class="col-lg-2 col-md-6">
-                        <h5 class="text-white mb-4 text-start text-md-start" style="position: relative; padding-bottom: 10px;">
+                        <h3 class="h5 text-white mb-4 text-start text-md-start" style="position: relative; padding-bottom: 10px;">
                             Para Usuarios
                             <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
-                        </h5>
+                        </h3>
                         <ul class="list-unstyled text-start text-md-start">
                             <li class="mb-2">
                                 <a href="{{ route('academias') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
@@ -794,7 +855,7 @@
                                 </a>
                             </li>
                             <li class="mb-2">
-                                <a href={{ route('ayuda') }} class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
+                                <a href="{{ route('ayuda') }}" class="text-light text-decoration-none d-flex align-items-center justify-content-start" style="opacity: 0.8; transition: all 0.3s ease;">
                                     <i class="fas fa-question-circle me-2" style="width: 20px;"></i>
                                     <span>Ayuda</span>
                                 </a>
@@ -804,10 +865,10 @@
 
                     <!-- Columna 4: Contacto -->
                     <div class="col-lg-2 col-md-6 text-start text-md-start">
-                        <h5 class="text-white mb-4 text-start" style="position: relative; padding-bottom: 10px;">
+                        <h3 class="h5 text-white mb-4 text-start" style="position: relative; padding-bottom: 10px;">
                             Contacto
                             <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
-                        </h5>
+                        </h3>
                         
                         <ul class="list-unstyled mb-0" style="opacity: 0.8;">
                             <li class="mb-3 d-flex align-items-start">
@@ -821,16 +882,16 @@
                         </ul>
                     </div>
                     <div class="col-lg-2 col-md-6 text-start text-md-start">
-                        <h5 class="text-white mb-4 text-start" style="position: relative; padding-bottom: 10px;">
+                        <h3 class="h5 text-white mb-4 text-start" style="position: relative; padding-bottom: 10px;">
                             Comunidades colaboradoras
                             <span style="position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: linear-gradient(90deg, #4cc9f0, #4361ee);"></span>
-                        </h5>
+                        </h3>
                         <div class="social-links mt-5">
-                            <a href="#" class="text-light me-3" style="opacity: 0.7; transition: all 0.3s ease; text-decoration: none;">
-                                <i class="fab fa-linkedin fa-lg"></i>
+                            <a href="#" aria-label="LinkedIn de RedFPE" class="text-light me-3" style="opacity: 0.7; transition: all 0.3s ease; text-decoration: none;">
+                                <i class="fab fa-linkedin fa-lg" aria-hidden="true"></i>
                             </a>
-                            <a href="#" class="text-light me-3" style="opacity: 0.7; transition: all 0.3s ease; text-decoration: none;">
-                                <i class="fab fa-telegram fa-lg"></i>
+                            <a href="#" aria-label="Canal de Telegram de RedFPE" class="text-light me-3" style="opacity: 0.7; transition: all 0.3s ease; text-decoration: none;">
+                                <i class="fab fa-telegram fa-lg" aria-hidden="true"></i>
                             </a>
                         </div>
                     </div>
@@ -1001,7 +1062,6 @@
             </div>
         </div>
     </div>
-    @endauth
 
     <!-- Modal para eliminar cuenta permanentemente -->
     <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
@@ -1128,13 +1188,9 @@
             </div>
         </div>
     </div>
-
-    <!-- ============================================== -->
-    <!-- CONFIGURACIÓN DE VARIABLES PARA EL JS EXTERNO   -->
-    <!-- ============================================== -->
-
-    <script src="{{ asset('public/js/config.js?v=2') }}" defer></script>
     <script src="{{ asset('public/js/perfil.js?v=2') }}" defer></script>
+    @endauth
+
     @yield('scripts')
     @stack('scripts')
 </body>
